@@ -31,7 +31,14 @@ const config: Configuration = {
       {
         test: /\.(jsx?|tsx?)$/,
         exclude: /\/node_modules\//,
-        use: ['swc-loader'],
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              configFile: path.resolve(__dirname, 'tsconfig.json'),
+            },
+          },
+        ],
       },
       {
         test: /\.(css)$/,

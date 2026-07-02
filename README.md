@@ -353,3 +353,5 @@ Coverage settings are configured in:
 - `jest.config.ts` - Jest coverage collection and thresholds
 - `.codecov.yml` - Codecov behavior and reporting preferences
 - `images/ci/Dockerfile.coverage` - Coverage-enabled container image for CI
+
+<!-- CI pipeline check: this comment is a no-op placeholder used to trigger a test run. -->

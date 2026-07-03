@@ -1,0 +1,4 @@
+---
+defaultChannel: alpha
+name: ocp-secrets-management-operator
+schema: olm.package

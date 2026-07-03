@@ -1,5 +1,5 @@
 ---
-image: openshift.io/ocp-secrets-management-operator-bundle:v0.1.0
+image: registry.stage.redhat.io/ocp-secrets-management/ocp-secrets-management-operator-bundle:v0.1.0
 name: ocp-secrets-management-operator.v0.1.0
 package: ocp-secrets-management-operator
 properties:
@@ -13,8 +13,8 @@ properties:
     packageName: ocp-secrets-management-operator
     version: 0.1.0
 relatedImages:
-- image: openshift.io/ocp-secrets-management-operator:v0.1.0
+- image: registry.stage.redhat.io/ocp-secrets-management/ocp-secrets-management-operator:v0.1.0
   name: manager
-- image: openshift.io/ocp-secrets-management:v0.1.0
+- image: registry.stage.redhat.io/ocp-secrets-management/ocp-secrets-management:v0.1.0
   name: ocp-secrets-management-plugin
 schema: olm.bundle

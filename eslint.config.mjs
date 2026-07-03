@@ -73,12 +73,22 @@ export default tseslint.config(
   },
   {
     ...playwright.configs['flat/recommended'],
-    files: ['integration-tests/**/*.ts'],
+    files: ['integration-tests/**/*.{ts,js}'],
     ...tseslint.configs.disableTypeChecked,
     rules: {
       ...playwright.configs['flat/recommended'].rules,
       ...tseslint.configs.disableTypeChecked.rules,
       'no-console': 'off',
+    },
+  },
+  {
+    files: ['integration-tests/*.config.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: globals.node,
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
   prettier,

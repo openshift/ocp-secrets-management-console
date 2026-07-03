@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   # no-op change to trigger console-plugin-operator-fbc-4-22-on-pull-request via pathChanged()
+  # re-triggered again to re-run the Konflux pipeline
   annotations:
     build.appstudio.openshift.io/repo: https://github.com/openshift/ocp-secrets-management-console?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'

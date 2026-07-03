@@ -1,0 +1,7 @@
+---
+entries:
+- name: ocp-secrets-management-operator.v0.1.0
+  skipRange: '<0.1.0'
+name: alpha
+package: ocp-secrets-management-operator
+schema: olm.channel

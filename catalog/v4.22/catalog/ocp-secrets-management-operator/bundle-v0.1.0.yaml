@@ -1,0 +1,20 @@
+---
+image: openshift.io/ocp-secrets-management-operator-bundle:v0.1.0
+name: ocp-secrets-management-operator.v0.1.0
+package: ocp-secrets-management-operator
+properties:
+- type: olm.gvk
+  value:
+    group: secrets-management.openshift.io
+    kind: SecretsManagementConfig
+    version: v1alpha1
+- type: olm.package
+  value:
+    packageName: ocp-secrets-management-operator
+    version: 0.1.0
+relatedImages:
+- image: openshift.io/ocp-secrets-management-operator:v0.1.0
+  name: manager
+- image: openshift.io/ocp-secrets-management:v0.1.0
+  name: ocp-secrets-management-plugin
+schema: olm.bundle

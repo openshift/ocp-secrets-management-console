@@ -1,6 +1,6 @@
 # Dockerfile for running CRD type generation scripts
 # Uses minimal dependencies - no Cypress or other heavy packages
-FROM node:20-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 

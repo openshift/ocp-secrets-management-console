@@ -148,7 +148,7 @@ clean-images: require-container-runtime ## Remove built container images
 
 .PHONY: operator-build
 operator-build: ## Build the operator (in operator/ directory)
-	cd operator && make build
+	cd operator && make container-build
 
 .PHONY: operator-test
 operator-test: ## Run operator tests

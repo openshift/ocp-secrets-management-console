@@ -1,0 +1,16 @@
+# Keep the build context minimal and avoid shipping generated/cache
+# artifacts into the image build (see .gitignore for details).
+.git
+node_modules
+**/node_modules
+dist
+**/dist
+coverage
+**/coverage
+
+# Yarn Berry generated cache/state - must be regenerated inside the build,
+# never copied in from the host/repo (causes EACCES when yarn rewrites it).
+.yarn/install-state.gz
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml

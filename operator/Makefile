@@ -90,6 +90,16 @@ lint: ## Run golangci-lint against code.
 build: manifests generate fmt vet ## Build manager binary.
 	go build -o bin/manager cmd/manager/main.go
 
+# container-build intentionally skips manifests/generate (controller-gen) and
+# fmt/vet: production image builds run in a network-isolated, vendor-only Go
+# environment where `go install tool@version` (used to fetch controller-gen/
+# kustomize) is unavailable. CRDs and generated deepcopy code are committed to
+# the repo, so a plain compile is sufficient here; run `make build` locally
+# after changing API types or kubebuilder markers to refresh those files.
+.PHONY: container-build
+container-build: ## Build manager binary for container/Konflux builds (no codegen).
+	go build -o bin/manager cmd/manager/main.go
+
 .PHONY: run
 run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./cmd/manager/main.go

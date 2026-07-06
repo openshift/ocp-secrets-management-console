@@ -30,6 +30,11 @@ spec:
     value: operator/Containerfile.ocp-secrets-management-operator
   - name: path-context
     value: .
+  - name: build-args
+    value:
+      - RELEASE_VERSION=v0.1.0
+      - COMMIT_SHA={{revision}}
+      - SOURCE_URL={{source_url}}
   - name: build-source-image
     value: "true"
   - name: hermetic

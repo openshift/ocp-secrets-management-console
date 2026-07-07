@@ -158,6 +158,71 @@ operator-test: ## Run operator tests
 operator-bundle: ## Generate operator bundle
 	cd operator && make bundle
 
+##@ FBC Catalog (File-Based Catalog, see catalog/README.md)
+
+## OCP version directory under catalog/ to operate on by default (e.g. v4.22).
+CATALOG_VERSION ?= v4.22
+## image name/tag for the ocp-secrets-management-operator catalog.
+CATALOG_IMG ?= openshift.io/ocp-secrets-management-operator-catalog:v0.1.0
+## operator bundle image to use for generating/updating the catalog (e.g. quay.io/<org>/ocp-secrets-management-operator-bundle@sha256:...).
+OPERATOR_BUNDLE_IMAGE ?=
+## catalog directory to update (e.g. catalog/v4.22/catalog).
+CATALOG_DIR ?= catalog/$(CATALOG_VERSION)/catalog
+## bundle file name to generate under the package directory (e.g. bundle-v0.2.0.yaml).
+BUNDLE_FILE_NAME ?=
+## OCP versions to replicate the bundle to: no | yes | 4.22,4.23 | 4.22-4.25
+REPLICATE_BUNDLE_FILE_IN_CATALOGS ?= no
+
+## Operator Package Manager tool version to download.
+OPM_VERSION ?= v1.72.0
+TOOL_BIN_DIR ?= $(CURDIR)/bin/tools
+## Operator Package Manager tool path (override with OPM=opm to use a system binary already on PATH).
+OPM ?= $(TOOL_BIN_DIR)/opm
+OPM_OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
+OPM_ARCH := $(shell uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
+OPM_DOWNLOAD_URL = https://github.com/operator-framework/operator-registry/releases/download/$(OPM_VERSION)/$(OPM_OS)-$(OPM_ARCH)-opm
+
+.PHONY: get-opm
+get-opm: ## Download opm (Operator Package Manager) locally if necessary
+	@test -s "$(OPM)" || { \
+		mkdir -p "$(TOOL_BIN_DIR)"; \
+		echo "Downloading $(OPM_DOWNLOAD_URL)"; \
+		curl -fL "$(OPM_DOWNLOAD_URL)" -o "$(OPM)"; \
+		chmod +x "$(OPM)"; \
+	}
+
+.PHONY: catalog-validate
+catalog-validate: get-opm ## Validate the file-based catalog under $(CATALOG_DIR)
+	$(OPM) validate $(CATALOG_DIR)
+
+.PHONY: catalog-render-bundle
+catalog-render-bundle: get-opm ## Render operator/bundle to a declarative-config bundle blob (for local inspection; use `make update-catalog` for a released bundle image)
+	$(OPM) render operator/bundle --migrate-level=bundle-object-to-csv-metadata -o yaml
+
+.PHONY: update-catalog
+update-catalog: get-opm ## Update catalog using the provided bundle image (OPERATOR_BUNDLE_IMAGE, CATALOG_DIR, BUNDLE_FILE_NAME; see catalog/README.md)
+	@test -n "$(OPERATOR_BUNDLE_IMAGE)" || { echo "OPERATOR_BUNDLE_IMAGE is required"; exit 1; }
+	@test -n "$(CATALOG_DIR)" || { echo "CATALOG_DIR is required (e.g. catalog/v4.22/catalog)"; exit 1; }
+	@test -n "$(BUNDLE_FILE_NAME)" || { echo "BUNDLE_FILE_NAME is required (e.g. bundle-v0.2.0.yaml)"; exit 1; }
+	@#ex.: make update-catalog OPERATOR_BUNDLE_IMAGE=quay.io/<org>/ocp-secrets-management-operator-bundle@sha256:<digest> CATALOG_DIR=catalog/v4.22/catalog BUNDLE_FILE_NAME=bundle-v0.2.0.yaml REPLICATE_BUNDLE_FILE_IN_CATALOGS=no
+	./hack/update-catalog.sh $(OPM) $(OPERATOR_BUNDLE_IMAGE) $(CATALOG_DIR) $(BUNDLE_FILE_NAME) $(REPLICATE_BUNDLE_FILE_IN_CATALOGS)
+
+.PHONY: catalog-build
+catalog-build: require-container-runtime catalog-validate ## Build the FBC catalog image (default: podman); runs catalog-validate first.
+	$(CONTAINER_RUNTIME) build -t $(CATALOG_IMG) -f catalog/$(CATALOG_VERSION)/Containerfile catalog/$(CATALOG_VERSION)
+
+.PHONY: catalog-push
+catalog-push: require-container-runtime ## Push the FBC catalog image (default: podman; override CATALOG_IMG)
+	$(CONTAINER_RUNTIME) push $(CATALOG_IMG)
+
+.PHONY: catalog
+catalog: get-opm catalog-build ## Update catalog (only if OPERATOR_BUNDLE_IMAGE is set) and build the catalog image
+
+# Only run update-catalog if OPERATOR_BUNDLE_IMAGE is set
+ifneq ($(OPERATOR_BUNDLE_IMAGE),)
+catalog: get-opm update-catalog catalog-build
+endif
+
 ##@ Update & verify (run after code changes / before PR)
 
 # Short prompt for AI: follow the detailed task in the script (avoids escaping full content in make).

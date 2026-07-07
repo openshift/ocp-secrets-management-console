@@ -1,0 +1,119 @@
+---
+image: openshift.io/ocp-secrets-management-operator-bundle:v0.1.0
+name: ocp-secrets-management-operator.v0.1.0
+package: ocp-secrets-management-operator
+properties:
+- type: olm.gvk
+  value:
+    group: secrets-management.openshift.io
+    kind: SecretsManagementConfig
+    version: v1alpha1
+- type: olm.package
+  value:
+    packageName: ocp-secrets-management-operator
+    version: 0.1.0
+- type: olm.csv.metadata
+  value:
+    annotations:
+      alm-examples: '[]'
+      capabilities: Basic Install
+      categories: Security
+      containerImage: openshift.io/ocp-secrets-management-operator:v0.1.0
+      createdAt: "2026-03-06T12:08:43Z"
+      description: Unified console plugin for managing secrets across cert-manager, External Secrets Operator, and Secrets Store CSI Driver
+      operators.operatorframework.io/builder: operator-sdk-v1.34.1
+      operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
+      repository: https://github.com/openshift/ocp-secrets-management
+      support: Red Hat
+    apiServiceDefinitions: {}
+    crdDescriptions:
+      owned:
+      - description: SecretsManagementConfig is the configuration for the OCP Secrets Management console plugin
+        displayName: Secrets Management Config
+        kind: SecretsManagementConfig
+        name: secretsmanagementconfigs.secrets-management.openshift.io
+        version: v1alpha1
+    description: |
+      ## OCP Secrets Management Console Plugin
+
+      The OCP Secrets Management operator provides a unified OpenShift Console plugin for managing
+      secrets-related Custom Resources from multiple operators:
+
+      * **cert-manager** - Certificates, Issuers, ClusterIssuers
+      * **External Secrets Operator (ESO)** - ExternalSecrets, SecretStores, PushSecrets
+      * **Secrets Store CSI Driver** - SecretProviderClasses
+
+      ### Features
+
+      * **Unified Dashboard** - View all secrets-related resources in one place
+      * **Operator Detection** - Automatically detects which operators are installed
+      * **RBAC Management** - Creates default ClusterRoles for view, delete, and admin access
+      * **Flexible Configuration** - Enable/disable features and operators via CRD
+
+      ### Prerequisites
+
+      * OpenShift 4.18 or later
+      * One or more of the supported operators installed (optional)
+
+      ### Getting Started
+
+      After installing the operator, create a `SecretsManagementConfig` resource:
+
+      ```yaml
+      apiVersion: secrets-management.openshift.io/v1alpha1
+      kind: SecretsManagementConfig
+      metadata:
+        name: cluster
+      spec:
+        rbac:
+          createDefaultRoles: true
+        plugin:
+          replicas: 2
+      ```
+
+      The operator will:
+      1. Create default RBAC ClusterRoles
+      2. Deploy the console plugin
+      3. Register the plugin with OpenShift Console
+      4. Detect installed operators
+    displayName: OCP Secrets Management
+    icon:
+    - base64data: PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzNFOEVFRCIgZD0iTTEyIDFhMTEgMTEgMCAxIDAgMTEgMTFBMTEgMTEgMCAwIDAgMTIgMXptMCAyMGE5IDkgMCAxIDEgOS05IDkgOSAwIDAgMS05IDl6bTUtMTNoLTN2LTJhMiAyIDAgMCAwLTQgMHYySDdhMSAxIDAgMCAwLTEgMXY3YTEgMSAwIDAgMCAxIDFoMTBhMSAxIDAgMCAwIDEtMXYtN2ExIDEgMCAwIDAtMS0xem0tNS0yYTEgMSAwIDAgMSAxIDF2Mkg5di0yYTEgMSAwIDAgMSAxLTF6bTQgMTBIOHYtNWg4eiIvPjwvc3ZnPg==
+      mediatype: image/svg+xml
+    installModes:
+    - supported: false
+      type: OwnNamespace
+    - supported: false
+      type: SingleNamespace
+    - supported: false
+      type: MultiNamespace
+    - supported: true
+      type: AllNamespaces
+    keywords:
+    - secrets
+    - cert-manager
+    - external-secrets
+    - secrets-store-csi
+    - console-plugin
+    - security
+    links:
+    - name: Documentation
+      url: https://github.com/openshift/ocp-secrets-management
+    - name: cert-manager
+      url: https://cert-manager.io
+    - name: External Secrets Operator
+      url: https://external-secrets.io
+    maintainers:
+    - email: support@redhat.com
+      name: Red Hat
+    maturity: alpha
+    minKubeVersion: 1.27.0
+    provider:
+      name: Red Hat
+      url: https://www.redhat.com
+relatedImages:
+- image: openshift.io/ocp-secrets-management-operator:v0.1.0
+  name: ""
+- image: openshift.io/ocp-secrets-management:v0.1.0
+  name: ocp-secrets-management-plugin
+schema: olm.bundle

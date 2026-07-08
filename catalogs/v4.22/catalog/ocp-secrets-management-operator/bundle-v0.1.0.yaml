@@ -1,5 +1,5 @@
 ---
-image: openshift.io/ocp-secrets-management-operator-bundle:v0.1.0
+image: registry.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:e9f9ec6869f2234d94e4f12282babeda7dafbf8d82cd92757cbb08b7c63fca1f
 name: ocp-secrets-management-operator.v0.1.0
 package: ocp-secrets-management-operator
 properties:
@@ -18,7 +18,7 @@ properties:
       alm-examples: '[]'
       capabilities: Basic Install
       categories: Security
-      containerImage: openshift.io/ocp-secrets-management-operator:v0.1.0
+      containerImage: registry.redhat.io/external-secrets-management/console-plugin-operator-rhel9@sha256:508f7749989614274b74ea688042f62bddb7cdc67b50a664e01dd31a6ec9f304
       createdAt: "2026-03-06T12:08:43Z"
       description: Unified console plugin for managing secrets across cert-manager, External Secrets Operator, and Secrets Store CSI Driver
       operators.operatorframework.io/builder: operator-sdk-v1.34.1
@@ -112,8 +112,10 @@ properties:
       name: Red Hat
       url: https://www.redhat.com
 relatedImages:
-- image: openshift.io/ocp-secrets-management-operator:v0.1.0
+- image: registry.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:e9f9ec6869f2234d94e4f12282babeda7dafbf8d82cd92757cbb08b7c63fca1f
   name: ""
-- image: openshift.io/ocp-secrets-management:v0.1.0
+- image: registry.redhat.io/external-secrets-management/console-plugin-operator-rhel9@sha256:508f7749989614274b74ea688042f62bddb7cdc67b50a664e01dd31a6ec9f304
+  name: ""
+- image: registry.redhat.io/external-secrets-management/console-plugin-rhel9@sha256:83f123e35e32f01fa39fe1f0632f8af2dc983fa6194d92d588c35fff71cfdd41
   name: ocp-secrets-management-plugin
 schema: olm.bundle

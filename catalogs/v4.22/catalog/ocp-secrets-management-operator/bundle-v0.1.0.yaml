@@ -1,5 +1,5 @@
 ---
-image: registry.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:e9f9ec6869f2234d94e4f12282babeda7dafbf8d82cd92757cbb08b7c63fca1f
+image: registry.stage.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:2725501adf562f4fbf91f59f295cf49d97fc40aeef7427ef74a943a96a56b3f4
 name: ocp-secrets-management-operator.v0.1.0
 package: ocp-secrets-management-operator
 properties:
@@ -18,9 +18,18 @@ properties:
       alm-examples: '[]'
       capabilities: Basic Install
       categories: Security
-      containerImage: registry.redhat.io/external-secrets-management/console-plugin-operator-rhel9@sha256:508f7749989614274b74ea688042f62bddb7cdc67b50a664e01dd31a6ec9f304
+      containerImage: registry.stage.redhat.io/external-secrets-management/console-plugin-operator-rhel9@sha256:b1cf5c4e26bd1db0fae189903a8b4f8583f962e08590f5a6bfcb29f6bf5288b7
       createdAt: "2026-03-06T12:08:43Z"
-      description: Unified console plugin for managing secrets across cert-manager, External Secrets Operator, and Secrets Store CSI Driver
+      description: Unified console plugin for managing secrets across cert-manager,
+        External Secrets Operator, and Secrets Store CSI Driver
+      features.operators.openshift.io/disconnected: "false"
+      features.operators.openshift.io/fips-compliant: "false"
+      features.operators.openshift.io/proxy-aware: "false"
+      features.operators.openshift.io/tls-profiles: "false"
+      features.operators.openshift.io/token-auth-aws: "false"
+      features.operators.openshift.io/token-auth-azure: "false"
+      features.operators.openshift.io/token-auth-gcp: "false"
+      operators.openshift.io/valid-subscription: '["OpenShift Container Platform"]'
       operators.operatorframework.io/builder: operator-sdk-v1.34.1
       operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
       repository: https://github.com/openshift/ocp-secrets-management
@@ -28,10 +37,35 @@ properties:
     apiServiceDefinitions: {}
     crdDescriptions:
       owned:
-      - description: SecretsManagementConfig is the configuration for the OCP Secrets Management console plugin
+      - description: SecretsManagementConfig is the configuration for the OCP Secrets
+          Management console plugin
         displayName: Secrets Management Config
         kind: SecretsManagementConfig
         name: secretsmanagementconfigs.secrets-management.openshift.io
+        specDescriptors:
+        - description: Feature toggles for the console plugin UI
+          displayName: Features
+          path: features
+        - description: RBAC resources managed by the operator
+          displayName: RBAC
+          path: rbac
+        - description: Console plugin deployment settings
+          displayName: Plugin
+          path: plugin
+        - description: Per-operator configuration
+          displayName: Operators
+          path: operators
+        statusDescriptors:
+        - description: Overall status of the deployment
+          displayName: Phase
+          path: phase
+          x-descriptors:
+          - urn:alm:descriptor:io.kubernetes.phase
+        - description: Whether the plugin is ready
+          displayName: Plugin Ready
+          path: plugin.ready
+          x-descriptors:
+          - urn:alm:descriptor:text
         version: v1alpha1
     description: |
       ## OCP Secrets Management Console Plugin
@@ -77,9 +111,6 @@ properties:
       3. Register the plugin with OpenShift Console
       4. Detect installed operators
     displayName: OCP Secrets Management
-    icon:
-    - base64data: PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzNFOEVFRCIgZD0iTTEyIDFhMTEgMTEgMCAxIDAgMTEgMTFBMTEgMTEgMCAwIDAgMTIgMXptMCAyMGE5IDkgMCAxIDEgOS05IDkgOSAwIDAgMS05IDl6bTUtMTNoLTN2LTJhMiAyIDAgMCAwLTQgMHYySDdhMSAxIDAgMCAwLTEgMXY3YTEgMSAwIDAgMCAxIDFoMTBhMSAxIDAgMCAwIDEtMXYtN2ExIDEgMCAwIDAtMS0xem0tNS0yYTEgMSAwIDAgMSAxIDF2Mkg5di0yYTEgMSAwIDAgMSAxLTF6bTQgMTBIOHYtNWg4eiIvPjwvc3ZnPg==
-      mediatype: image/svg+xml
     installModes:
     - supported: false
       type: OwnNamespace
@@ -107,15 +138,15 @@ properties:
     - email: support@redhat.com
       name: Red Hat
     maturity: alpha
-    minKubeVersion: 1.31.0
+    minKubeVersion: 1.35.0
     provider:
       name: Red Hat
       url: https://www.redhat.com
 relatedImages:
-- image: registry.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:e9f9ec6869f2234d94e4f12282babeda7dafbf8d82cd92757cbb08b7c63fca1f
+- image: registry.stage.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:2725501adf562f4fbf91f59f295cf49d97fc40aeef7427ef74a943a96a56b3f4
   name: ""
-- image: registry.redhat.io/external-secrets-management/console-plugin-operator-rhel9@sha256:508f7749989614274b74ea688042f62bddb7cdc67b50a664e01dd31a6ec9f304
-  name: ""
-- image: registry.redhat.io/external-secrets-management/console-plugin-rhel9@sha256:83f123e35e32f01fa39fe1f0632f8af2dc983fa6194d92d588c35fff71cfdd41
+- image: registry.stage.redhat.io/external-secrets-management/console-plugin-operator-rhel9@sha256:b1cf5c4e26bd1db0fae189903a8b4f8583f962e08590f5a6bfcb29f6bf5288b7
+  name: ocp-secrets-management-operator
+- image: registry.stage.redhat.io/external-secrets-management/console-plugin-rhel9@sha256:8cc2819cdf72d98b7c21c4048954976a80d99223640518914b69273bc93be4de
   name: ocp-secrets-management-plugin
 schema: olm.bundle

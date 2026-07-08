@@ -8,7 +8,7 @@ Layout mirrors [openshift/external-secrets-operator-release](https://github.com/
 one directory per targeted OpenShift Container Platform (OCP) version:
 
 ```
-catalog/
+catalogs/
   v4.22/
     Containerfile                                    # builds the FBC image (opm serve /configs)
     catalog/
@@ -19,7 +19,7 @@ catalog/
 ```
 
 The `.tekton/console-plugin-operator-fbc-4-22-*.yaml` PipelineRuns build and validate
-`catalog/v4.22` on push/PR (triggered when files under `catalog/v4.22/` change) and publish the
+`catalogs/v4.22` on push/PR (triggered when files under `catalogs/v4.22/` change) and publish the
 result to `quay.io/redhat-user-workloads/secrets-management-console-tenant/console-plugin-operator-fbc-4-22/...`.
 
 ## Adding a new bundle version
@@ -35,8 +35,8 @@ result to `quay.io/redhat-user-workloads/secrets-management-console-tenant/conso
 
    ```bash
    make update-catalog \
-     OPERATOR_BUNDLE_IMAGE=quay.io/<org>/ocp-secrets-management-operator-bundle@sha256:<digest> \
-     CATALOG_DIR=catalog/v4.22/catalog \
+     OPERATOR_BUNDLE_IMAGE=registry.stage.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:<digest> \
+     CATALOG_VERSION=v4.22 \
      BUNDLE_FILE_NAME=bundle-vX.Y.Z.yaml \
      REPLICATE_BUNDLE_FILE_IN_CATALOGS=no
    ```
@@ -47,15 +47,11 @@ result to `quay.io/redhat-user-workloads/secrets-management-console-tenant/conso
    `opm render --migrate-level=bundle-object-to-csv-metadata` (producing a readable
    `olm.csv.metadata` property instead of opaque base64 `olm.bundle.object` blobs), writes
    `bundle-vX.Y.Z.yaml`, runs `opm validate`, and optionally copies the same bundle file into other
-   `catalog/v*/catalog` directories per `REPLICATE_BUNDLE_FILE_IN_CATALOGS`
-   (`no` / `yes` / `4.23,4.24` / `4.23-4.25`).
+   `catalogs/v*/catalog` directories per `REPLICATE_BUNDLE_FILE_IN_CATALOGS`
+   (`no` / `yes` / `4.23,5.0` / `4.22-5.0`).
 4. `make catalog` combines the above with building the catalog image
    (`OPERATOR_BUNDLE_IMAGE=... make catalog`); with `OPERATOR_BUNDLE_IMAGE` unset it just validates
    and builds the existing catalog contents.
-
-Without a pushed bundle image (e.g. local iteration), `make catalog-render-bundle` renders
-`operator/bundle` directly for inspection — but the `image:` field must still be replaced with a
-real pull spec before committing, so prefer `make update-catalog` for anything that ships.
 
 Other useful targets: `make catalog-validate` (just `opm validate`), `make get-opm` (downloads
 `opm` into `bin/tools/opm`, override with `OPM=opm` to use one already on `PATH`).

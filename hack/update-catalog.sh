@@ -4,7 +4,7 @@
 # Example usage:
 # ./hack/update-catalog.sh ./bin/tools/opm \
 # quay.io/<org>/ocp-secrets-management-operator-bundle@sha256:4114321b0ab6ceb882f26501ff9b22214d90b83d92466e7c5a62217f592c1fed \
-# catalog/v4.22/catalog \
+# catalogs/v4.22/catalog \
 # bundle-v0.2.0.yaml \
 # no
 #
@@ -17,7 +17,7 @@
 #
 # channel.yaml is not updated by this script. Update channel.yaml in each affected
 # catalog before running this script — opm validate runs automatically after bundle
-# generation and replication. See catalog/README.md.
+# generation and replication. See catalogs/README.md.
 #
 # Adapted from https://github.com/openshift/external-secrets-operator-release/blob/main/hack/update_catalog.sh
 
@@ -136,8 +136,8 @@ expand_ocp_version_range()
 		return 1
 	fi
 
-	for catalog_dir in catalog/v*/catalog; do
-		version="${catalog_dir#catalog/v}"
+	for catalog_dir in catalogs/v*/catalog; do
+		version="${catalog_dir#catalogs/v}"
 		version="${version%/catalog}"
 		version_int="$(ocp_version_to_int "${version}")" || continue
 		if (( version_int >= start_int && version_int <= end_int )); then
@@ -236,13 +236,13 @@ replicate_catalog_bundle()
 			cp "${bundle_file}" "${target_dir}/${BUNDLE_FILE_NAME}"
 			target_catalog_dir="$(dirname "${target_dir}")"
 			validate_catalog_dir "${target_catalog_dir}"
-		done < <(find catalog/*/catalog/${CATALOG_PACKAGE_NAME} -type d ! -path "${CATALOG_DIR}/*")
+		done < <(find catalogs/*/catalog/${CATALOG_PACKAGE_NAME} -type d ! -path "${CATALOG_DIR}/*")
 		return
 	fi
 
 	mapfile -t ocp_versions < <(parse_replicate_ocp_versions "${REPLICATE_BUNDLE_FILE_IN_CATALOGS}")
 	for ocp_version in "${ocp_versions[@]}"; do
-		target_catalog_dir="catalog/v${ocp_version}/catalog"
+		target_catalog_dir="catalogs/v${ocp_version}/catalog"
 		target_dir="${target_catalog_dir}/${CATALOG_PACKAGE_NAME}"
 		if [[ "${target_dir}" == "${CATALOG_DIR}/${CATALOG_PACKAGE_NAME}" ]]; then
 			log_info "skipping replication to source catalog \"${target_dir}\""

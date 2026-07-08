@@ -9,8 +9,8 @@ metadata:
     pipelinesascode.tekton.dev/cancel-in-progress: "true"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch
-      == "main" && ( "catalog/v4.22/***".pathChanged() || ".tekton/console-plugin-operator-fbc-4-22-pull-request.yaml".pathChanged()
-      || "catalog/v4.22/Containerfile".pathChanged() )
+      == "main" && ( "catalogs/v4.22/***".pathChanged() || ".tekton/console-plugin-operator-fbc-4-22-pull-request.yaml".pathChanged()
+      || "catalogs/v4.22/Containerfile".pathChanged() )
   labels:
     appstudio.openshift.io/application: console-plugin-operator-fbc-4-22
     appstudio.openshift.io/component: console-plugin-operator-fbc-4-22
@@ -31,9 +31,9 @@ spec:
     value:
     - linux/x86_64
   - name: dockerfile
-    value: catalog/v4.22/Containerfile
+    value: catalogs/v4.22/Containerfile
   - name: path-context
-    value: catalog/v4.22
+    value: catalogs/v4.22
   pipelineSpec:
     description: |
       This pipeline is ideal for building and verifying [file-based catalogs](https://konflux-ci.dev/docs/end-to-end/building-olm/#building-the-file-based-catalog).

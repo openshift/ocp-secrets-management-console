@@ -147,6 +147,16 @@ spec:
                         - patch
                         - delete
                     - apiGroups:
+                        - operator.openshift.io
+                      resources:
+                        - consoles
+                      verbs:
+                        - get
+                        - list
+                        - watch
+                        - update
+                        - patch
+                    - apiGroups:
                         - coordination.k8s.io
                       resources:
                         - leases

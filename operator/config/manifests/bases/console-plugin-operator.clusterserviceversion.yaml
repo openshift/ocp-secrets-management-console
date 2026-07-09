@@ -55,8 +55,8 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: SecretsManagementConfig is the configuration for the OCP Secrets
-        Management console plugin
+    - description: SecretsManagementConfig is the configuration for the External Secrets
+        Management Console plugin
       displayName: Secrets Management Config
       kind: SecretsManagementConfig
       name: secretsmanagementconfigs.secrets-management.openshift.io
@@ -86,9 +86,9 @@ spec:
         - urn:alm:descriptor:text
       version: v1alpha1
   description: |
-    ## OCP Secrets Management Console Plugin
+    ## External Secrets Management Console
 
-    The OCP Secrets Management operator provides a unified OpenShift Console plugin for managing
+    The External Secrets Management Console operator provides a unified OpenShift Console plugin for managing
     secrets-related Custom Resources from multiple operators:
 
     * **cert-manager** - Certificates, Issuers, ClusterIssuers
@@ -128,7 +128,7 @@ spec:
     2. Deploy the console plugin
     3. Register the plugin with OpenShift Console
     4. Detect installed operators
-  displayName: OCP Secrets Management
+  displayName: External Secrets Management Console
   icon:
   - base64data: PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzNFOEVFRCIgZD0iTTEyIDFhMTEgMTEgMCAxIDAgMTEgMTFBMTEgMTEgMCAwIDAgMTIgMXptMCAyMGE5IDkgMCAxIDEgOS05IDkgOSAwIDAgMS05IDl6bTUtMTNoLTN2LTJhMiAyIDAgMCAwLTQgMHYySDdhMSAxIDAgMCAwLTEgMXY3YTEgMSAwIDAgMCAxIDFoMTBhMSAxIDAgMCAwIDEtMXYtN2ExIDEgMCAwIDAtMS0xem0tNS0yYTEgMSAwIDAgMSAxIDF2Mkg5di0yYTEgMSAwIDAgMSAxLTF6bTQgMTBIOHYtNWg4eiIvPjwvc3ZnPg==
     mediatype: image/svg+xml
@@ -286,7 +286,7 @@ spec:
               - args:
                 - --leader-elect
                 command:
-                - /manager
+                - /bin/ocp-secrets-management-operator
                 image: openshift.io/ocp-secrets-management-operator:v0.1.0
                 imagePullPolicy: IfNotPresent
                 livenessProbe:

@@ -23,7 +23,7 @@ metadata:
             },
             "plugin": {
               "image": "openshift.io/ocp-secrets-management:latest",
-              "replicas": 2
+              "replicas": 1
             },
             "operators": {
               "certManager": {
@@ -109,7 +109,16 @@ spec:
 
     ### Getting Started
 
-    After installing the operator, create a `SecretsManagementConfig` resource:
+    After installing the operator, it will automatically:
+    1. Create a default `SecretsManagementConfig` resource
+    2. Create default RBAC ClusterRoles
+    3. Deploy the console plugin
+    4. Register the plugin with OpenShift Console
+    5. Detect installed operators
+
+    No manual configuration is required. The console plugin will appear automatically after installation.
+
+    To customize the configuration, edit the auto-created `SecretsManagementConfig` resource:
 
     ```yaml
     apiVersion: secrets-management.openshift.io/v1alpha1
@@ -120,14 +129,8 @@ spec:
       rbac:
         createDefaultRoles: true
       plugin:
-        replicas: 2
+        replicas: 1
     ```
-
-    The operator will:
-    1. Create default RBAC ClusterRoles
-    2. Deploy the console plugin
-    3. Register the plugin with OpenShift Console
-    4. Detect installed operators
   displayName: External Secrets Management Console
   icon:
   - base64data: PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzNFOEVFRCIgZD0iTTEyIDFhMTEgMTEgMCAxIDAgMTEgMTFBMTEgMTEgMCAwIDAgMTIgMXptMCAyMGE5IDkgMCAxIDEgOS05IDkgOSAwIDAgMS05IDl6bTUtMTNoLTN2LTJhMiAyIDAgMCAwLTQgMHYySDdhMSAxIDAgMCAwLTEgMXY3YTEgMSAwIDAgMCAxIDFoMTBhMSAxIDAgMCAwIDEtMXYtN2ExIDEgMCAwIDAtMS0xem0tNS0yYTEgMSAwIDAgMSAxIDF2Mkg5di0yYTEgMSAwIDAgMSAxLTF6bTQgMTBIOHYtNWg4eiIvPjwvc3ZnPg==
@@ -176,6 +179,16 @@ spec:
           - update
           - patch
           - delete
+        - apiGroups:
+          - operator.openshift.io
+          resources:
+          - consoles
+          verbs:
+          - get
+          - list
+          - watch
+          - update
+          - patch
         - apiGroups:
           - coordination.k8s.io
           resources:

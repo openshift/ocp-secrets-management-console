@@ -62,6 +62,13 @@ var consolePluginGVK = schema.GroupVersionKind{
 	Kind:    "ConsolePlugin",
 }
 
+// Console Operator GVK for enabling plugins in the cluster console
+var consoleOperatorGVK = schema.GroupVersionKind{
+	Group:   "operator.openshift.io",
+	Version: "v1",
+	Kind:    "Console",
+}
+
 // CRD names for operator detection
 var operatorCRDs = map[string]string{
 	"certManager":     "certificates.cert-manager.io",
@@ -83,6 +90,7 @@ type SecretsManagementConfigReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=services;serviceaccounts;configmaps;namespaces,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=clusterroles;clusterrolebindings,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=console.openshift.io,resources=consoleplugins,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=operator.openshift.io,resources=consoles,verbs=get;list;watch;update;patch
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch
 // Permissions for cert-manager / external-secrets / secrets-store-csi so the operator can create ClusterRoles that grant these to the plugin (RBAC escalation rule; use * so we can grant * to admin role)
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates;issuers;clusterissuers,verbs=*
@@ -152,6 +160,11 @@ func (r *SecretsManagementConfigReconciler) Reconcile(ctx context.Context, req c
 		return r.updateStatusError(ctx, config, err)
 	}
 
+	// Enable plugin in the cluster console
+	if err := r.reconcileConsolePluginEnabled(ctx, config); err != nil {
+		log.Error(err, "Failed to enable console plugin (non-fatal)")
+	}
+
 	// Detect installed operators
 	if err := r.detectOperators(ctx, config); err != nil {
 		log.Error(err, "Failed to detect operators")
@@ -175,6 +188,9 @@ func (r *SecretsManagementConfigReconciler) reconcileDelete(ctx context.Context,
 	log.Info("Reconciling deletion")
 
 	// Clean up resources; log errors but do not block finalizer removal so the CR can be deleted
+	if err := r.removeConsolePluginEnabled(ctx, config); err != nil {
+		log.Error(err, "Failed to remove plugin from console operator (continuing to remove finalizer)")
+	}
 	if err := r.cleanupConsolePlugin(ctx, config); err != nil {
 		log.Error(err, "Failed to cleanup ConsolePlugin (continuing to remove finalizer)")
 	}
@@ -494,7 +510,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 	// Get replicas from config or use default
 	replicas := config.Spec.Plugin.Replicas
 	if replicas == 0 {
-		replicas = 2
+		replicas = 1
 	}
 
 	// Get image pull policy
@@ -804,6 +820,72 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 	existing.SetLabels(labels)
 
 	return r.Update(ctx, existing)
+}
+
+// reconcileConsolePluginEnabled ensures the plugin is registered in the Console Operator's enabled plugins list
+func (r *SecretsManagementConfigReconciler) reconcileConsolePluginEnabled(ctx context.Context, config *smv1alpha1.SecretsManagementConfig) error {
+	console := &unstructured.Unstructured{}
+	console.SetGroupVersionKind(consoleOperatorGVK)
+	if err := r.Get(ctx, types.NamespacedName{Name: "cluster"}, console); err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	plugins, found, err := unstructured.NestedStringSlice(console.Object, "spec", "plugins")
+	if err != nil {
+		return err
+	}
+
+	if found {
+		for _, p := range plugins {
+			if p == PluginName {
+				return nil // already registered
+			}
+		}
+	}
+
+	plugins = append(plugins, PluginName)
+	if err := unstructured.SetNestedStringSlice(console.Object, plugins, "spec", "plugins"); err != nil {
+		return err
+	}
+
+	return r.Update(ctx, console)
+}
+
+// removeConsolePluginEnabled removes the plugin from the Console Operator's enabled plugins list
+func (r *SecretsManagementConfigReconciler) removeConsolePluginEnabled(ctx context.Context, config *smv1alpha1.SecretsManagementConfig) error {
+	console := &unstructured.Unstructured{}
+	console.SetGroupVersionKind(consoleOperatorGVK)
+	if err := r.Get(ctx, types.NamespacedName{Name: "cluster"}, console); err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	plugins, found, err := unstructured.NestedStringSlice(console.Object, "spec", "plugins")
+	if err != nil || !found {
+		return err
+	}
+
+	filtered := make([]string, 0, len(plugins))
+	for _, p := range plugins {
+		if p != PluginName {
+			filtered = append(filtered, p)
+		}
+	}
+
+	if len(filtered) == len(plugins) {
+		return nil // wasn't in the list
+	}
+
+	if err := unstructured.SetNestedStringSlice(console.Object, filtered, "spec", "plugins"); err != nil {
+		return err
+	}
+
+	return r.Update(ctx, console)
 }
 
 // detectOperators checks for installed operator CRDs

@@ -70,7 +70,7 @@ type PluginConfig struct {
 	ImagePullPolicy string `json:"imagePullPolicy,omitempty"`
 
 	// Replicas is the number of plugin deployment replicas
-	// +kubebuilder:default=2
+	// +kubebuilder:default=1
 	// +kubebuilder:validation:Minimum=1
 	Replicas int32 `json:"replicas,omitempty"`
 

@@ -233,7 +233,7 @@ spec:
   rbac:
     createDefaultRoles: true
   plugin:
-    replicas: 2
+    replicas: 1
 EOF
 
   ok "SecretsManagementConfig created"

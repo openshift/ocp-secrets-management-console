@@ -23,7 +23,7 @@ metadata:
             },
             "plugin": {
               "image": "openshift.io/ocp-secrets-management:latest",
-              "replicas": 2
+              "replicas": 1
             },
             "operators": {
               "certManager": {
@@ -120,7 +120,7 @@ spec:
       rbac:
         createDefaultRoles: true
       plugin:
-        replicas: 2
+        replicas: 1
     ```
 
     The operator will:

@@ -90,7 +90,7 @@ spec:
           rbac:
             createDefaultRoles: true
           plugin:
-            replicas: 2
+            replicas: 1
         ```
 
         The operator will:

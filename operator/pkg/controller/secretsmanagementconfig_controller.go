@@ -510,7 +510,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 	// Get replicas from config or use default
 	replicas := config.Spec.Plugin.Replicas
 	if replicas == 0 {
-		replicas = 2
+		replicas = 1
 	}
 
 	// Get image pull policy

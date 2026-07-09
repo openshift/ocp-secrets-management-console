@@ -60,10 +60,10 @@ func newTestConfig(name string) *smv1alpha1.SecretsManagementConfig {
 				CreateDefaultRoles: true,
 				RolePrefix:         "secrets-management",
 			},
-			Plugin: smv1alpha1.PluginConfig{
-				Image:    "openshift.io/ocp-secrets-management:test",
-				Replicas: 2,
-			},
+		Plugin: smv1alpha1.PluginConfig{
+			Image:    "openshift.io/ocp-secrets-management:test",
+			Replicas: 1,
+		},
 			Operators: smv1alpha1.OperatorsConfig{
 				CertManager:     smv1alpha1.OperatorConfig{Enabled: true},
 				ExternalSecrets: smv1alpha1.OperatorConfig{Enabled: true},
@@ -278,7 +278,7 @@ func TestReconcileDeployment(t *testing.T) {
 		Namespace: PluginNamespace,
 	}, deployment)
 	require.NoError(t, err)
-	assert.Equal(t, int32(2), *deployment.Spec.Replicas)
+	assert.Equal(t, int32(1), *deployment.Spec.Replicas)
 	assert.Equal(t, "openshift.io/ocp-secrets-management:test", deployment.Spec.Template.Spec.Containers[0].Image)
 }
 

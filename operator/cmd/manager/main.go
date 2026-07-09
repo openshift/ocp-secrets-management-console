@@ -131,7 +131,7 @@ func (d *defaultConfigInitializer) Start(ctx context.Context) error {
 				RolePrefix:         "secrets-management",
 			},
 			Plugin: smv1alpha1.PluginConfig{
-				Replicas: 2,
+				Replicas: 1,
 			},
 		},
 	}

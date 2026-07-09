@@ -156,12 +156,12 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
   const loadError = pushSecretsError || clusterPushSecretsError;
 
   const columns = [
-    { title: t('Name'), width: 16 },
+    { title: t('Name'), width: 15 },
     { title: t('Namespace'), width: 10 },
     { title: t('Type'), width: 11 },
     { title: t('Secret Store'), width: 19 },
     { title: t('Source Secret'), width: 16 },
-    { title: t('Refresh Interval'), width: 13 },
+    { title: t('Refresh Interval'), width: 14 },
     { title: t('Status'), width: 10 },
     { title: '', width: 5 }, // Actions column
   ];

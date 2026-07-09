@@ -207,11 +207,11 @@ export const SecretProviderClassTable: React.FC<SecretProviderClassTableProps> =
   const loadError = spcLoadError || podStatusesLoadError;
 
   const columns = [
-    { title: t('Name'), width: 16 },
+    { title: t('Name'), width: 15 },
     { title: t('Namespace'), width: 10 },
     { title: t('Provider'), width: 13 },
     { title: t('Secret Objects'), width: 13 },
-    { title: t('Parameters'), width: 23 },
+    { title: t('Parameters'), width: 24 },
     { title: t('Expiry Date'), width: 10 },
     { title: t('Status'), width: 10 },
     { title: '', width: 5 }, // Actions column

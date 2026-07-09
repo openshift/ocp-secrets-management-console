@@ -186,11 +186,11 @@ export const CertificatesTable: React.FC<CertificatesTableProps> = ({ selectedPr
   });
 
   const columns = [
-    { title: t('Name'), width: 16 },
+    { title: t('Name'), width: 15 },
     { title: t('Namespace'), width: 10 },
     { title: t('Secret'), width: 15 },
     { title: t('Issuer'), width: 15 },
-    { title: t('DNS Names'), width: 19 },
+    { title: t('DNS Names'), width: 20 },
     { title: t('Expiry Date'), width: 10 },
     { title: t('Status'), width: 10 },
     { title: '', width: 5 }, // Actions column

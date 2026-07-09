@@ -249,12 +249,12 @@ export const ExternalSecretsTable: React.FC<ExternalSecretsTableProps> = ({ sele
   const loadError = externalSecretsError || clusterExternalSecretsError;
 
   const columns = [
-    { title: t('Name'), width: 13 },
+    { title: t('Name'), width: 15 },
     { title: t('Namespace'), width: 10 },
     { title: t('Type'), width: 9 },
     { title: t('Target Secret'), width: 12 },
-    { title: t('Secret Store'), width: 15 },
-    { title: t('Refresh Interval'), width: 9 },
+    { title: t('Secret Store'), width: 14 },
+    { title: t('Refresh Interval'), width: 8 },
     { title: t('Next Refresh'), width: 17 },
     { title: t('Status'), width: 10 },
     { title: '', width: 5 }, // Actions column

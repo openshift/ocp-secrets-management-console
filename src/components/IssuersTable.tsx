@@ -174,13 +174,13 @@ export const IssuersTable: React.FC<IssuersTableProps> = ({ selectedProject }) =
   const loadError = issuersError || clusterIssuersError;
 
   const columns = [
-    { title: t('Name'), width: 12 },
-    { title: t('Type'), width: 9 },
-    { title: t('Namespace'), width: 11 },
-    { title: t('Issuer Type'), width: 11 },
-    { title: t('Details'), width: 20 },
-    { title: t('Status'), width: 9 },
-    { title: '', width: 10 }, // Actions column
+    { title: t('Name'), width: 15 },
+    { title: t('Namespace'), width: 14 },
+    { title: t('Type'), width: 12 },
+    { title: t('Issuer Type'), width: 14 },
+    { title: t('Details'), width: 30 },
+    { title: t('Status'), width: 10 },
+    { title: '', width: 5 }, // Actions column
   ];
 
   const rows = React.useMemo(() => {
@@ -208,8 +208,8 @@ export const IssuersTable: React.FC<IssuersTableProps> = ({ selectedProject }) =
       return {
         cells: [
           issuer.metadata.name,
-          issuer.scope === 'Namespace' ? 'Issuer' : 'ClusterIssuer',
           issuer.metadata.namespace || 'Cluster',
+          issuer.scope === 'Namespace' ? 'Issuer' : 'ClusterIssuer',
           issuerType,
           details,
           <Label key={`status-${issuerId}`} status={conditionStatus.labelStatus} icon={conditionStatus.icon}>

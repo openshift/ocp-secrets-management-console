@@ -156,14 +156,14 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
   const loadError = pushSecretsError || clusterPushSecretsError;
 
   const columns = [
-    { title: t('Name'), width: 14 },
-    { title: t('Type'), width: 9 },
-    { title: t('Namespace'), width: 11 },
-    { title: t('Secret Store'), width: 16 },
-    { title: t('Source Secret'), width: 14 },
-    { title: t('Refresh Interval'), width: 11 },
-    { title: t('Status'), width: 9 },
-    { title: '', width: 6 }, // Actions column
+    { title: t('Name'), width: 15 },
+    { title: t('Namespace'), width: 12 },
+    { title: t('Type'), width: 10 },
+    { title: t('Secret Store'), width: 19 },
+    { title: t('Source Secret'), width: 16 },
+    { title: t('Refresh Interval'), width: 13 },
+    { title: t('Status'), width: 10 },
+    { title: '', width: 5 }, // Actions column
   ];
 
   const rows = React.useMemo(() => {
@@ -205,8 +205,8 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
       return {
         cells: [
           pushSecret.metadata.name,
-          resourceType,
           namespace,
+          resourceType,
           secretStoreText,
           sourceSecret,
           refreshInterval,

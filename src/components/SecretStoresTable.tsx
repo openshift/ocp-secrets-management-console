@@ -217,14 +217,14 @@ export const SecretStoresTable: React.FC<SecretStoresTableProps> = ({ selectedPr
   const loadError = secretStoresError || clusterSecretStoresError;
 
   const columns = [
-    { title: t('Name'), width: 12 },
-    { title: t('Namespace'), width: 11 },
-    { title: t('Type'), width: 9 },
-    { title: t('Scope'), width: 10 },
-    { title: t('Provider'), width: 12 },
-    { title: t('Details'), width: 20 },
-    { title: t('Status'), width: 9 },
-    { title: '', width: 10 }, // Actions column
+    { title: t('Name'), width: 14 },
+    { title: t('Namespace'), width: 12 },
+    { title: t('Type'), width: 10 },
+    { title: t('Scope'), width: 11 },
+    { title: t('Provider'), width: 14 },
+    { title: t('Details'), width: 24 },
+    { title: t('Status'), width: 10 },
+    { title: '', width: 5 }, // Actions column
   ];
 
   const rows = React.useMemo(() => {

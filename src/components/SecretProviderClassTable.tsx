@@ -207,14 +207,14 @@ export const SecretProviderClassTable: React.FC<SecretProviderClassTableProps> =
   const loadError = spcLoadError || podStatusesLoadError;
 
   const columns = [
-    { title: t('Name'), width: 14 },
-    { title: t('Namespace'), width: 11 },
-    { title: t('Provider'), width: 11 },
-    { title: t('Secret Objects'), width: 12 },
-    { title: t('Parameters'), width: 22 },
+    { title: t('Name'), width: 15 },
+    { title: t('Namespace'), width: 12 },
+    { title: t('Provider'), width: 12 },
+    { title: t('Secret Objects'), width: 13 },
+    { title: t('Parameters'), width: 23 },
     { title: t('Expiry Date'), width: 10 },
-    { title: t('Status'), width: 11 },
-    { title: '', width: 10 }, // Actions column
+    { title: t('Status'), width: 10 },
+    { title: '', width: 5 }, // Actions column
   ];
 
   const rows = React.useMemo(() => {

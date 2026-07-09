@@ -174,11 +174,11 @@ export const IssuersTable: React.FC<IssuersTableProps> = ({ selectedProject }) =
   const loadError = issuersError || clusterIssuersError;
 
   const columns = [
-    { title: t('Name'), width: 15 },
-    { title: t('Namespace'), width: 14 },
-    { title: t('Type'), width: 12 },
-    { title: t('Issuer Type'), width: 14 },
-    { title: t('Details'), width: 30 },
+    { title: t('Name'), width: 16 },
+    { title: t('Namespace'), width: 10 },
+    { title: t('Type'), width: 13 },
+    { title: t('Issuer Type'), width: 15 },
+    { title: t('Details'), width: 31 },
     { title: t('Status'), width: 10 },
     { title: '', width: 5 }, // Actions column
   ];

@@ -217,9 +217,9 @@ export const SecretStoresTable: React.FC<SecretStoresTableProps> = ({ selectedPr
   const loadError = secretStoresError || clusterSecretStoresError;
 
   const columns = [
-    { title: t('Name'), width: 14 },
-    { title: t('Namespace'), width: 12 },
-    { title: t('Type'), width: 10 },
+    { title: t('Name'), width: 15 },
+    { title: t('Namespace'), width: 10 },
+    { title: t('Type'), width: 11 },
     { title: t('Scope'), width: 11 },
     { title: t('Provider'), width: 14 },
     { title: t('Details'), width: 24 },

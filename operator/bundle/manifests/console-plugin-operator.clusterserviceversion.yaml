@@ -248,7 +248,7 @@ spec:
                                 - args:
                                     - --leader-elect
                                   command:
-                                    - /manager
+                                    - /bin/ocp-secrets-management-operator
                                   env:
                                     - name: RELATED_IMAGE_PLUGIN
                                       value: openshift.io/ocp-secrets-management:v0.1.0

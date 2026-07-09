@@ -286,7 +286,7 @@ spec:
               - args:
                 - --leader-elect
                 command:
-                - /manager
+                - /bin/ocp-secrets-management-operator
                 image: openshift.io/ocp-secrets-management-operator:v0.1.0
                 imagePullPolicy: IfNotPresent
                 livenessProbe:

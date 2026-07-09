@@ -186,14 +186,14 @@ export const CertificatesTable: React.FC<CertificatesTableProps> = ({ selectedPr
   });
 
   const columns = [
-    { title: t('Name'), width: 14 },
-    { title: t('Namespace'), width: 9 },
-    { title: t('Secret'), width: 14 },
-    { title: t('Issuer'), width: 14 },
-    { title: t('DNS Names'), width: 18 },
+    { title: t('Name'), width: 15 },
+    { title: t('Namespace'), width: 10 },
+    { title: t('Secret'), width: 15 },
+    { title: t('Issuer'), width: 15 },
+    { title: t('DNS Names'), width: 20 },
     { title: t('Expiry Date'), width: 10 },
-    { title: t('Status'), width: 11 },
-    { title: '', width: 10 }, // Actions column
+    { title: t('Status'), width: 10 },
+    { title: '', width: 5 }, // Actions column
   ];
 
   const rows = React.useMemo(() => {

@@ -249,15 +249,15 @@ export const ExternalSecretsTable: React.FC<ExternalSecretsTableProps> = ({ sele
   const loadError = externalSecretsError || clusterExternalSecretsError;
 
   const columns = [
-    { title: t('Name'), width: 14 },
-    { title: t('Type'), width: 12 },
-    { title: t('Namespace'), width: 11 },
-    { title: t('Target Secret'), width: 13 },
-    { title: t('Secret Store'), width: 18 },
-    { title: t('Refresh Interval'), width: 11 },
-    { title: t('Next Refresh'), width: 22 },
-    { title: t('Status'), width: 9 },
-    { title: '', width: 10 }, // Actions column
+    { title: t('Name'), width: 15 },
+    { title: t('Namespace'), width: 10 },
+    { title: t('Type'), width: 9 },
+    { title: t('Target Secret'), width: 12 },
+    { title: t('Secret Store'), width: 14 },
+    { title: t('Refresh Interval'), width: 8 },
+    { title: t('Next Refresh'), width: 17 },
+    { title: t('Status'), width: 10 },
+    { title: '', width: 5 }, // Actions column
   ];
 
   const rows = React.useMemo(() => {
@@ -299,8 +299,8 @@ export const ExternalSecretsTable: React.FC<ExternalSecretsTableProps> = ({ sele
       return {
         cells: [
           resource.metadata.name,
-          resourceType,
           namespace,
+          resourceType,
           targetSecret,
           secretStore,
           refreshInterval,

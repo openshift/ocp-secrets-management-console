@@ -23,7 +23,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -a -o manager c
 # Use UBI minimal as base image for OpenShift compatibility
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 WORKDIR /
-COPY --from=builder /workspace/manager .
+COPY --from=builder /workspace/manager /bin/ocp-secrets-management-operator
 USER 65532:65532
 
-ENTRYPOINT ["/manager"]
+ENTRYPOINT ["/bin/ocp-secrets-management-operator"]

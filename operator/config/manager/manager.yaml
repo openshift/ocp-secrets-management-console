@@ -39,7 +39,7 @@ spec:
           image: openshift.io/ocp-secrets-management-operator:latest
           imagePullPolicy: Always
           command:
-            - /manager
+            - /bin/ocp-secrets-management-operator
           args:
             - --leader-elect
           ports:

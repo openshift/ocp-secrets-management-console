@@ -76,7 +76,7 @@
     "pluralize": "^8.0.0",
     "prettier": "^3.8.3",
     "prettier-stylelint": "^0.4.2",
-    "react": "^18.3.1",
+    "react": "^19.0.0",
     "react-dom": "^18.3.1",
     "react-helmet": "^6.1.0",
     "react-i18next": "~16.5.8",

@@ -13,6 +13,7 @@ export interface OperatorStatus {
 
 export interface OperatorDetectionResult {
   certManager: OperatorStatus;
+  trustManager: OperatorStatus;
   externalSecrets: OperatorStatus;
   secretsStoreCSI: OperatorStatus;
   loading: boolean;
@@ -26,6 +27,8 @@ const EXTERNAL_SECRETS_CRDS = [
   'externalsecrets.external-secrets.io',
   'secretstores.external-secrets.io',
 ];
+
+const TRUST_MANAGER_CRDS = ['bundles.trust.cert-manager.io'];
 
 const SECRETS_STORE_CSI_CRDS = ['secretproviderclasses.secrets-store.csi.x-k8s.io'];
 
@@ -66,6 +69,11 @@ export const useOperatorDetection = (): OperatorDetectionResult => {
     loading: true,
   });
 
+  const [trustManager, setTrustManager] = React.useState<OperatorStatus>({
+    installed: false,
+    loading: true,
+  });
+
   const [externalSecrets, setExternalSecrets] = React.useState<OperatorStatus>({
     installed: false,
     loading: true,
@@ -79,6 +87,7 @@ export const useOperatorDetection = (): OperatorDetectionResult => {
   const checkOperators = React.useCallback(async () => {
     // Reset to loading state
     setCertManager((prev) => ({ ...prev, loading: true }));
+    setTrustManager((prev) => ({ ...prev, loading: true }));
     setExternalSecrets((prev) => ({ ...prev, loading: true }));
     setSecretsStoreCSI((prev) => ({ ...prev, loading: true }));
 
@@ -88,6 +97,22 @@ export const useOperatorDetection = (): OperatorDetectionResult => {
       setCertManager({ installed, loading: false });
     } catch (err) {
       setCertManager({
+        installed: false,
+        loading: false,
+        error: isNotFoundError(err)
+          ? undefined
+          : err instanceof Error
+          ? err.message
+          : 'Unknown error',
+      });
+    }
+
+    // Check trust-manager (part of cert-manager operator)
+    try {
+      const installed = await checkOperatorInstalled(TRUST_MANAGER_CRDS);
+      setTrustManager({ installed, loading: false });
+    } catch (err) {
+      setTrustManager({
         installed: false,
         loading: false,
         error: isNotFoundError(err)
@@ -137,9 +162,14 @@ export const useOperatorDetection = (): OperatorDetectionResult => {
 
   return {
     certManager,
+    trustManager,
     externalSecrets,
     secretsStoreCSI,
-    loading: certManager.loading || externalSecrets.loading || secretsStoreCSI.loading,
+    loading:
+      certManager.loading ||
+      trustManager.loading ||
+      externalSecrets.loading ||
+      secretsStoreCSI.loading,
     refresh: checkOperators,
   };
 };
@@ -162,6 +192,20 @@ export const OPERATOR_INFO = {
       'Or go to Catalog and search for "cert-manager Operator for Red Hat OpenShift"',
       'Click Install and select the appropriate namespace',
       'Wait for the operator to be installed and ready',
+    ],
+  },
+  'trust-manager': {
+    name: 'trust-manager',
+    displayName: 'trust-manager (cert-manager Operator)',
+    description:
+      'Distributes trust bundles (CA certificates) across namespaces. Part of the cert-manager operator, trust-manager ensures consistent TLS trust configuration across your cluster.',
+    quickStartUrl: '/quickstart?quickstart=install-cert-manager',
+    operatorHubUrl: '/catalog/ns/default',
+    installInstructions: [
+      'Trust-manager is included with the cert-manager Operator for Red Hat OpenShift',
+      'Install the cert-manager operator from Catalog',
+      'Enable trust-manager via the TrustManager custom resource',
+      'Create Bundle resources to distribute CA trust across namespaces',
     ],
   },
   'external-secrets': {
@@ -195,3 +239,8 @@ export const OPERATOR_INFO = {
 } as const;
 
 export type OperatorKey = keyof typeof OPERATOR_INFO;
+export type OperatorDetectionKey =
+  | 'cert-manager'
+  | 'trust-manager'
+  | 'external-secrets'
+  | 'secrets-store-csi';

@@ -24,6 +24,7 @@ export const getInvolvedObjectKind = (rt: string): string => {
     pushsecrets: 'PushSecret',
     clusterpushsecrets: 'ClusterPushSecret',
     secretproviderclasses: 'SecretProviderClass',
+    bundles: 'Bundle',
   };
   return map[rt] || rt;
 };

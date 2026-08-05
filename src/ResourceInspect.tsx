@@ -21,6 +21,7 @@ import {
 import { ArrowLeftIcon, KeyIcon, CheckCircleIcon, TimesCircleIcon } from '@patternfly/react-icons';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import {
+  BundleModel,
   CertificateModel,
   IssuerModel,
   ClusterIssuerModel,
@@ -150,6 +151,8 @@ export const ResourceInspect: React.FC = () => {
         return ClusterPushSecretModel;
       case 'secretproviderclasses':
         return SecretProviderClassModel;
+      case 'bundles':
+        return BundleModel;
       default:
         return null;
     }
@@ -160,7 +163,8 @@ export const ResourceInspect: React.FC = () => {
     resourceType === 'clusterissuers' ||
     resourceType === 'clustersecretstores' ||
     resourceType === 'clusterexternalsecrets' ||
-    resourceType === 'clusterpushsecrets';
+    resourceType === 'clusterpushsecrets' ||
+    resourceType === 'bundles';
 
   /** Minimal K8s resource shape for inspect view (avoids explicit any). */
   type K8sResourceInspect = {
@@ -774,6 +778,8 @@ export const ResourceInspect: React.FC = () => {
         return t('ClusterPushSecret');
       case 'secretproviderclasses':
         return t('SecretProviderClass');
+      case 'bundles':
+        return t('Bundle');
       default:
         return t('Resource');
     }

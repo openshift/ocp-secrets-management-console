@@ -21,6 +21,7 @@ import {
 import { KeyIcon } from '@patternfly/react-icons';
 import { CertificatesTable } from './components/CertificatesTable';
 import { IssuersTable } from './components/IssuersTable';
+import { BundlesTable } from './components/BundlesTable';
 import { ExternalSecretsTable } from './components/ExternalSecretsTable';
 import { SecretStoresTable } from './components/SecretStoresTable';
 import { PushSecretsTable } from './components/PushSecretsTable';
@@ -50,10 +51,11 @@ const OperatorStatusBadge: React.FC<{ status: OperatorStatus }> = ({ status }) =
   return null;
 };
 
-type OperatorType = 'cert-manager' | 'external-secrets' | 'secrets-store-csi' | 'all';
+type OperatorType = 'cert-manager' | 'trust-manager' | 'external-secrets' | 'secrets-store-csi' | 'all';
 type ResourceKind =
   | 'certificates'
   | 'issuers'
+  | 'bundles'
   | 'externalsecrets'
   | 'secretstores'
   | 'pushsecrets'
@@ -105,6 +107,7 @@ export default function SecretsManagement() {
   // Detect installed operators
   const {
     certManager,
+    trustManager,
     externalSecrets,
     secretsStoreCSI,
     loading: operatorsLoading,
@@ -115,6 +118,8 @@ export default function SecretsManagement() {
     switch (operator) {
       case 'cert-manager':
         return certManager.installed;
+      case 'trust-manager':
+        return trustManager.installed;
       case 'external-secrets':
         return externalSecrets.installed;
       case 'secrets-store-csi':
@@ -125,11 +130,13 @@ export default function SecretsManagement() {
   };
 
   const getOperatorStatus = (
-    operatorKey: 'cert-manager' | 'external-secrets' | 'secrets-store-csi',
+    operatorKey: 'cert-manager' | 'trust-manager' | 'external-secrets' | 'secrets-store-csi',
   ) => {
     switch (operatorKey) {
       case 'cert-manager':
         return certManager;
+      case 'trust-manager':
+        return trustManager;
       case 'external-secrets':
         return externalSecrets;
       case 'secrets-store-csi':
@@ -138,7 +145,10 @@ export default function SecretsManagement() {
   };
 
   const anyOperatorInstalled =
-    certManager.installed || externalSecrets.installed || secretsStoreCSI.installed;
+    certManager.installed ||
+    trustManager.installed ||
+    externalSecrets.installed ||
+    secretsStoreCSI.installed;
 
   // Fetch all namespaces/projects dynamically
   const [projects, projectsLoaded, projectsError] = useK8sWatchResource<Project[]>({
@@ -151,6 +161,11 @@ export default function SecretsManagement() {
       value: 'cert-manager',
       label: 'cert-manager',
       description: t('Certificate lifecycle management'),
+    },
+    {
+      value: 'trust-manager',
+      label: 'trust-manager',
+      description: t('CA trust bundle distribution'),
     },
     {
       value: 'external-secrets',
@@ -239,6 +254,10 @@ export default function SecretsManagement() {
     { value: 'issuers', label: t('Issuers'), description: t('Certificate issuers') },
   ];
 
+  const trustManagerResources = [
+    { value: 'bundles', label: t('Bundles'), description: t('CA trust bundles') },
+  ];
+
   const externalSecretsResources = [
     {
       value: 'externalsecrets',
@@ -274,11 +293,14 @@ export default function SecretsManagement() {
       return [
         ...baseOptions,
         ...(certManager.installed ? certManagerResources : []),
+        ...(trustManager.installed ? trustManagerResources : []),
         ...(externalSecrets.installed ? externalSecretsResources : []),
         ...(secretsStoreCSI.installed ? secretsStoreCSIResources : []),
       ];
     } else if (operator === 'cert-manager') {
       return [...baseOptions, ...certManagerResources];
+    } else if (operator === 'trust-manager') {
+      return [...baseOptions, ...trustManagerResources];
     } else if (operator === 'external-secrets') {
       return [...baseOptions, ...externalSecretsResources];
     } else if (operator === 'secrets-store-csi') {
@@ -318,7 +340,7 @@ export default function SecretsManagement() {
 
   const renderOperatorContent = (
     renderInstalledContent: () => React.ReactNode,
-    operatorKey: 'cert-manager' | 'external-secrets' | 'secrets-store-csi',
+    operatorKey: 'cert-manager' | 'trust-manager' | 'external-secrets' | 'secrets-store-csi',
   ) => {
     if (operatorsLoading) {
       return (
@@ -561,6 +583,30 @@ export default function SecretsManagement() {
                       <IssuersTable selectedProject={filters.project} />
                     ),
                     'cert-manager',
+                  )}
+                </div>
+              )}
+
+              {/* trust-manager Resources */}
+              {shouldShowComponent('trust-manager', 'bundles') && (
+                <div style={{ marginBottom: '2rem' }}>
+                  <Flex alignItems={{ default: 'alignItemsCenter' }} style={{ marginBottom: '0.5rem' }}>
+                    <FlexItem>
+                      <Title headingLevel="h3" size="md">
+                        {t('Trust Bundles')}
+                      </Title>
+                    </FlexItem>
+                    <FlexItem>
+                      <Badge isRead>{t('trust-manager')}</Badge>
+                      <OperatorStatusBadge status={trustManager} />
+                    </FlexItem>
+                  </Flex>
+                  <Divider style={{ marginBottom: '1rem' }} />
+                  {renderOperatorContent(
+                    () => (
+                      <BundlesTable selectedProject={filters.project} />
+                    ),
+                    'trust-manager',
                   )}
                 </div>
               )}

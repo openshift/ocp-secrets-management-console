@@ -34,6 +34,7 @@ describe('useOperatorDetection', () => {
       const { result } = renderHook(() => useOperatorDetection());
 
       expect(result.current.certManager.loading).toBe(true);
+      expect(result.current.trustManager.loading).toBe(true);
       expect(result.current.externalSecrets.loading).toBe(true);
       expect(result.current.secretsStoreCSI.loading).toBe(true);
       expect(result.current.loading).toBe(true);
@@ -43,6 +44,7 @@ describe('useOperatorDetection', () => {
       const { result } = renderHook(() => useOperatorDetection());
 
       expect(result.current.certManager.installed).toBe(false);
+      expect(result.current.trustManager.installed).toBe(false);
       expect(result.current.externalSecrets.installed).toBe(false);
       expect(result.current.secretsStoreCSI.installed).toBe(false);
     });
@@ -138,6 +140,76 @@ describe('useOperatorDetection', () => {
 
       expect(result.current.certManager.installed).toBe(false);
       expect(result.current.certManager.error).toBeUndefined();
+    });
+  });
+
+  describe('Trust Manager Detection', () => {
+    it('detects trust-manager when bundles CRD exists', async () => {
+      mockConsoleFetch.mockImplementation((url) => {
+        if (url.includes('bundles.trust.cert-manager.io')) {
+          return createMockResponse(200, mockCRDResponse('bundles.trust.cert-manager.io'));
+        }
+        return createMockResponse(404);
+      });
+
+      const { result } = renderHook(() => useOperatorDetection());
+
+      await waitFor(() => {
+        expect(result.current.trustManager.loading).toBe(false);
+      });
+
+      expect(result.current.trustManager.installed).toBe(true);
+      expect(result.current.trustManager.error).toBeUndefined();
+    });
+
+    it('marks trust-manager as not installed when bundles CRD does not exist', async () => {
+      mockConsoleFetch.mockResolvedValue(createMockResponse(404));
+
+      const { result } = renderHook(() => useOperatorDetection());
+
+      await waitFor(() => {
+        expect(result.current.trustManager.loading).toBe(false);
+      });
+
+      expect(result.current.trustManager.installed).toBe(false);
+      expect(result.current.trustManager.error).toBeUndefined();
+    });
+
+    it('handles trust-manager detection errors gracefully', async () => {
+      mockConsoleFetch.mockImplementation((url) => {
+        if (url.includes('trust.cert-manager.io')) {
+          return createMockResponse(500, undefined, 'Internal Server Error');
+        }
+        return createMockResponse(404);
+      });
+
+      const { result } = renderHook(() => useOperatorDetection());
+
+      await waitFor(() => {
+        expect(result.current.trustManager.loading).toBe(false);
+      });
+
+      expect(result.current.trustManager.installed).toBe(false);
+      expect(result.current.trustManager.error).toBeDefined();
+      expect(result.current.trustManager.error).toContain('CRD lookup failed');
+    });
+
+    it('detects trust-manager independently from cert-manager', async () => {
+      mockConsoleFetch.mockImplementation((url) => {
+        if (url.includes('bundles.trust.cert-manager.io')) {
+          return createMockResponse(200, mockCRDResponse('bundles.trust.cert-manager.io'));
+        }
+        return createMockResponse(404);
+      });
+
+      const { result } = renderHook(() => useOperatorDetection());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.trustManager.installed).toBe(true);
+      expect(result.current.certManager.installed).toBe(false);
     });
   });
 
@@ -268,6 +340,9 @@ describe('useOperatorDetection', () => {
         if (urlString.includes('certificates.cert-manager.io')) {
           return createMockResponse(200, mockCRDResponse('certificates.cert-manager.io'));
         }
+        if (urlString.includes('bundles.trust.cert-manager.io')) {
+          return createMockResponse(200, mockCRDResponse('bundles.trust.cert-manager.io'));
+        }
         if (urlString.includes('externalsecrets.external-secrets.io')) {
           return createMockResponse(200, mockCRDResponse('externalsecrets.external-secrets.io'));
         }
@@ -287,6 +362,7 @@ describe('useOperatorDetection', () => {
       });
 
       expect(result.current.certManager.installed).toBe(true);
+      expect(result.current.trustManager.installed).toBe(true);
       expect(result.current.externalSecrets.installed).toBe(true);
       expect(result.current.secretsStoreCSI.installed).toBe(true);
     });
@@ -301,6 +377,7 @@ describe('useOperatorDetection', () => {
       });
 
       expect(result.current.certManager.loading).toBe(false);
+      expect(result.current.trustManager.loading).toBe(false);
       expect(result.current.externalSecrets.loading).toBe(false);
       expect(result.current.secretsStoreCSI.loading).toBe(false);
     });
@@ -383,6 +460,21 @@ describe('useOperatorDetection', () => {
       );
       expect(calls).toContainEqual(
         expect.stringContaining('issuers.cert-manager.io'),
+      );
+    });
+
+    it('makes correct API call for trust-manager CRD', async () => {
+      mockConsoleFetch.mockResolvedValue(createMockResponse(404));
+
+      renderHook(() => useOperatorDetection());
+
+      await waitFor(() => {
+        expect(mockConsoleFetch).toHaveBeenCalled();
+      });
+
+      const calls = mockConsoleFetch.mock.calls.map((call) => call[0]);
+      expect(calls).toContainEqual(
+        expect.stringContaining('bundles.trust.cert-manager.io'),
       );
     });
 

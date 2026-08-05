@@ -53,6 +53,12 @@ jest.mock('./components/SecretProviderClassTable', () => ({
   ),
 }));
 
+jest.mock('./components/BundlesTable', () => ({
+  BundlesTable: ({ selectedProject }: { selectedProject: string }) => (
+    <div data-test="bundles-table">Bundles Table - Project: {selectedProject}</div>
+  ),
+}));
+
 jest.mock('./components/OperatorNotInstalled', () => ({
   NoOperatorsInstalled: () => <div data-test="no-operators">No operators installed</div>,
 }));
@@ -76,6 +82,7 @@ const mockUseK8sWatchResource = useK8sWatchResource as jest.Mock;
 describe('SecretsManagement', () => {
   const defaultOperatorStatus = {
     certManager: { installed: true, loading: false },
+    trustManager: { installed: true, loading: false },
     externalSecrets: { installed: true, loading: false },
     secretsStoreCSI: { installed: true, loading: false },
     loading: false,
@@ -182,6 +189,7 @@ describe('SecretsManagement', () => {
     it('shows NoOperatorsInstalled component when no operators are detected', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: false, loading: false },
         secretsStoreCSI: { installed: false, loading: false },
         loading: false,
@@ -195,6 +203,7 @@ describe('SecretsManagement', () => {
     it('does not show resource tables when no operators are installed', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: false, loading: false },
         secretsStoreCSI: { installed: false, loading: false },
         loading: false,
@@ -216,6 +225,9 @@ describe('SecretsManagement', () => {
       expect(screen.getByTestId('certificates-table')).toBeInTheDocument();
       expect(screen.getByTestId('issuers-table')).toBeInTheDocument();
 
+      // trust-manager tables
+      expect(screen.getByTestId('bundles-table')).toBeInTheDocument();
+
       // External Secrets Operator tables
       expect(screen.getByTestId('external-secrets-table')).toBeInTheDocument();
       expect(screen.getByTestId('secret-stores-table')).toBeInTheDocument();
@@ -230,6 +242,7 @@ describe('SecretsManagement', () => {
 
       expect(screen.getByRole('heading', { name: 'Certificates', level: 3 })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Issuers', level: 3 })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Trust Bundles', level: 3 })).toBeInTheDocument();
       expect(
         screen.getByRole('heading', { name: 'External Secrets', level: 3 }),
       ).toBeInTheDocument();
@@ -246,6 +259,9 @@ describe('SecretsManagement', () => {
       // Should have cert-manager badges (2 sections)
       const certManagerBadges = screen.getAllByText('cert-manager');
       expect(certManagerBadges.length).toBeGreaterThanOrEqual(2);
+
+      // Should have trust-manager badge (1 section)
+      expect(screen.getByText('trust-manager')).toBeInTheDocument();
 
       // Should have External Secrets Operator badges (3 sections)
       const esooBadges = screen.getAllByText('External Secrets Operator');
@@ -266,6 +282,7 @@ describe('SecretsManagement', () => {
     it('shows only cert-manager resources when only cert-manager is installed', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: true, loading: false },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: false, loading: false },
         secretsStoreCSI: { installed: false, loading: false },
         loading: false,
@@ -276,6 +293,7 @@ describe('SecretsManagement', () => {
 
       expect(screen.getByTestId('certificates-table')).toBeInTheDocument();
       expect(screen.getByTestId('issuers-table')).toBeInTheDocument();
+      expect(screen.queryByTestId('bundles-table')).not.toBeInTheDocument();
       expect(screen.queryByTestId('external-secrets-table')).not.toBeInTheDocument();
       expect(screen.queryByTestId('secret-provider-class-table')).not.toBeInTheDocument();
     });
@@ -283,6 +301,7 @@ describe('SecretsManagement', () => {
     it('shows only External Secrets resources when only ESO is installed', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: true, loading: false },
         secretsStoreCSI: { installed: false, loading: false },
         loading: false,
@@ -301,6 +320,7 @@ describe('SecretsManagement', () => {
     it('shows only Secrets Store CSI resources when only CSI is installed', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: false, loading: false },
         secretsStoreCSI: { installed: true, loading: false },
         loading: false,
@@ -317,6 +337,7 @@ describe('SecretsManagement', () => {
     it('shows cert-manager and ESO resources when both are installed', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: true, loading: false },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: true, loading: false },
         secretsStoreCSI: { installed: false, loading: false },
         loading: false,
@@ -331,10 +352,108 @@ describe('SecretsManagement', () => {
     });
   });
 
+  describe('Trust Manager Integration', () => {
+    it('shows bundles table when trust-manager is installed', () => {
+      mockUseOperatorDetection.mockReturnValue({
+        certManager: { installed: false, loading: false },
+        trustManager: { installed: true, loading: false },
+        externalSecrets: { installed: false, loading: false },
+        secretsStoreCSI: { installed: false, loading: false },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      render(<SecretsManagement />);
+
+      expect(screen.getByTestId('bundles-table')).toBeInTheDocument();
+      expect(screen.queryByTestId('certificates-table')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('external-secrets-table')).not.toBeInTheDocument();
+    });
+
+    it('shows trust-manager badge on bundles section', () => {
+      mockUseOperatorDetection.mockReturnValue({
+        certManager: { installed: false, loading: false },
+        trustManager: { installed: true, loading: false },
+        externalSecrets: { installed: false, loading: false },
+        secretsStoreCSI: { installed: false, loading: false },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      render(<SecretsManagement />);
+
+      expect(screen.getByText('trust-manager')).toBeInTheDocument();
+    });
+
+    it('shows Trust Bundles heading when trust-manager is installed', () => {
+      mockUseOperatorDetection.mockReturnValue({
+        certManager: { installed: false, loading: false },
+        trustManager: { installed: true, loading: false },
+        externalSecrets: { installed: false, loading: false },
+        secretsStoreCSI: { installed: false, loading: false },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      render(<SecretsManagement />);
+
+      expect(screen.getByRole('heading', { name: 'Trust Bundles', level: 3 })).toBeInTheDocument();
+    });
+
+    it('hides bundles table when trust-manager is not installed', () => {
+      mockUseOperatorDetection.mockReturnValue({
+        certManager: { installed: true, loading: false },
+        trustManager: { installed: false, loading: false },
+        externalSecrets: { installed: true, loading: false },
+        secretsStoreCSI: { installed: true, loading: false },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      render(<SecretsManagement />);
+
+      expect(screen.queryByTestId('bundles-table')).not.toBeInTheDocument();
+      expect(screen.getByTestId('certificates-table')).toBeInTheDocument();
+    });
+
+    it('shows both cert-manager and trust-manager resources when both are installed', () => {
+      mockUseOperatorDetection.mockReturnValue({
+        certManager: { installed: true, loading: false },
+        trustManager: { installed: true, loading: false },
+        externalSecrets: { installed: false, loading: false },
+        secretsStoreCSI: { installed: false, loading: false },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      render(<SecretsManagement />);
+
+      expect(screen.getByTestId('certificates-table')).toBeInTheDocument();
+      expect(screen.getByTestId('issuers-table')).toBeInTheDocument();
+      expect(screen.getByTestId('bundles-table')).toBeInTheDocument();
+    });
+
+    it('passes selectedProject to BundlesTable', () => {
+      mockUseOperatorDetection.mockReturnValue({
+        certManager: { installed: false, loading: false },
+        trustManager: { installed: true, loading: false },
+        externalSecrets: { installed: false, loading: false },
+        secretsStoreCSI: { installed: false, loading: false },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      render(<SecretsManagement />);
+
+      expect(screen.getByTestId('bundles-table')).toHaveTextContent('Project: all');
+    });
+  });
+
   describe('Operator Error Handling', () => {
     it('does not show cert-manager resources when it has an error', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false, error: 'API unreachable' },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: true, loading: false },
         secretsStoreCSI: { installed: true, loading: false },
         loading: false,
@@ -354,6 +473,7 @@ describe('SecretsManagement', () => {
     it('treats operator with error as not installed', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false, error: 'Connection timeout' },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: true, loading: false },
         secretsStoreCSI: { installed: false, loading: false },
         loading: false,
@@ -372,6 +492,7 @@ describe('SecretsManagement', () => {
       const mockRefresh = jest.fn();
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false, error: 'Error 1' },
+        trustManager: { installed: false, loading: false, error: 'Error 4' },
         externalSecrets: { installed: false, loading: false, error: 'Error 2' },
         secretsStoreCSI: { installed: false, loading: false, error: 'Error 3' },
         loading: false,
@@ -387,6 +508,7 @@ describe('SecretsManagement', () => {
       const mockRefresh = jest.fn();
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false, error: 'Connection timeout' },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: false, loading: false, error: 'Timeout' },
         secretsStoreCSI: { installed: false, loading: false },
         loading: false,
@@ -402,6 +524,7 @@ describe('SecretsManagement', () => {
     it('shows loading spinner when operator has error', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: true, error: 'Previous error' },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: false, loading: false },
         secretsStoreCSI: { installed: false, loading: false },
         loading: true,
@@ -483,6 +606,7 @@ describe('SecretsManagement', () => {
     it('only shows installed operators in filter options', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: true, loading: false },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: false, loading: false },
         secretsStoreCSI: { installed: false, loading: false },
         loading: false,
@@ -636,6 +760,7 @@ describe('SecretsManagement', () => {
       const mockRefresh = jest.fn();
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false, error: 'Error 1' },
+        trustManager: { installed: false, loading: false, error: 'Error 4' },
         externalSecrets: { installed: false, loading: false, error: 'Error 2' },
         secretsStoreCSI: { installed: false, loading: false, error: 'Error 3' },
         loading: false,
@@ -663,6 +788,7 @@ describe('SecretsManagement', () => {
     it('hides resources when their operator is not installed', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: true, loading: false },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: false, loading: false },
         secretsStoreCSI: { installed: false, loading: false },
         loading: false,
@@ -686,6 +812,7 @@ describe('SecretsManagement', () => {
     it('shows correct tables based on operator installation state', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false },
+        trustManager: { installed: false, loading: false },
         externalSecrets: { installed: true, loading: false },
         secretsStoreCSI: { installed: true, loading: false },
         loading: false,

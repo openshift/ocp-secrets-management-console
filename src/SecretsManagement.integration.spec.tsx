@@ -56,6 +56,12 @@ jest.mock('./components/SecretProviderClassTable', () => ({
   ),
 }));
 
+jest.mock('./components/BundlesTable', () => ({
+  BundlesTable: ({ selectedProject }: { selectedProject: string }) => (
+    <div data-test="bundles-table">Bundles - {selectedProject}</div>
+  ),
+}));
+
 jest.mock('./components/OperatorNotInstalled', () => ({
   NoOperatorsInstalled: () => <div data-test="no-operators">No operators installed</div>,
 }));
@@ -77,6 +83,7 @@ const mockUseK8sWatchResource = useK8sWatchResource as jest.Mock;
 describe('SecretsManagement - User Interactions', () => {
   const defaultOperatorStatus = {
     certManager: { installed: true, loading: false },
+    trustManager: { installed: true, loading: false },
     externalSecrets: { installed: true, loading: false },
     secretsStoreCSI: { installed: true, loading: false },
     loading: false,

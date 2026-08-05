@@ -34,6 +34,19 @@
       ]
     },
     {
+      "name": "trust-manager",
+      "repo": "cert-manager/trust-manager",
+      "ref": "v0.20.3",
+      "crds": [
+        {
+          "file": "deploy/crds/trust.cert-manager.io_bundles.yaml",
+          "kind": "Bundle",
+          "group": "trust.cert-manager.io",
+          "version": "v1alpha1"
+        }
+      ]
+    },
+    {
       "name": "external-secrets",
       "repo": "external-secrets/external-secrets",
       "ref": "v0.20.4",

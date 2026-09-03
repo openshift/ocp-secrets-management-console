@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import SecretsManagement from './SecretsManagement';
 import { useOperatorDetection } from './hooks/useOperatorDetection';
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
+import { useActiveNamespace } from '@openshift-console/dynamic-plugin-sdk';
 
 // Mock dependencies
 jest.mock('./hooks/useOperatorDetection', () => ({
@@ -9,7 +9,9 @@ jest.mock('./hooks/useOperatorDetection', () => ({
 }));
 
 jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  useK8sWatchResource: jest.fn(),
+  useActiveNamespace: jest.fn(),
+  isAllNamespacesKey: (ns: string) => ns === '#ALL_NS#',
+  NamespaceBar: () => <div data-test="namespace-bar" />,
   consoleFetch: jest.fn(),
   DocumentTitle: ({ children }: { children: string }) => <title>{children}</title>,
 }));
@@ -83,7 +85,7 @@ jest.mock('react-helmet', () => ({
 }));
 
 const mockUseOperatorDetection = useOperatorDetection as jest.Mock;
-const mockUseK8sWatchResource = useK8sWatchResource as jest.Mock;
+const mockUseActiveNamespace = useActiveNamespace as jest.Mock;
 
 describe('SecretsManagement', () => {
   const defaultOperatorStatus = {
@@ -95,27 +97,12 @@ describe('SecretsManagement', () => {
     refresh: jest.fn(),
   };
 
-  const mockProjects = [
-    {
-      metadata: { name: 'default' },
-      status: { phase: 'Active' },
-    },
-    {
-      metadata: { name: 'my-project' },
-      status: { phase: 'Active' },
-    },
-    {
-      metadata: { name: 'openshift-operators' },
-      status: { phase: 'Active' },
-    },
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
 
     // Default mocks
     mockUseOperatorDetection.mockReturnValue(defaultOperatorStatus);
-    mockUseK8sWatchResource.mockReturnValue([mockProjects, true, undefined]);
+    mockUseActiveNamespace.mockReturnValue(['#ALL_NS#', jest.fn()]);
   });
 
   describe('Page Structure', () => {
@@ -140,9 +127,13 @@ describe('SecretsManagement', () => {
       ).toBeInTheDocument();
     });
 
-    it('renders all three filter dropdowns', () => {
+    it('renders the standard console namespace bar', () => {
       render(<SecretsManagement />);
-      expect(screen.getByRole('button', { name: /Project/i })).toBeInTheDocument();
+      expect(screen.getByTestId('namespace-bar')).toBeInTheDocument();
+    });
+
+    it('renders the operator and resource type filter dropdowns', () => {
+      render(<SecretsManagement />);
       expect(screen.getByRole('button', { name: /Operator/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Resource Type/i })).toBeInTheDocument();
     });
@@ -163,21 +154,6 @@ describe('SecretsManagement', () => {
 
       render(<SecretsManagement />);
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    });
-
-    it('shows loading text in project dropdown when projects are loading', () => {
-      mockUseK8sWatchResource.mockReturnValue([[], false, undefined]);
-
-      render(<SecretsManagement />);
-      expect(screen.getByText('Loading projects...')).toBeInTheDocument();
-    });
-
-    it('disables project dropdown when projects are loading', () => {
-      mockUseK8sWatchResource.mockReturnValue([[], false, undefined]);
-
-      render(<SecretsManagement />);
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      expect(projectButton).toBeDisabled();
     });
 
     it('does not show resource tables while operators are loading', () => {
@@ -482,7 +458,7 @@ describe('SecretsManagement', () => {
       expect(screen.getByTestId('bundles-table')).toBeInTheDocument();
     });
 
-    it('passes selectedProject to BundlesTable', () => {
+    it('passes selectedProject "all" to BundlesTable when the global namespace is "All Projects"', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false },
         trustManager: { installed: true, loading: false },
@@ -495,6 +471,22 @@ describe('SecretsManagement', () => {
       render(<SecretsManagement />);
 
       expect(screen.getByTestId('bundles-table')).toHaveTextContent('Project: all');
+    });
+
+    it('passes the active namespace to BundlesTable when a specific project is selected', () => {
+      mockUseActiveNamespace.mockReturnValue(['my-project', jest.fn()]);
+      mockUseOperatorDetection.mockReturnValue({
+        certManager: { installed: false, loading: false },
+        trustManager: { installed: true, loading: false },
+        externalSecrets: { installed: false, loading: false },
+        secretsStoreCSI: { installed: false, loading: false },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      render(<SecretsManagement />);
+
+      expect(screen.getByTestId('bundles-table')).toHaveTextContent('Project: my-project');
     });
   });
 
@@ -621,61 +613,29 @@ describe('SecretsManagement', () => {
     });
   });
 
-  describe('Filter - Project Selection', () => {
-    it('shows default "All Projects" in project filter initially', () => {
-      render(<SecretsManagement />);
-
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      expect(projectButton).toHaveTextContent('All Projects');
-    });
-
-    it('passes "all" as selectedProject to tables by default', () => {
+  describe('Filter - Global Project (Namespace) Selection', () => {
+    it('passes "all" as selectedProject to tables when the global namespace is "All Projects"', () => {
       render(<SecretsManagement />);
 
       expect(screen.getByTestId('certificates-table')).toHaveTextContent('Project: all');
     });
 
-    it('filters out system namespaces from project list', () => {
-      const projectsWithSystem = [
-        ...mockProjects,
-        { metadata: { name: 'kube-system' }, status: { phase: 'Active' } },
-        { metadata: { name: 'kube-public' }, status: { phase: 'Active' } },
-        { metadata: { name: 'kube-node-lease' }, status: { phase: 'Active' } },
-        { metadata: { name: 'openshift-kube-apiserver' }, status: { phase: 'Active' } },
-      ];
+    it('passes the active namespace as selectedProject to tables when a specific project is active', () => {
+      mockUseActiveNamespace.mockReturnValue(['my-project', jest.fn()]);
 
-      mockUseK8sWatchResource.mockReturnValue([projectsWithSystem, true, undefined]);
       render(<SecretsManagement />);
 
-      // System namespaces should be filtered (component filters them internally)
-      expect(mockUseK8sWatchResource).toHaveBeenCalled();
+      expect(screen.getByTestId('certificates-table')).toHaveTextContent('Project: my-project');
     });
 
-    it('filters out terminating projects', () => {
-      const projectsWithTerminating = [
-        ...mockProjects,
-        { metadata: { name: 'terminating-project' }, status: { phase: 'Terminating' } },
-      ];
+    it('updates all tables when the active namespace changes', () => {
+      mockUseActiveNamespace.mockReturnValue(['test-project', jest.fn()]);
 
-      mockUseK8sWatchResource.mockReturnValue([projectsWithTerminating, true, undefined]);
       render(<SecretsManagement />);
 
-      // Component should filter out terminating projects
-      expect(mockUseK8sWatchResource).toHaveBeenCalled();
-    });
-
-    it('includes whitelisted system namespaces', () => {
-      const systemProjects = [
-        { metadata: { name: 'default' }, status: { phase: 'Active' } },
-        { metadata: { name: 'openshift-operators' }, status: { phase: 'Active' } },
-        { metadata: { name: 'openshift-monitoring' }, status: { phase: 'Active' } },
-      ];
-
-      mockUseK8sWatchResource.mockReturnValue([systemProjects, true, undefined]);
-      render(<SecretsManagement />);
-
-      // These should all be included as they're whitelisted
-      expect(mockUseK8sWatchResource).toHaveBeenCalled();
+      expect(screen.getByTestId('certificates-table')).toHaveTextContent('test-project');
+      expect(screen.getByTestId('issuers-table')).toHaveTextContent('test-project');
+      expect(screen.getByTestId('external-secrets-table')).toHaveTextContent('test-project');
     });
   });
 
@@ -727,60 +687,10 @@ describe('SecretsManagement', () => {
     });
   });
 
-  describe('Project Error Handling', () => {
-    it('shows "Error loading projects" when project fetch fails', () => {
-      mockUseK8sWatchResource.mockReturnValue([
-        [],
-        true,
-        new Error('Failed to fetch projects'),
-      ]);
-
-      render(<SecretsManagement />);
-
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      expect(projectButton).toHaveTextContent('Error loading projects');
-    });
-
-    it('disables project dropdown when there is a fetch error', () => {
-      mockUseK8sWatchResource.mockReturnValue([
-        [],
-        false,  // not loaded
-        new Error('Failed to fetch projects'),
-      ]);
-
-      render(<SecretsManagement />);
-
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      expect(projectButton).toBeDisabled();
-    });
-
-    it('handles empty projects list gracefully', () => {
-      mockUseK8sWatchResource.mockReturnValue([[], true, undefined]);
-
-      render(<SecretsManagement />);
-
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      expect(projectButton).toBeEnabled();
-    });
-
-    it('handles null projects gracefully', () => {
-      mockUseK8sWatchResource.mockReturnValue([null as any, true, undefined]);
-
-      render(<SecretsManagement />);
-
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      expect(projectButton).toBeEnabled();
-    });
-  });
-
   describe('Accessibility', () => {
     it('has proper ARIA labels on filter buttons', () => {
       render(<SecretsManagement />);
 
-      expect(screen.getByRole('button', { name: /Project/i })).toHaveAttribute(
-        'aria-label',
-        'Project',
-      );
       expect(screen.getByRole('button', { name: /Operator/i })).toHaveAttribute(
         'aria-label',
         'Operator',
@@ -810,35 +720,10 @@ describe('SecretsManagement', () => {
   });
 
   describe('Edge Cases', () => {
-    it('handles valid projects with all required metadata', () => {
-      const validProjects = [
-        { metadata: { name: 'valid-project' }, status: { phase: 'Active' } },
-        { metadata: { name: 'another-project' }, status: { phase: 'Active' } },
-      ];
-
-      mockUseK8sWatchResource.mockReturnValue([validProjects, true, undefined]);
-
-      // Should render without errors
+    it('renders without errors when the active namespace is "All Projects"', () => {
       const { container } = render(<SecretsManagement />);
       expect(container).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Project/i })).toBeInTheDocument();
-    });
-
-    it('handles projects with display name labels', () => {
-      const projectsWithLabels = [
-        {
-          metadata: {
-            name: 'my-project',
-            labels: { 'openshift.io/display-name': 'My Cool Project' },
-          },
-          status: { phase: 'Active' },
-        },
-      ];
-
-      mockUseK8sWatchResource.mockReturnValue([projectsWithLabels, true, undefined]);
-      render(<SecretsManagement />);
-
-      expect(screen.getByRole('button', { name: /Project/i })).toBeInTheDocument();
+      expect(screen.getByTestId('namespace-bar')).toBeInTheDocument();
     });
 
     it('shows no operators state when all operators have errors', () => {
@@ -856,16 +741,6 @@ describe('SecretsManagement', () => {
 
       // Should show no operators component since all have errors
       expect(screen.getByTestId('no-operators')).toBeInTheDocument();
-    });
-
-    it('renders correctly with minimal project data', () => {
-      const minimalProjects = [
-        { metadata: { name: 'test' } } as any,
-      ];
-
-      mockUseK8sWatchResource.mockReturnValue([minimalProjects, true, undefined]);
-
-      expect(() => render(<SecretsManagement />)).not.toThrow();
     });
   });
 
@@ -933,9 +808,6 @@ describe('SecretsManagement', () => {
 
     it('uses translation keys for filter labels', () => {
       render(<SecretsManagement />);
-
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      expect(projectButton).toHaveTextContent('All Projects');
 
       const operatorButton = screen.getByRole('button', { name: /Operator/i });
       expect(operatorButton).toHaveTextContent('All Operators');

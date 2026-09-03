@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { DocumentTitle } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  DocumentTitle,
+  NamespaceBar,
+  useActiveNamespace,
+  isAllNamespacesKey,
+} from '@openshift-console/dynamic-plugin-sdk';
 import { useTranslation } from 'react-i18next';
 import {
   Title,
@@ -29,7 +34,6 @@ import { GeneratorsTable } from './components/GeneratorsTable';
 import { SecretProviderClassTable } from './components/SecretProviderClassTable';
 import { NoOperatorsInstalled } from './components/OperatorNotInstalled';
 import { ActiveRowMenuProvider } from './components/ActiveRowMenuProvider';
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import { useOperatorDetection, type OperatorStatus } from './hooks/useOperatorDetection';
 
 /** Badge shown on card titles when operator detection encountered an error. */
@@ -69,30 +73,10 @@ type ResourceKind =
   | 'generators'
   | 'secretproviderclasses'
   | 'all';
-type ProjectType = 'all' | string;
-
-// Project/Namespace resource model
-const ProjectModel = {
-  group: '',
-  version: 'v1',
-  kind: 'Namespace',
-};
-
-interface Project {
-  metadata: {
-    name: string;
-    labels?: Record<string, string>;
-    annotations?: Record<string, string>;
-  };
-  status?: {
-    phase: string;
-  };
-}
 
 interface FilterState {
   operator: OperatorType;
   resourceKind: ResourceKind;
-  project: ProjectType;
 }
 
 export default function SecretsManagement() {
@@ -100,13 +84,12 @@ export default function SecretsManagement() {
   const [filters, setFilters] = React.useState<FilterState>({
     operator: 'all',
     resourceKind: 'all',
-    project: 'all',
   });
-  const [projectMenuOpen, setProjectMenuOpen] = React.useState(false);
+  const [activeNamespace] = useActiveNamespace();
+  // Downstream tables/hooks treat 'all' as "no namespace filter" and otherwise expect a namespace name.
+  const selectedProject = isAllNamespacesKey(activeNamespace) ? 'all' : activeNamespace;
   const [operatorMenuOpen, setOperatorMenuOpen] = React.useState(false);
   const [resourceKindMenuOpen, setResourceKindMenuOpen] = React.useState(false);
-  const projectMenuRef = React.useRef<HTMLDivElement>(null);
-  const projectToggleRef = React.useRef<HTMLButtonElement>(null);
   const operatorMenuRef = React.useRef<HTMLDivElement>(null);
   const operatorToggleRef = React.useRef<HTMLButtonElement>(null);
   const resourceKindMenuRef = React.useRef<HTMLDivElement>(null);
@@ -158,12 +141,6 @@ export default function SecretsManagement() {
     externalSecrets.installed ||
     secretsStoreCSI.installed;
 
-  // Fetch all namespaces/projects dynamically
-  const [projects, projectsLoaded, projectsError] = useK8sWatchResource<Project[]>({
-    groupVersionKind: ProjectModel,
-    isList: true,
-  });
-
   const allOperatorEntries: { value: OperatorType; label: string; description: string }[] = [
     {
       value: 'cert-manager',
@@ -195,67 +172,6 @@ export default function SecretsManagement() {
     },
     ...allOperatorEntries.filter((entry) => isOperatorInstalled(entry.value)),
   ];
-
-  // Generate dynamic project options from fetched namespaces
-  const getProjectOptions = React.useMemo(() => {
-    const baseOptions = [
-      {
-        value: 'all',
-        label: t('All Projects'),
-        description: t('Show resources from all projects'),
-      },
-    ];
-
-    if (!projectsLoaded || projectsError || !projects) {
-      return baseOptions;
-    }
-
-    // Filter and sort projects
-    const sortedProjects = projects
-      .filter((project) => {
-        // Filter out system namespaces that are typically not user-relevant
-        const name = project.metadata.name;
-        const isSystemNamespace =
-          name.startsWith('kube-') ||
-          name.startsWith('openshift-') ||
-          name === 'default' ||
-          name === 'kube-node-lease' ||
-          name === 'kube-public';
-
-        // Include active projects only
-        const isActive = !project.status || project.status.phase !== 'Terminating';
-
-        return (
-          isActive &&
-          (!isSystemNamespace ||
-            name === 'default' ||
-            name === 'openshift-operators' ||
-            name === 'openshift-monitoring')
-        );
-      })
-      .sort((a, b) => {
-        // Sort with common projects first, then alphabetically
-        const commonProjects = ['default', 'openshift-operators', 'openshift-monitoring'];
-        const aIsCommon = commonProjects.includes(a.metadata.name);
-        const bIsCommon = commonProjects.includes(b.metadata.name);
-
-        if (aIsCommon && !bIsCommon) return -1;
-        if (!aIsCommon && bIsCommon) return 1;
-        return a.metadata.name.localeCompare(b.metadata.name);
-      });
-
-    const projectOptions = sortedProjects.map((project) => ({
-      value: project.metadata.name,
-      label: project.metadata.name,
-      description:
-        project.metadata.labels?.['openshift.io/display-name'] ||
-        `${t('Project')}: ${project.metadata.name}`,
-    }));
-
-    return [...baseOptions, ...projectOptions];
-  }, [projects, projectsLoaded, projectsError, t]);
-
-  const projectOptions = getProjectOptions;
 
   const certManagerResources = [
     { value: 'certificates', label: t('Certificates'), description: t('TLS certificates') },
@@ -337,13 +253,6 @@ export default function SecretsManagement() {
     }));
   };
 
-  const handleProjectChange = (_event: React.FormEvent<HTMLSelectElement>, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      project: value as ProjectType,
-    }));
-  };
-
   const shouldShowComponent = (operator: OperatorType, resourceKind: ResourceKind) => {
     if (!isOperatorInstalled(operator)) return false;
     if (filters.operator !== 'all' && filters.operator !== operator) return false;
@@ -381,6 +290,7 @@ export default function SecretsManagement() {
   return (
     <>
       <DocumentTitle>{t('Secrets Management page title')}</DocumentTitle>
+      <NamespaceBar />
       <div className="co-m-pane__body co-m-pane__body--no-top-margin">
         <div
           className="co-m-pane__heading"
@@ -401,55 +311,6 @@ export default function SecretsManagement() {
           style={{ padding: '16px 2rem', marginBottom: '16px' }}
         >
           <Flex spaceItems={{ default: 'spaceItemsMd' }}>
-            <FlexItem>
-              <MenuContainer
-                isOpen={projectMenuOpen}
-                onOpenChange={setProjectMenuOpen}
-                menuRef={projectMenuRef}
-                toggleRef={projectToggleRef}
-                toggle={
-                  <MenuToggle
-                    ref={projectToggleRef}
-                    onClick={() => setProjectMenuOpen((prev) => !prev)}
-                    isExpanded={projectMenuOpen}
-                    isDisabled={!projectsLoaded}
-                    aria-label={t('Project')}
-                    style={{ width: '200px' }}
-                  >
-                    {!projectsLoaded
-                      ? t('Loading projects...')
-                      : projectsError
-                        ? t('Error loading projects')
-                        : (projectOptions.find((o) => o.value === filters.project)?.label ??
-                          t('All Projects'))}
-                  </MenuToggle>
-                }
-                menu={
-                  <Menu
-                    ref={projectMenuRef}
-                    onSelect={(_event, value) => {
-                      handleProjectChange(
-                        _event as unknown as React.FormEvent<HTMLSelectElement>,
-                        value as string,
-                      );
-                      setProjectMenuOpen(false);
-                      projectToggleRef.current?.focus();
-                    }}
-                    selected={filters.project}
-                  >
-                    <MenuContent>
-                      <MenuList>
-                        {projectOptions.map((option) => (
-                          <MenuItem key={option.value} itemId={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </MenuList>
-                    </MenuContent>
-                  </Menu>
-                }
-              />
-            </FlexItem>
             <FlexItem>
               <MenuContainer
                 isOpen={operatorMenuOpen}
@@ -574,7 +435,7 @@ export default function SecretsManagement() {
                     <Divider style={{ marginBottom: '1rem' }} />
                     {renderOperatorContent(
                       () => (
-                        <ExternalSecretsTable selectedProject={filters.project} />
+                        <ExternalSecretsTable selectedProject={selectedProject} />
                       ),
                       'external-secrets',
                     )}
@@ -600,7 +461,7 @@ export default function SecretsManagement() {
                     <Divider style={{ marginBottom: '1rem' }} />
                     {renderOperatorContent(
                       () => (
-                        <SecretStoresTable selectedProject={filters.project} />
+                        <SecretStoresTable selectedProject={selectedProject} />
                       ),
                       'external-secrets',
                     )}
@@ -626,7 +487,7 @@ export default function SecretsManagement() {
                     <Divider style={{ marginBottom: '1rem' }} />
                     {renderOperatorContent(
                       () => (
-                        <PushSecretsTable selectedProject={filters.project} />
+                        <PushSecretsTable selectedProject={selectedProject} />
                       ),
                       'external-secrets',
                     )}
@@ -652,7 +513,7 @@ export default function SecretsManagement() {
                     <Divider style={{ marginBottom: '1rem' }} />
                     {renderOperatorContent(
                       () => (
-                        <GeneratorsTable selectedProject={filters.project} />
+                        <GeneratorsTable selectedProject={selectedProject} />
                       ),
                       'external-secrets',
                     )}
@@ -679,7 +540,7 @@ export default function SecretsManagement() {
                     <Divider style={{ marginBottom: '1rem' }} />
                     {renderOperatorContent(
                       () => (
-                        <CertificatesTable selectedProject={filters.project} />
+                        <CertificatesTable selectedProject={selectedProject} />
                       ),
                       'cert-manager',
                     )}
@@ -705,7 +566,7 @@ export default function SecretsManagement() {
                     <Divider style={{ marginBottom: '1rem' }} />
                     {renderOperatorContent(
                       () => (
-                        <IssuersTable selectedProject={filters.project} />
+                        <IssuersTable selectedProject={selectedProject} />
                       ),
                       'cert-manager',
                     )}
@@ -732,7 +593,7 @@ export default function SecretsManagement() {
                     <Divider style={{ marginBottom: '1rem' }} />
                     {renderOperatorContent(
                       () => (
-                        <BundlesTable selectedProject={filters.project} />
+                        <BundlesTable selectedProject={selectedProject} />
                       ),
                       'trust-manager',
                     )}
@@ -759,7 +620,7 @@ export default function SecretsManagement() {
                     <Divider style={{ marginBottom: '1rem' }} />
                     {renderOperatorContent(
                       () => (
-                        <SecretProviderClassTable selectedProject={filters.project} />
+                        <SecretProviderClassTable selectedProject={selectedProject} />
                       ),
                       'secrets-store-csi',
                     )}

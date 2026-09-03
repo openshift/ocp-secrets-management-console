@@ -6,7 +6,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SecretsManagement from './SecretsManagement';
 import { useOperatorDetection } from './hooks/useOperatorDetection';
-import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
+import { useActiveNamespace } from '@openshift-console/dynamic-plugin-sdk';
 
 // Mock dependencies
 jest.mock('./hooks/useOperatorDetection', () => ({
@@ -14,7 +14,9 @@ jest.mock('./hooks/useOperatorDetection', () => ({
 }));
 
 jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
-  useK8sWatchResource: jest.fn(),
+  useActiveNamespace: jest.fn(),
+  isAllNamespacesKey: (ns: string) => ns === '#ALL_NS#',
+  NamespaceBar: () => <div data-test="namespace-bar" />,
   consoleFetch: jest.fn(),
   DocumentTitle: ({ children }: { children: string }) => <title>{children}</title>,
 }));
@@ -84,7 +86,7 @@ jest.mock('react-helmet', () => ({
 }));
 
 const mockUseOperatorDetection = useOperatorDetection as jest.Mock;
-const mockUseK8sWatchResource = useK8sWatchResource as jest.Mock;
+const mockUseActiveNamespace = useActiveNamespace as jest.Mock;
 
 describe('SecretsManagement - User Interactions', () => {
   const defaultOperatorStatus = {
@@ -96,83 +98,52 @@ describe('SecretsManagement - User Interactions', () => {
     refresh: jest.fn(),
   };
 
-  const mockProjects = [
-    { metadata: { name: 'default' }, status: { phase: 'Active' } },
-    { metadata: { name: 'my-project' }, status: { phase: 'Active' } },
-    { metadata: { name: 'test-project' }, status: { phase: 'Active' } },
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseOperatorDetection.mockReturnValue(defaultOperatorStatus);
-    mockUseK8sWatchResource.mockReturnValue([mockProjects, true, undefined]);
+    mockUseActiveNamespace.mockReturnValue(['#ALL_NS#', jest.fn()]);
   });
 
-  describe('Project Filter Interactions', () => {
-    it('opens and closes project dropdown menu', async () => {
-      const user = userEvent.setup();
+  describe('Global Project (Namespace) Selection', () => {
+    it('renders the standard console namespace bar instead of a custom project dropdown', () => {
       render(<SecretsManagement />);
 
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-
-      // Initially closed
-      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
-
-      // Click to open
-      await user.click(projectButton);
-
-      // Menu should be open with items
-      await waitFor(() => {
-        const menus = screen.queryAllByRole('menu');
-        expect(menus.length).toBeGreaterThan(0);
-      });
+      expect(screen.getByTestId('namespace-bar')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^Project$/i })).not.toBeInTheDocument();
     });
 
-    it('changes selected project and updates table props', async () => {
-      const user = userEvent.setup();
+    it('passes "all" to tables when the global namespace is "All Projects"', () => {
       render(<SecretsManagement />);
 
-      // Initially shows "all"
       expect(screen.getByTestId('certificates-table')).toHaveTextContent('all');
-
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      await user.click(projectButton);
-
-      // Find and click a project option
-      await waitFor(async () => {
-        const menuItems = screen.getAllByRole('menuitem');
-        const myProjectItem = menuItems.find((item) => item.textContent === 'my-project');
-        if (myProjectItem) {
-          await user.click(myProjectItem);
-        }
-      });
-
-      // Table should now show the selected project
-      await waitFor(() => {
-        expect(screen.getByTestId('certificates-table')).toHaveTextContent('my-project');
-      });
     });
 
-    it('updates all tables when project changes', async () => {
-      const user = userEvent.setup();
+    it('passes the active namespace to tables when a specific project is selected globally', () => {
+      mockUseActiveNamespace.mockReturnValue(['my-project', jest.fn()]);
+
       render(<SecretsManagement />);
 
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      await user.click(projectButton);
+      expect(screen.getByTestId('certificates-table')).toHaveTextContent('my-project');
+    });
 
-      await waitFor(async () => {
-        const menuItems = screen.getAllByRole('menuitem');
-        const testProjectItem = menuItems.find((item) => item.textContent === 'test-project');
-        if (testProjectItem) {
-          await user.click(testProjectItem);
-        }
-      });
+    it('updates all tables when the active namespace changes', () => {
+      mockUseActiveNamespace.mockReturnValue(['test-project', jest.fn()]);
 
-      await waitFor(() => {
-        expect(screen.getByTestId('certificates-table')).toHaveTextContent('test-project');
-        expect(screen.getByTestId('issuers-table')).toHaveTextContent('test-project');
-        expect(screen.getByTestId('external-secrets-table')).toHaveTextContent('test-project');
-      });
+      render(<SecretsManagement />);
+
+      expect(screen.getByTestId('certificates-table')).toHaveTextContent('test-project');
+      expect(screen.getByTestId('issuers-table')).toHaveTextContent('test-project');
+      expect(screen.getByTestId('external-secrets-table')).toHaveTextContent('test-project');
+    });
+
+    it('re-renders tables with the new namespace after the global namespace context changes', () => {
+      mockUseActiveNamespace.mockReturnValue(['first-project', jest.fn()]);
+      const { rerender } = render(<SecretsManagement />);
+      expect(screen.getByTestId('certificates-table')).toHaveTextContent('first-project');
+
+      mockUseActiveNamespace.mockReturnValue(['second-project', jest.fn()]);
+      rerender(<SecretsManagement />);
+      expect(screen.getByTestId('certificates-table')).toHaveTextContent('second-project');
     });
   });
 
@@ -347,21 +318,10 @@ describe('SecretsManagement - User Interactions', () => {
   });
 
   describe('Combined Filter Interactions', () => {
-    it('applies project and operator filters together', async () => {
+    it('applies the global project namespace and operator filters together', async () => {
+      mockUseActiveNamespace.mockReturnValue(['my-project', jest.fn()]);
       const user = userEvent.setup();
       render(<SecretsManagement />);
-
-      // Select project
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      await user.click(projectButton);
-
-      await waitFor(async () => {
-        const menuItems = screen.getAllByRole('menuitem');
-        const projectItem = menuItems.find((item) => item.textContent === 'my-project');
-        if (projectItem) {
-          await user.click(projectItem);
-        }
-      });
 
       // Select operator
       const operatorButton = screen.getByRole('button', { name: /Operator/i });
@@ -383,18 +343,10 @@ describe('SecretsManagement - User Interactions', () => {
       });
     });
 
-    it('applies all three filters (project, operator, resource)', async () => {
+    it('applies the global project namespace with operator and resource filters', async () => {
+      mockUseActiveNamespace.mockReturnValue(['test-project', jest.fn()]);
       const user = userEvent.setup();
       render(<SecretsManagement />);
-
-      // Select project
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      await user.click(projectButton);
-      await waitFor(async () => {
-        const items = screen.getAllByRole('menuitem');
-        const item = items.find((i) => i.textContent === 'test-project');
-        if (item) await user.click(item);
-      });
 
       // Select operator
       const operatorButton = screen.getByRole('button', { name: /Operator/i });
@@ -428,8 +380,8 @@ describe('SecretsManagement - User Interactions', () => {
       const user = userEvent.setup();
       render(<SecretsManagement />);
 
-      const projectButton = screen.getByRole('button', { name: /Project/i });
-      await user.click(projectButton);
+      const operatorButton = screen.getByRole('button', { name: /Operator/i });
+      await user.click(operatorButton);
 
       await waitFor(async () => {
         const menuItems = screen.getAllByRole('menuitem');
@@ -439,7 +391,7 @@ describe('SecretsManagement - User Interactions', () => {
       });
 
       // Focus should return to button (checked by PatternFly MenuContainer)
-      expect(document.activeElement).toBe(projectButton);
+      expect(document.activeElement).toBe(operatorButton);
     });
   });
 

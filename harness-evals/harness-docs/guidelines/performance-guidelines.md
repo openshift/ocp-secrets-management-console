@@ -41,12 +41,16 @@ Rules:
 
 ## 5. Namespace Watch and Project Filter
 
-`SecretsManagement.tsx` watches all Namespaces (`isList: true`, no namespace filter). The dropdown is built via `React.useMemo`.
+`SecretsManagement.tsx` no longer maintains its own Namespace watch or project dropdown. It uses the
+Console SDK's `NamespaceBar` component and `useActiveNamespace()` hook (global Console project context),
+converting the SDK's `"#ALL_NS#"` sentinel to the page's own `selectedProject: 'all'` contract via
+`isAllNamespacesKey()`.
 
 Rules:
-- The project list filters out system namespaces (`kube-*`, `openshift-*`) in JavaScript. For clusters with 10,000+ namespaces, consider a typeahead.
-- Sorting logic in `getProjectOptions` must stay inside `useMemo`.
-- When `selectedProject` changes, all visible tables re-render. This is expected.
+- Do not reintroduce a page-local namespace watch/dropdown; rely on the global `NamespaceBar` /
+  `useActiveNamespace()` so this page matches standard console UX and stays in sync with the rest of
+  the console.
+- When the active namespace changes, all visible tables re-render. This is expected.
 
 ## 6. Operator Detection Sequencing
 

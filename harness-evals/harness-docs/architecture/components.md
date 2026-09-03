@@ -55,7 +55,10 @@ useOperatorDetection
   └─ returns {certManager, trustManager, externalSecrets, secretsStoreCSI}.{installed, loading, error}
 
 SecretsManagement (dashboard)
-  ├─ FilterState: {operator, resourceKind, project} (React useState)
+  ├─ FilterState: {operator, resourceKind} (React useState)
+  ├─ Project/namespace selection: SDK `NamespaceBar` + `useActiveNamespace()` (global Console namespace
+  │    context, not a page-local dropdown); `isAllNamespacesKey()` maps the SDK's "#ALL_NS#" to the
+  │    `selectedProject: 'all'` contract expected by table components
   ├─ Renders only sections for installed operators
   └─ Each table component:
        ├─ useK8sWatchResource(model, {namespace: selectedProject})

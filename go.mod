@@ -1,6 +1,6 @@
 module github.com/openshift/ocp-secrets-management-console
 
-go 1.25.5
+go 1.26.0
 
 require github.com/mikefarah/yq/v4 v4.53.3
 
@@ -32,7 +32,7 @@ require (
 	golang.org/x/mod v0.36.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/tools v0.44.0 // indirect
 )

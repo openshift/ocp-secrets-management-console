@@ -7,6 +7,7 @@ import userEvent from '@testing-library/user-event';
 import SecretsManagement from './SecretsManagement';
 import { useOperatorDetection } from './hooks/useOperatorDetection';
 import { useActiveNamespace } from '@openshift-console/dynamic-plugin-sdk';
+import { createAllOperatorsInstalledDetection } from './test-utils/fullAccessRbacMocks';
 
 // Mock dependencies
 jest.mock('./hooks/useOperatorDetection', () => ({
@@ -430,5 +431,33 @@ describe('SecretsManagement - User Interactions', () => {
         expect(texts.some((t) => t === 'Secret Stores')).toBe(false);
       });
     });
+  });
+});
+
+describe('SecretsManagement - full access (cluster-admin)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseOperatorDetection.mockReturnValue(createAllOperatorsInstalledDetection());
+    mockUseActiveNamespace.mockReturnValue(['#ALL_NS#', jest.fn()]);
+  });
+
+  it('renders cert-manager, ESO, and trust-manager table sections when all operators are installed', () => {
+    render(<SecretsManagement />);
+
+    expect(screen.getByTestId('certificates-table')).toBeInTheDocument();
+    expect(screen.getByTestId('issuers-table')).toBeInTheDocument();
+    expect(screen.getByTestId('external-secrets-table')).toBeInTheDocument();
+    expect(screen.getByTestId('secret-stores-table')).toBeInTheDocument();
+    expect(screen.getByTestId('bundles-table')).toBeInTheDocument();
+    expect(screen.getByTestId('generators-table')).toBeInTheDocument();
+    expect(screen.getByTestId('secret-provider-class-table')).toBeInTheDocument();
+    expect(screen.queryByTestId('no-operators')).not.toBeInTheDocument();
+  });
+
+  it('does not show operator permission error alerts when detection reports installed', () => {
+    render(<SecretsManagement />);
+
+    expect(screen.queryByText(/Cannot determine installed operators/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Unable to verify operator status/i)).not.toBeInTheDocument();
   });
 });

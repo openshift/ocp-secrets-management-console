@@ -120,9 +120,13 @@ export default function SecretsManagement() {
     }
   };
 
-  const getOperatorStatus = (
-    operatorKey: 'cert-manager' | 'trust-manager' | 'external-secrets' | 'secrets-store-csi',
-  ) => {
+  type DetectedOperatorKey =
+    | 'cert-manager'
+    | 'trust-manager'
+    | 'external-secrets'
+    | 'secrets-store-csi';
+
+  const getOperatorStatus = (operatorKey: DetectedOperatorKey): OperatorStatus => {
     switch (operatorKey) {
       case 'cert-manager':
         return certManager;
@@ -135,11 +139,33 @@ export default function SecretsManagement() {
     }
   };
 
-  const anyOperatorInstalled =
-    certManager.installed ||
-    trustManager.installed ||
-    externalSecrets.installed ||
-    secretsStoreCSI.installed;
+  const operatorDetectionStatuses: OperatorStatus[] = [
+    certManager,
+    trustManager,
+    externalSecrets,
+    secretsStoreCSI,
+  ];
+
+  const anyOperatorInstalled = operatorDetectionStatuses.some((status) => status.installed);
+
+  /** Operator check failed (e.g. network); distinct from confirmed not installed. */
+  const operatorHasVerificationError = (operatorKey: DetectedOperatorKey): boolean => {
+    const status = getOperatorStatus(operatorKey);
+    return !!status.error && !status.installed;
+  };
+
+  const anyOperatorVerificationError = operatorDetectionStatuses.some(
+    (status) => !!status.error && !status.installed,
+  );
+
+  const allOperatorsConfirmedNotInstalled =
+    !operatorsLoading &&
+    operatorDetectionStatuses.every(
+      (status) => !status.loading && !status.installed && !status.error,
+    );
+
+  const showGlobalOperatorDetectionUnavailable =
+    !operatorsLoading && !anyOperatorInstalled && anyOperatorVerificationError;
 
   const allOperatorEntries: { value: OperatorType; label: string; description: string }[] = [
     {
@@ -253,16 +279,24 @@ export default function SecretsManagement() {
     }));
   };
 
-  const shouldShowComponent = (operator: OperatorType, resourceKind: ResourceKind) => {
-    if (!isOperatorInstalled(operator)) return false;
-    if (filters.operator !== 'all' && filters.operator !== operator) return false;
-    if (filters.resourceKind !== 'all' && filters.resourceKind !== resourceKind) return false;
-    return true;
+  const matchesOperatorFilter = (operator: OperatorType): boolean =>
+    filters.operator === 'all' || filters.operator === operator;
+
+  const matchesResourceFilter = (resourceKind: ResourceKind): boolean =>
+    filters.resourceKind === 'all' || filters.resourceKind === resourceKind;
+
+  const shouldShowResourceSection = (operator: OperatorType, resourceKind: ResourceKind) => {
+    if (operator === 'all') return false;
+    if (!matchesOperatorFilter(operator)) return false;
+    if (!matchesResourceFilter(resourceKind)) return false;
+    return (
+      isOperatorInstalled(operator) || operatorHasVerificationError(operator as DetectedOperatorKey)
+    );
   };
 
   const renderOperatorContent = (
     renderInstalledContent: () => React.ReactNode,
-    operatorKey: 'cert-manager' | 'trust-manager' | 'external-secrets' | 'secrets-store-csi',
+    operatorKey: DetectedOperatorKey,
   ) => {
     if (operatorsLoading) {
       return (
@@ -273,15 +307,23 @@ export default function SecretsManagement() {
     }
 
     const status = getOperatorStatus(operatorKey);
-    if (status.error) {
+    if (status.error && !status.installed) {
       return (
-        <Alert variant="danger" title={t('Unable to verify operator status')}>
+        <Alert
+          variant="danger"
+          title={t('Unable to verify operator status')}
+          data-test={`operator-status-error-${operatorKey}`}
+        >
           <p>{status.error}</p>
           <Button variant="secondary" onClick={() => checkOperators()} style={{ marginTop: '8px' }}>
             {t('Retry')}
           </Button>
         </Alert>
       );
+    }
+
+    if (!status.installed) {
+      return null;
     }
 
     return renderInstalledContent();
@@ -411,12 +453,30 @@ export default function SecretsManagement() {
               </div>
             )}
 
-            {!operatorsLoading && !anyOperatorInstalled && <NoOperatorsInstalled />}
+            {!operatorsLoading && allOperatorsConfirmedNotInstalled && <NoOperatorsInstalled />}
 
-            {!operatorsLoading && anyOperatorInstalled && (
+            {showGlobalOperatorDetectionUnavailable && (
+              <Alert
+                variant="warning"
+                title={t('Cannot determine installed operators with your current permissions.')}
+                data-test="operator-detection-inconclusive"
+              >
+                <Button
+                  variant="secondary"
+                  onClick={() => checkOperators()}
+                  style={{ marginTop: '8px' }}
+                >
+                  {t('Retry')}
+                </Button>
+              </Alert>
+            )}
+
+            {!operatorsLoading &&
+              (anyOperatorInstalled || anyOperatorVerificationError) &&
+              !showGlobalOperatorDetectionUnavailable && (
               <>
                 {/* External Secrets Resources */}
-                {shouldShowComponent('external-secrets', 'externalsecrets') && (
+                {shouldShowResourceSection('external-secrets', 'externalsecrets') && (
                   <div style={{ marginBottom: '2rem' }}>
                     <Flex
                       alignItems={{ default: 'alignItemsCenter' }}
@@ -442,7 +502,7 @@ export default function SecretsManagement() {
                   </div>
                 )}
 
-                {shouldShowComponent('external-secrets', 'secretstores') && (
+                {shouldShowResourceSection('external-secrets', 'secretstores') && (
                   <div style={{ marginBottom: '2rem' }}>
                     <Flex
                       alignItems={{ default: 'alignItemsCenter' }}
@@ -468,7 +528,7 @@ export default function SecretsManagement() {
                   </div>
                 )}
 
-                {shouldShowComponent('external-secrets', 'pushsecrets') && (
+                {shouldShowResourceSection('external-secrets', 'pushsecrets') && (
                   <div style={{ marginBottom: '2rem' }}>
                     <Flex
                       alignItems={{ default: 'alignItemsCenter' }}
@@ -494,7 +554,7 @@ export default function SecretsManagement() {
                   </div>
                 )}
 
-                {shouldShowComponent('external-secrets', 'generators') && (
+                {shouldShowResourceSection('external-secrets', 'generators') && (
                   <div style={{ marginBottom: '2rem' }}>
                     <Flex
                       alignItems={{ default: 'alignItemsCenter' }}
@@ -521,7 +581,7 @@ export default function SecretsManagement() {
                 )}
 
                 {/* cert-manager Resources */}
-                {shouldShowComponent('cert-manager', 'certificates') && (
+                {shouldShowResourceSection('cert-manager', 'certificates') && (
                   <div style={{ marginBottom: '2rem' }}>
                     <Flex
                       alignItems={{ default: 'alignItemsCenter' }}
@@ -547,7 +607,7 @@ export default function SecretsManagement() {
                   </div>
                 )}
 
-                {shouldShowComponent('cert-manager', 'issuers') && (
+                {shouldShowResourceSection('cert-manager', 'issuers') && (
                   <div style={{ marginBottom: '2rem' }}>
                     <Flex
                       alignItems={{ default: 'alignItemsCenter' }}
@@ -574,7 +634,7 @@ export default function SecretsManagement() {
                 )}
 
                 {/* trust-manager Resources */}
-                {shouldShowComponent('trust-manager', 'bundles') && (
+                {shouldShowResourceSection('trust-manager', 'bundles') && (
                   <div style={{ marginBottom: '2rem' }}>
                     <Flex
                       alignItems={{ default: 'alignItemsCenter' }}
@@ -601,7 +661,7 @@ export default function SecretsManagement() {
                 )}
 
                 {/* Secrets Store CSI Driver Resources */}
-                {shouldShowComponent('secrets-store-csi', 'secretproviderclasses') && (
+                {shouldShowResourceSection('secrets-store-csi', 'secretproviderclasses') && (
                   <div style={{ marginBottom: '2rem' }}>
                     <Flex
                       alignItems={{ default: 'alignItemsCenter' }}

@@ -20,6 +20,17 @@ import {
   PushSecretResource,
   isClusterPushSecret,
 } from './crds';
+import {
+  useOptionalClusterListWatch,
+  combineDualListWatchLoaded,
+  combineDualListWatchError,
+  useDualScopeDeleteAllowed,
+} from '../hooks/useClusterWatchAllowed';
+import {
+  formatDeleteErrorMessage,
+  formatResourceTableErrorMessage,
+  listErrorNamespace,
+} from '../utils/permissionErrors';
 
 const getPushSecretStatus = (pushSecret: PushSecretResource) => {
   if (!pushSecret.status?.conditions) {
@@ -99,7 +110,12 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
       setDeleteModal((prev) => ({
         ...prev,
         isDeleting: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: formatDeleteErrorMessage(error, t, {
+          resourceCategory: deleteModal.pushSecret?.metadata?.namespace
+            ? t('PushSecret')
+            : t('ClusterPushSecret'),
+          namespace: deleteModal.pushSecret?.metadata?.namespace,
+        }),
       }));
     }
   };
@@ -129,15 +145,17 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
     isList: true,
   });
 
-  // Watch ClusterPushSecrets (cluster-scoped)
-  const [clusterPushSecrets, clusterPushSecretsLoaded, clusterPushSecretsError] =
-    useK8sWatchResource<ClusterPushSecret[]>({
-      groupVersionKind: ClusterPushSecretModel,
-      isList: true,
-    });
+  const clusterPushSecretsWatch =
+    useOptionalClusterListWatch<ClusterPushSecret>(ClusterPushSecretModel);
+  const clusterPushSecrets = clusterPushSecretsWatch.data;
 
-  const loaded = pushSecretsLoaded && clusterPushSecretsLoaded;
-  const loadError = pushSecretsError || clusterPushSecretsError;
+  const loaded = combineDualListWatchLoaded(pushSecretsLoaded, clusterPushSecretsWatch);
+  const loadError = combineDualListWatchError(pushSecretsError, clusterPushSecretsWatch);
+  const canDeleteRow = useDualScopeDeleteAllowed(
+    PushSecretModel,
+    ClusterPushSecretModel,
+    selectedProject,
+  );
 
   const columns = [
     { title: t('Name'), width: 15 },
@@ -218,17 +236,21 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
                   }
                 },
               },
-              {
-                key: 'delete',
-                label: t('Delete {{kind}}', { kind: resourceKind }),
-                onClick: () => openDeleteModal(pushSecret),
-              },
+              ...(canDeleteRow(isCluster ? undefined : pushSecret.metadata.namespace)
+                ? [
+                    {
+                      key: 'delete',
+                      label: t('Delete {{kind}}', { kind: resourceKind }),
+                      onClick: () => openDeleteModal(pushSecret),
+                    },
+                  ]
+                : []),
             ]}
           />,
         ],
       };
     });
-  }, [pushSecrets, clusterPushSecrets, loaded, t]);
+  }, [pushSecrets, clusterPushSecrets, loaded, t, canDeleteRow]);
 
   const getErrorMessage = () => {
     if (loadError?.message?.includes('no matches for kind')) {
@@ -236,7 +258,10 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
         'PushSecret CRDs are not available. This feature requires External Secrets Operator v0.9.0 or later.',
       );
     }
-    return loadError?.message;
+    return formatResourceTableErrorMessage(loadError, t, {
+      resourceCategory: t('Push Secrets'),
+      namespace: listErrorNamespace(selectedProject),
+    });
   };
 
   return (

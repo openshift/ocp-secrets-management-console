@@ -56,6 +56,40 @@ describe('useOperatorDetection', () => {
     });
   });
 
+  describe('cluster-admin baseline (CRD GET allowed)', () => {
+    it('marks all operators installed when representative CRD GET succeeds', async () => {
+      const installedCrds = [
+        'certificates.cert-manager.io',
+        'bundles.trust.cert-manager.io',
+        'externalsecrets.external-secrets.io',
+        'secretproviderclasses.secrets-store.csi.x-k8s.io',
+      ];
+
+      mockConsoleFetch.mockImplementation((url: string) => {
+        const match = installedCrds.find((crd) => url.includes(crd));
+        if (match) {
+          return createMockResponse(200, mockCRDResponse(match));
+        }
+        return createMockResponse(404);
+      });
+
+      const { result } = renderHook(() => useOperatorDetection());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.certManager.installed).toBe(true);
+      expect(result.current.trustManager.installed).toBe(true);
+      expect(result.current.externalSecrets.installed).toBe(true);
+      expect(result.current.secretsStoreCSI.installed).toBe(true);
+      expect(result.current.certManager.error).toBeUndefined();
+      expect(result.current.trustManager.error).toBeUndefined();
+      expect(result.current.externalSecrets.error).toBeUndefined();
+      expect(result.current.secretsStoreCSI.error).toBeUndefined();
+    });
+  });
+
   describe('cert-manager Detection', () => {
     it('detects cert-manager when certificates CRD exists', async () => {
       mockConsoleFetch.mockImplementation((url) => {
@@ -128,6 +162,47 @@ describe('useOperatorDetection', () => {
       mockConsoleFetch.mockImplementation((url) => {
         if (url.includes('cert-manager')) {
           return createMockResponse(403, undefined, 'Resource not found');
+        }
+        return createMockResponse(404);
+      });
+
+      const { result } = renderHook(() => useOperatorDetection());
+
+      await waitFor(() => {
+        expect(result.current.certManager.loading).toBe(false);
+      });
+
+      expect(result.current.certManager.installed).toBe(false);
+      expect(result.current.certManager.error).toBeUndefined();
+    });
+
+    it('detects cert-manager via resource list when CRD GET is forbidden', async () => {
+      mockConsoleFetch.mockImplementation((url) => {
+        const urlString = url.toString();
+        if (urlString.includes('customresourcedefinitions') && urlString.includes('cert-manager')) {
+          return createMockResponse(403, undefined, 'Forbidden');
+        }
+        if (urlString.includes('/cert-manager.io/v1/certificates')) {
+          return createMockResponse(200, { kind: 'CertificateList', items: [] });
+        }
+        return createMockResponse(404);
+      });
+
+      const { result } = renderHook(() => useOperatorDetection());
+
+      await waitFor(() => {
+        expect(result.current.certManager.loading).toBe(false);
+      });
+
+      expect(result.current.certManager.installed).toBe(true);
+      expect(result.current.certManager.error).toBeUndefined();
+    });
+
+    it('marks cert-manager not installed when CRD and fallback list are forbidden', async () => {
+      mockConsoleFetch.mockImplementation((url) => {
+        const urlString = url.toString();
+        if (urlString.includes('cert-manager')) {
+          return createMockResponse(403, undefined, 'Forbidden');
         }
         return createMockResponse(404);
       });

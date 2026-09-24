@@ -526,7 +526,7 @@ describe('SecretsManagement', () => {
   });
 
   describe('Operator Error Handling', () => {
-    it('does not show cert-manager resources when it has an error', () => {
+    it('shows cert-manager verification alert instead of tables when detection fails', () => {
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false, error: 'API unreachable' },
         trustManager: { installed: false, loading: false },
@@ -538,11 +538,12 @@ describe('SecretsManagement', () => {
 
       render(<SecretsManagement />);
 
-      // cert-manager resources should not show
       expect(screen.queryByTestId('certificates-table')).not.toBeInTheDocument();
       expect(screen.queryByTestId('issuers-table')).not.toBeInTheDocument();
-
-      // But other operators' resources should show
+      expect(screen.getAllByTestId('operator-status-error-cert-manager').length).toBeGreaterThan(
+        0,
+      );
+      expect(screen.getAllByRole('button', { name: 'Retry' }).length).toBeGreaterThan(0);
       expect(screen.getByTestId('external-secrets-table')).toBeInTheDocument();
     });
 
@@ -564,7 +565,7 @@ describe('SecretsManagement', () => {
       expect(screen.queryByTestId('secret-provider-class-table')).not.toBeInTheDocument();
     });
 
-    it('shows NoOperatorsInstalled when all operators have errors', () => {
+    it('shows inconclusive operator message when all operator checks fail', () => {
       const mockRefresh = jest.fn();
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false, error: 'Error 1' },
@@ -577,7 +578,9 @@ describe('SecretsManagement', () => {
 
       render(<SecretsManagement />);
 
-      expect(screen.getByTestId('no-operators')).toBeInTheDocument();
+      expect(screen.queryByTestId('no-operators')).not.toBeInTheDocument();
+      expect(screen.getByTestId('operator-detection-inconclusive')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
     });
 
     it('refresh function is available when operators have errors', () => {
@@ -726,7 +729,7 @@ describe('SecretsManagement', () => {
       expect(screen.getByTestId('namespace-bar')).toBeInTheDocument();
     });
 
-    it('shows no operators state when all operators have errors', () => {
+    it('shows inconclusive state instead of no-operators when every check errors', () => {
       const mockRefresh = jest.fn();
       mockUseOperatorDetection.mockReturnValue({
         certManager: { installed: false, loading: false, error: 'Error 1' },
@@ -739,8 +742,43 @@ describe('SecretsManagement', () => {
 
       render(<SecretsManagement />);
 
-      // Should show no operators component since all have errors
+      expect(screen.getByTestId('operator-detection-inconclusive')).toBeInTheDocument();
+      expect(screen.queryByTestId('no-operators')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('RBAC operator detection (US-001)', () => {
+    it('shows cert-manager tables when operator is installed via fallback detection', () => {
+      mockUseOperatorDetection.mockReturnValue({
+        certManager: { installed: true, loading: false },
+        trustManager: { installed: false, loading: false },
+        externalSecrets: { installed: false, loading: false },
+        secretsStoreCSI: { installed: false, loading: false },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      render(<SecretsManagement />);
+
+      expect(screen.queryByTestId('no-operators')).not.toBeInTheDocument();
+      expect(screen.getByTestId('certificates-table')).toBeInTheDocument();
+      expect(screen.getByTestId('issuers-table')).toBeInTheDocument();
+    });
+
+    it('keeps NoOperatorsInstalled when operators are genuinely not installed', () => {
+      mockUseOperatorDetection.mockReturnValue({
+        certManager: { installed: false, loading: false },
+        trustManager: { installed: false, loading: false },
+        externalSecrets: { installed: false, loading: false },
+        secretsStoreCSI: { installed: false, loading: false },
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      render(<SecretsManagement />);
+
       expect(screen.getByTestId('no-operators')).toBeInTheDocument();
+      expect(screen.queryByTestId('operator-detection-inconclusive')).not.toBeInTheDocument();
     });
   });
 

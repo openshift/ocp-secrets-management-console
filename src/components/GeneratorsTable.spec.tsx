@@ -3,11 +3,22 @@ import userEvent from '@testing-library/user-event';
 import { GeneratorsTable } from './GeneratorsTable';
 import { useK8sWatchResource, consoleFetch } from '@openshift-console/dynamic-plugin-sdk';
 import { GENERATOR_KIND_DEFS } from './crds';
+import { useClusterWatchAllowed } from '../hooks/useClusterWatchAllowed';
 
 jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
   useK8sWatchResource: jest.fn(),
   consoleFetch: jest.fn(),
 }));
+
+jest.mock('../hooks/useClusterWatchAllowed', () => {
+  const actual = jest.requireActual('../hooks/useClusterWatchAllowed');
+  return {
+    ...actual,
+    useClusterWatchAllowed: jest.fn(() => ({ allowed: true, loading: false })),
+    useClusterDeleteAllowed: jest.fn(() => ({ allowed: true, loading: false })),
+    useNamespacedDeleteAllowed: jest.fn(() => ({ allowed: true, loading: false })),
+  };
+});
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -23,6 +34,7 @@ jest.mock('react-i18next', () => ({
 
 const mockUseK8sWatchResource = useK8sWatchResource as jest.Mock;
 const mockConsoleFetch = consoleFetch as jest.Mock;
+const mockUseClusterWatchAllowed = useClusterWatchAllowed as jest.Mock;
 
 const mockPasswords = [
   {
@@ -96,16 +108,27 @@ const mockFailedPassword = {
 };
 
 function mockWatches(dataByKind: Record<string, unknown[]> = {}) {
-  mockUseK8sWatchResource.mockImplementation((opts: { groupVersionKind?: { kind?: string } }) => {
-    const kind = opts.groupVersionKind?.kind || '';
-    return [dataByKind[kind] || [], true, undefined];
-  });
+  mockUseK8sWatchResource.mockImplementation(
+    (opts: { groupVersionKind?: { kind?: string } } | null) => {
+      if (!opts) {
+        return [undefined, true, undefined];
+      }
+      const kind = opts.groupVersionKind?.kind || '';
+      return [dataByKind[kind] || [], true, undefined];
+    },
+  );
 }
 
 describe('GeneratorsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockConsoleFetch.mockReset();
+    mockUseClusterWatchAllowed.mockImplementation(() => ({ allowed: true, loading: false }));
+    const { useNamespacedDeleteAllowed, useClusterDeleteAllowed } = jest.requireMock(
+      '../hooks/useClusterWatchAllowed',
+    );
+    (useNamespacedDeleteAllowed as jest.Mock).mockReturnValue({ allowed: true, loading: false });
+    (useClusterDeleteAllowed as jest.Mock).mockReturnValue({ allowed: true, loading: false });
   });
 
   describe('Loading State', () => {
@@ -118,6 +141,37 @@ describe('GeneratorsTable', () => {
     });
   });
 
+  describe('RBAC delete gating', () => {
+    it('omits Delete when password generator delete is denied', async () => {
+      const user = userEvent.setup();
+      const { useNamespacedDeleteAllowed } = jest.requireMock('../hooks/useClusterWatchAllowed');
+      (useNamespacedDeleteAllowed as jest.Mock).mockReturnValue({ allowed: false, loading: false });
+      mockWatches({ Password: mockPasswords });
+
+      render(<GeneratorsTable selectedProject="app" />);
+
+      const kebabs = await screen.findAllByRole('button', { name: /kebab dropdown toggle/i });
+      await user.click(kebabs[0]);
+      expect(screen.queryByRole('menuitem', { name: /Delete/ })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('RBAC cluster watch gating', () => {
+    it('still lists namespace generators when cluster generator watch is denied', async () => {
+      mockUseClusterWatchAllowed.mockImplementation((model) =>
+        model?.kind === 'ClusterGenerator'
+          ? { allowed: false, loading: false }
+          : { allowed: true, loading: false },
+      );
+      mockWatches({ Password: mockPasswords });
+
+      render(<GeneratorsTable selectedProject="app" />);
+
+      expect(await screen.findByText('db-password')).toBeInTheDocument();
+      expect(screen.queryByTestId('generators-table-error')).not.toBeInTheDocument();
+    });
+  });
+
   describe('Error State', () => {
     it('displays error when every generator watch fails with a real error', async () => {
       mockUseK8sWatchResource.mockReturnValue([[], true, { message: 'Failed to fetch generators' }]);
@@ -125,6 +179,20 @@ describe('GeneratorsTable', () => {
       render(<GeneratorsTable selectedProject="all" />);
 
       expect(await screen.findByText(/Failed to fetch generators/)).toBeInTheDocument();
+    });
+
+    it('shows friendly permission message when every generator watch is forbidden', async () => {
+      mockUseK8sWatchResource.mockReturnValue([
+        [],
+        true,
+        new Error('Forbidden: cannot list password.generators.external-secrets.io'),
+      ]);
+
+      render(<GeneratorsTable selectedProject="app" />);
+
+      const error = await screen.findByTestId('generators-table-error');
+      expect(error).toHaveTextContent('You do not have permission to list');
+      expect(error).not.toHaveTextContent('Forbidden: cannot');
     });
 
     it('treats missing CRD errors as empty rather than a table error', async () => {
@@ -149,16 +217,21 @@ describe('GeneratorsTable', () => {
     });
 
     it('still renders generators when some kinds are missing CRDs', async () => {
-      mockUseK8sWatchResource.mockImplementation((opts: { groupVersionKind?: { kind?: string } }) => {
-        const kind = opts.groupVersionKind?.kind || '';
-        if (kind === 'Password') {
-          return [mockPasswords, true, undefined];
-        }
-        if (kind === 'Fake') {
-          return [[], true, { message: 'the server could not find the requested resource' }];
-        }
-        return [[], true, undefined];
-      });
+      mockUseK8sWatchResource.mockImplementation(
+        (opts: { groupVersionKind?: { kind?: string } } | null) => {
+          if (!opts) {
+            return [undefined, true, undefined];
+          }
+          const kind = opts.groupVersionKind?.kind || '';
+          if (kind === 'Password') {
+            return [mockPasswords, true, undefined];
+          }
+          if (kind === 'Fake') {
+            return [[], true, { message: 'the server could not find the requested resource' }];
+          }
+          return [[], true, undefined];
+        },
+      );
 
       render(<GeneratorsTable selectedProject="all" />);
 
@@ -392,7 +465,7 @@ describe('GeneratorsTable', () => {
       const user = userEvent.setup();
       mockWatches({ Password: [mockPasswords[0]] });
 
-      render(<GeneratorsTable selectedProject="all" />);
+      render(<GeneratorsTable selectedProject="app" />);
 
       await user.click(await screen.findByRole('button', { name: /kebab dropdown toggle/i }));
       expect(screen.getByRole('menuitem', { name: 'Inspect Password' })).toBeInTheDocument();
@@ -407,7 +480,7 @@ describe('GeneratorsTable', () => {
         text: async () => '',
       });
 
-      render(<GeneratorsTable selectedProject="all" />);
+      render(<GeneratorsTable selectedProject="app" />);
 
       await user.click(await screen.findByRole('button', { name: /kebab dropdown toggle/i }));
       await user.click(screen.getByRole('menuitem', { name: 'Delete Password' }));
@@ -463,21 +536,22 @@ describe('GeneratorsTable', () => {
         text: async () => 'forbidden',
       });
 
-      render(<GeneratorsTable selectedProject="all" />);
+      render(<GeneratorsTable selectedProject="app" />);
 
       await user.click(await screen.findByRole('button', { name: /kebab dropdown toggle/i }));
       await user.click(screen.getByRole('menuitem', { name: 'Delete Password' }));
       await user.type(screen.getByLabelText('Type resource name to confirm deletion'), 'db-password');
       await user.click(screen.getByRole('button', { name: 'Delete' }));
 
-      expect(await screen.findByText(/Delete failed: 403 Forbidden/)).toBeInTheDocument();
+      expect(await screen.findByText(/You do not have permission to delete/)).toBeInTheDocument();
+      expect(screen.queryByText(/Delete failed: 403 Forbidden/)).not.toBeInTheDocument();
     });
 
     it('closes the delete modal on cancel without calling the API', async () => {
       const user = userEvent.setup();
       mockWatches({ Password: [mockPasswords[0]] });
 
-      render(<GeneratorsTable selectedProject="all" />);
+      render(<GeneratorsTable selectedProject="app" />);
 
       await user.click(await screen.findByRole('button', { name: /kebab dropdown toggle/i }));
       await user.click(screen.getByRole('menuitem', { name: 'Delete Password' }));
@@ -705,7 +779,7 @@ describe('GeneratorsTable', () => {
         text: async () => '',
       });
 
-      render(<GeneratorsTable selectedProject="all" />);
+      render(<GeneratorsTable selectedProject="test-ns" />);
 
       await user.click(await screen.findByRole('button', { name: /kebab dropdown toggle/i }));
       await user.click(screen.getByRole('menuitem', { name: 'Delete Webhook' }));
@@ -737,7 +811,7 @@ describe('GeneratorsTable', () => {
         text: async () => '',
       });
 
-      render(<GeneratorsTable selectedProject="all" />);
+      render(<GeneratorsTable selectedProject="vault-ns" />);
 
       await user.click(await screen.findByRole('button', { name: /kebab dropdown toggle/i }));
       await user.click(screen.getByRole('menuitem', { name: 'Delete VaultDynamicSecret' }));
@@ -751,5 +825,34 @@ describe('GeneratorsTable', () => {
         );
       });
     });
+  });
+});
+
+describe('GeneratorsTable full access (cluster-admin)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockConsoleFetch.mockReset();
+    mockUseClusterWatchAllowed.mockImplementation(() => ({ allowed: true, loading: false }));
+    const { useNamespacedDeleteAllowed, useClusterDeleteAllowed } = jest.requireMock(
+      '../hooks/useClusterWatchAllowed',
+    );
+    (useNamespacedDeleteAllowed as jest.Mock).mockReturnValue({ allowed: true, loading: false });
+    (useClusterDeleteAllowed as jest.Mock).mockReturnValue({ allowed: true, loading: false });
+    mockWatches({
+      Password: mockPasswords,
+      ClusterGenerator: mockClusterGenerators,
+    });
+  });
+
+  it('renders namespace and cluster generators with Delete action and no permission error', async () => {
+    const user = userEvent.setup();
+    render(<GeneratorsTable selectedProject="app" />);
+
+    expect(await screen.findByText('db-password')).toBeInTheDocument();
+    expect(screen.getByText('cluster-password')).toBeInTheDocument();
+    expect(screen.queryByTestId('generators-table-error')).not.toBeInTheDocument();
+
+    await user.click(screen.getAllByRole('button', { name: /kebab dropdown toggle/i })[0]);
+    expect(screen.getByRole('menuitem', { name: /Delete Password/ })).toBeInTheDocument();
   });
 });

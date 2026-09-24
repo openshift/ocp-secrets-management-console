@@ -32,6 +32,38 @@ const TRUST_MANAGER_CRDS = ['bundles.trust.cert-manager.io'];
 
 const SECRETS_STORE_CSI_CRDS = ['secretproviderclasses.secrets-store.csi.x-k8s.io'];
 
+type OperatorProbeConfig = {
+  crds: string[];
+  /** List URLs used when CRD GET is forbidden but the user may still access CRs. */
+  fallbackListUrls: string[];
+};
+
+const OPERATOR_PROBES: Record<
+  'certManager' | 'trustManager' | 'externalSecrets' | 'secretsStoreCSI',
+  OperatorProbeConfig
+> = {
+  certManager: {
+    crds: CERT_MANAGER_CRDS,
+    fallbackListUrls: ['/api/kubernetes/apis/cert-manager.io/v1/certificates?limit=1'],
+  },
+  trustManager: {
+    crds: TRUST_MANAGER_CRDS,
+    fallbackListUrls: ['/api/kubernetes/apis/trust.cert-manager.io/v1alpha1/bundles?limit=1'],
+  },
+  externalSecrets: {
+    crds: EXTERNAL_SECRETS_CRDS,
+    fallbackListUrls: ['/api/kubernetes/apis/external-secrets.io/v1/externalsecrets?limit=1'],
+  },
+  secretsStoreCSI: {
+    crds: SECRETS_STORE_CSI_CRDS,
+    fallbackListUrls: [
+      '/api/kubernetes/apis/secrets-store.csi.x-k8s.io/v1/secretproviderclasses?limit=1',
+    ],
+  },
+};
+
+type CrdProbeResult = 'exists' | 'missing' | 'forbidden';
+
 /**
  * Returns true if the error indicates the CRD/resource was not found.
  * When the operator is not installed, the API may return 404 or an error body
@@ -42,25 +74,63 @@ function isNotFoundError(err: unknown): boolean {
   return /not found/i.test(msg);
 }
 
-async function checkCRDExists(crdName: string): Promise<boolean> {
-  // Console proxies Kubernetes API under /api/kubernetes (same as other plugin API calls)
+function isForbiddenStatus(status: number): boolean {
+  return status === 401 || status === 403;
+}
+
+async function probeCRD(crdName: string): Promise<CrdProbeResult> {
   const response = await consoleFetch(
     `/api/kubernetes/apis/apiextensions.k8s.io/v1/customresourcedefinitions/${crdName}`,
   );
-  if (response.status === 404) return false;
+  if (response.status === 404) {
+    return 'missing';
+  }
   if (!response.ok) {
     const errorText = await response.text();
-    // Treat "not found" responses (e.g. some proxies return 403/500 with not found body) as missing CRD
-    if (/not found/i.test(errorText)) return false;
+    if (/not found/i.test(errorText)) {
+      return 'missing';
+    }
+    if (isForbiddenStatus(response.status)) {
+      return 'forbidden';
+    }
     throw new Error(`CRD lookup failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
   const data = await response.json();
-  return data?.kind === 'CustomResourceDefinition' && data?.metadata?.name === crdName;
+  return data?.kind === 'CustomResourceDefinition' && data?.metadata?.name === crdName
+    ? 'exists'
+    : 'missing';
 }
 
-async function checkOperatorInstalled(crds: string[]): Promise<boolean> {
-  const results = await Promise.all(crds.map(checkCRDExists));
-  return results.some(Boolean);
+async function probeResourceList(listUrl: string): Promise<boolean> {
+  const response = await consoleFetch(listUrl);
+  if (response.ok) {
+    return true;
+  }
+  if (isForbiddenStatus(response.status)) {
+    return false;
+  }
+  if (response.status === 404) {
+    return false;
+  }
+  const errorText = await response.text();
+  throw new Error(`Resource list probe failed: ${response.status} ${response.statusText} - ${errorText}`);
+}
+
+async function detectOperatorInstalled({ crds, fallbackListUrls }: OperatorProbeConfig): Promise<boolean> {
+  const crdResults = await Promise.all(crds.map(probeCRD));
+  if (crdResults.some((r) => r === 'exists')) {
+    return true;
+  }
+  if (crdResults.every((r) => r === 'missing')) {
+    return false;
+  }
+  // CRD GET forbidden (or mixed forbidden/missing): try namespace/cluster list the user may access.
+  for (const listUrl of fallbackListUrls) {
+    if (await probeResourceList(listUrl)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export const useOperatorDetection = (): OperatorDetectionResult => {
@@ -84,76 +154,36 @@ export const useOperatorDetection = (): OperatorDetectionResult => {
     loading: true,
   });
 
+  const runOperatorCheck = async (
+    probe: OperatorProbeConfig,
+    setter: React.Dispatch<React.SetStateAction<OperatorStatus>>,
+  ) => {
+    try {
+      const installed = await detectOperatorInstalled(probe);
+      setter({ installed, loading: false });
+    } catch (err) {
+      setter({
+        installed: false,
+        loading: false,
+        error: isNotFoundError(err)
+          ? undefined
+          : err instanceof Error
+            ? err.message
+            : 'Unknown error',
+      });
+    }
+  };
+
   const checkOperators = React.useCallback(async () => {
-    // Reset to loading state
     setCertManager((prev) => ({ ...prev, loading: true }));
     setTrustManager((prev) => ({ ...prev, loading: true }));
     setExternalSecrets((prev) => ({ ...prev, loading: true }));
     setSecretsStoreCSI((prev) => ({ ...prev, loading: true }));
 
-    // Check cert-manager
-    try {
-      const installed = await checkOperatorInstalled(CERT_MANAGER_CRDS);
-      setCertManager({ installed, loading: false });
-    } catch (err) {
-      setCertManager({
-        installed: false,
-        loading: false,
-        error: isNotFoundError(err)
-          ? undefined
-          : err instanceof Error
-          ? err.message
-          : 'Unknown error',
-      });
-    }
-
-    // Check trust-manager (part of cert-manager operator)
-    try {
-      const installed = await checkOperatorInstalled(TRUST_MANAGER_CRDS);
-      setTrustManager({ installed, loading: false });
-    } catch (err) {
-      setTrustManager({
-        installed: false,
-        loading: false,
-        error: isNotFoundError(err)
-          ? undefined
-          : err instanceof Error
-          ? err.message
-          : 'Unknown error',
-      });
-    }
-
-    // Check external-secrets
-    try {
-      const installed = await checkOperatorInstalled(EXTERNAL_SECRETS_CRDS);
-      setExternalSecrets({ installed, loading: false });
-    } catch (err) {
-      setExternalSecrets({
-        installed: false,
-        loading: false,
-        error: isNotFoundError(err)
-          ? undefined
-          : err instanceof Error
-          ? err.message
-          : 'Unknown error',
-      });
-    }
-
-    // Check secrets-store-csi
-    try {
-      const installed = await checkOperatorInstalled(SECRETS_STORE_CSI_CRDS);
-      setSecretsStoreCSI({ installed, loading: false });
-    } catch (err) {
-      setSecretsStoreCSI({
-        installed: false,
-        loading: false,
-        error: isNotFoundError(err)
-          ? undefined
-          : err instanceof Error
-          ? err.message
-          : 'Unknown error',
-      });
-    }
+    await runOperatorCheck(OPERATOR_PROBES.certManager, setCertManager);
+    await runOperatorCheck(OPERATOR_PROBES.trustManager, setTrustManager);
+    await runOperatorCheck(OPERATOR_PROBES.externalSecrets, setExternalSecrets);
+    await runOperatorCheck(OPERATOR_PROBES.secretsStoreCSI, setSecretsStoreCSI);
   }, []);
 
   React.useEffect(() => {

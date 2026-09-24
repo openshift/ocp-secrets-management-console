@@ -8,6 +8,12 @@ import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { RowActionsMenu } from './RowActionsMenu';
 import { useK8sWatchResource, consoleFetch } from '@openshift-console/dynamic-plugin-sdk';
 import {
+  useClusterWatchAllowed,
+  useClusterDeleteAllowed,
+  useNamespacedDeleteAllowed,
+  isDeleteAllowed,
+} from '../hooks/useClusterWatchAllowed';
+import {
   GENERATOR_KIND_DEFS,
   getGeneratorModel,
   GeneratorKindDef,
@@ -17,6 +23,10 @@ import {
   getGeneratorInspectHref,
   isClusterGenerator,
 } from './crds';
+import {
+  formatDeleteErrorMessage,
+  formatResourceTableErrorMessage,
+} from '../utils/permissionErrors';
 
 const isMissingCrdError = (error: { message?: string } | undefined): boolean => {
   const message = error?.message?.toLowerCase() || '';
@@ -82,12 +92,51 @@ interface GeneratorKindWatchProps {
   onUpdate: (result: KindWatchResult) => void;
 }
 
+interface GeneratorKindDeleteAccessProps {
+  def: GeneratorKindDef;
+  namespace?: string;
+  onUpdate: (kind: string, allowed: boolean) => void;
+}
+
+const GeneratorKindDeleteAccess: React.FC<GeneratorKindDeleteAccessProps> = ({
+  def,
+  namespace,
+  onUpdate,
+}) => {
+  const model = getGeneratorModel(def.kind);
+  const clusterDelete = useClusterDeleteAllowed(def.clusterScoped ? model : null);
+  const namespacedDelete = useNamespacedDeleteAllowed(
+    def.clusterScoped ? null : model,
+    namespace || '',
+  );
+  const allowed = def.clusterScoped
+    ? isDeleteAllowed(clusterDelete)
+    : namespace
+      ? isDeleteAllowed(namespacedDelete)
+      : false;
+
+  React.useLayoutEffect(() => {
+    onUpdate(def.kind, allowed);
+  }, [def.kind, allowed, onUpdate]);
+
+  return null;
+};
+
 const GeneratorKindWatch: React.FC<GeneratorKindWatchProps> = ({ def, namespace, onUpdate }) => {
-  const [items, loaded, error] = useK8sWatchResource<GeneratorResource[]>({
-    groupVersionKind: getGeneratorModel(def.kind),
-    namespace: def.clusterScoped ? undefined : namespace,
-    isList: true,
-  });
+  const model = getGeneratorModel(def.kind);
+  const { allowed: clusterAllowed, loading: clusterAccessLoading } = useClusterWatchAllowed(
+    def.clusterScoped ? model : null,
+  );
+  const watchEnabled = !def.clusterScoped || (clusterAllowed && !clusterAccessLoading);
+  const [items, loaded, error] = useK8sWatchResource<GeneratorResource[]>(
+    watchEnabled
+      ? {
+          groupVersionKind: model,
+          namespace: def.clusterScoped ? undefined : namespace,
+          isList: true,
+        }
+      : null,
+  );
 
   React.useEffect(() => {
     onUpdate({
@@ -113,6 +162,7 @@ interface GeneratorsTableProps {
 export const GeneratorsTable: React.FC<GeneratorsTableProps> = ({ selectedProject }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
   const [watchState, setWatchState] = React.useState<Record<string, KindWatchResult>>({});
+  const [deleteAllowedByKind, setDeleteAllowedByKind] = React.useState<Record<string, boolean>>({});
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;
     generator: GeneratorResource | null;
@@ -124,6 +174,15 @@ export const GeneratorsTable: React.FC<GeneratorsTableProps> = ({ selectedProjec
     isDeleting: false,
     error: null,
   });
+
+  const handleDeleteAccessUpdate = React.useCallback((kind: string, allowed: boolean) => {
+    setDeleteAllowedByKind((prev) => {
+      if (prev[kind] === allowed) {
+        return prev;
+      }
+      return { ...prev, [kind]: allowed };
+    });
+  }, []);
 
   const handleWatchUpdate = React.useCallback((result: KindWatchResult) => {
     setWatchState((prev) => {
@@ -184,7 +243,10 @@ export const GeneratorsTable: React.FC<GeneratorsTableProps> = ({ selectedProjec
       setDeleteModal((prev) => ({
         ...prev,
         isDeleting: false,
-        error: error instanceof Error ? error.message : 'Failed to delete generator',
+        error: formatDeleteErrorMessage(error, t, {
+          resourceCategory: t('Generators'),
+          namespace: deleteModal.generator?.metadata?.namespace,
+        }),
       }));
     }
   };
@@ -233,6 +295,8 @@ export const GeneratorsTable: React.FC<GeneratorsTableProps> = ({ selectedProjec
       const generatorId = `${generator.kind}-${namespaceLabel}-${generator.metadata.name}`;
       const conditionStatus = getGeneratorStatus(generator);
       const generatorKind = generator.kind || t('Generator');
+      const kindKey = generator.kind || 'Password';
+      const showDelete = deleteAllowedByKind[kindKey] === true;
 
       return {
         cells: [
@@ -257,33 +321,46 @@ export const GeneratorsTable: React.FC<GeneratorsTableProps> = ({ selectedProjec
                 label: t('Inspect {{kind}}', { kind: generatorKind }),
                 onClick: () => handleInspect(generator),
               },
-              {
-                key: 'delete',
-                label: t('Delete {{kind}}', { kind: generatorKind }),
-                onClick: () => openDeleteModal(generator),
-              },
+              ...(showDelete
+                ? [
+                    {
+                      key: 'delete',
+                      label: t('Delete {{kind}}', { kind: generatorKind }),
+                      onClick: () => openDeleteModal(generator),
+                    },
+                  ]
+                : []),
             ]}
           />,
         ],
       };
     });
-  }, [loaded, watchState, t]);
+  }, [loaded, watchState, deleteAllowedByKind, t]);
 
   return (
     <>
       {GENERATOR_KIND_DEFS.map((def) => (
-        <GeneratorKindWatch
-          key={def.kind}
-          def={def}
-          namespace={namespace}
-          onUpdate={handleWatchUpdate}
-        />
+        <React.Fragment key={def.kind}>
+          <GeneratorKindDeleteAccess
+            def={def}
+            namespace={namespace}
+            onUpdate={handleDeleteAccessUpdate}
+          />
+          <GeneratorKindWatch def={def} namespace={namespace} onUpdate={handleWatchUpdate} />
+        </React.Fragment>
       ))}
       <ResourceTable
         columns={columns}
         rows={rows}
         loading={!loaded}
-        error={loadError}
+        error={
+          loadError
+            ? formatResourceTableErrorMessage(loadError, t, {
+                resourceCategory: t('Generators'),
+                namespace,
+              })
+            : undefined
+        }
         emptyStateTitle={t('No generators found')}
         emptyStateBody={
           selectedProject === 'all'

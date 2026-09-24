@@ -29,6 +29,17 @@ describe('ResourceTable', () => {
       expect(screen.getByText('boom')).toBeInTheDocument();
     });
 
+    it('renders friendly permission message without raw API error text', () => {
+      const friendly =
+        'You do not have permission to list Issuers in project app.';
+      render(
+        <ResourceTable columns={columns} rows={[]} error={friendly} data-test="res-table" />,
+      );
+      const alert = screen.getByTestId('res-table-error');
+      expect(alert).toHaveTextContent(friendly);
+      expect(alert).not.toHaveTextContent('Forbidden:');
+    });
+
     it('renders empty state when there are no rows', () => {
       render(
         <ResourceTable

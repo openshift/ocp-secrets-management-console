@@ -52,7 +52,7 @@ plugin:
   jobs:
     patchConsoles:
       enabled: true
-      image: "registry.redhat.io/openshift4/ose-tools-rhel9@sha256:ee65b244fc94d5765514c604dc0a288517dcdce68de65128d047622b6b30a618"
+      image: "registry.redhat.io/openshift4/ose-tools-rhel9@sha256:9bc766c7405e8ee87887a6f4708babcc73432adaa1c570ed7621b07247f9ea6b"
       podSecurityContext:
         enabled: true
         runAsNonRoot: true

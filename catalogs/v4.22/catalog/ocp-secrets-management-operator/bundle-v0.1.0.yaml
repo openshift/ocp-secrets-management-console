@@ -1,7 +1,7 @@
 ---
 image: registry.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:91b648c26f7d4d9624226f9293e8b756e3a08717ca98f9663e97311ada8a17af
-name: console-plugin-operator.v0.1.0
-package: console-plugin-operator
+name: ocp-secrets-management-operator.v0.1.0
+package: ocp-secrets-management-operator
 properties:
 - type: olm.gvk
   value:
@@ -10,7 +10,7 @@ properties:
     version: v1alpha1
 - type: olm.package
   value:
-    packageName: console-plugin-operator
+    packageName: ocp-secrets-management-operator
     version: 0.1.0
 - type: olm.csv.metadata
   value:

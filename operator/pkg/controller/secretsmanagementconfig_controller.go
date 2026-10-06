@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -418,6 +419,11 @@ func (r *SecretsManagementConfigReconciler) reconcilePluginDeployment(ctx contex
 		return err
 	}
 
+	// Create plugin config ConfigMap (feature flags served to the frontend)
+	if err := r.reconcilePluginConfig(ctx, config); err != nil {
+		return err
+	}
+
 	// Create Deployment
 	if err := r.reconcileDeployment(ctx, config); err != nil {
 		return err
@@ -627,6 +633,12 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 									SubPath:   "nginx.conf",
 									ReadOnly:  true,
 								},
+								{
+									Name:      "plugin-config",
+									MountPath: "/usr/share/nginx/html/plugin-config.json",
+									SubPath:   "plugin-config.json",
+									ReadOnly:  true,
+								},
 							},
 						},
 					},
@@ -646,6 +658,17 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
 										Name: fmt.Sprintf("%s-nginx-conf", PluginName),
+									},
+									DefaultMode: int32Ptr(420),
+								},
+							},
+						},
+						{
+							Name: "plugin-config",
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: fmt.Sprintf("%s-plugin-config", PluginName),
 									},
 									DefaultMode: int32Ptr(420),
 								},
@@ -745,6 +768,65 @@ http {
 			return r.Create(ctx, cm)
 		}
 		return err
+	}
+
+	existing.Data = cm.Data
+	return r.Update(ctx, existing)
+}
+
+// pluginConfig is the JSON structure served to the frontend plugin at /plugin-config.json.
+type pluginConfig struct {
+	Features pluginFeaturesConfig `json:"features"`
+}
+
+type pluginFeaturesConfig struct {
+	Delete pluginFeatureToggle `json:"delete"`
+}
+
+type pluginFeatureToggle struct {
+	Enabled   bool `json:"enabled"`
+	CheckRBAC bool `json:"checkRBAC"`
+}
+
+// reconcilePluginConfig ensures a ConfigMap exists with the feature flags as JSON,
+// mounted by nginx so the plugin frontend can fetch it at /plugin-config.json.
+func (r *SecretsManagementConfigReconciler) reconcilePluginConfig(ctx context.Context, config *smv1alpha1.SecretsManagementConfig) error {
+	cfg := pluginConfig{
+		Features: pluginFeaturesConfig{
+			Delete: pluginFeatureToggle{
+				Enabled:   config.Spec.Features.Delete.Enabled,
+				CheckRBAC: config.Spec.Features.Delete.CheckRBAC,
+			},
+		},
+	}
+
+	data, err := json.Marshal(cfg)
+	if err != nil {
+		return fmt.Errorf("marshalling plugin config: %w", err)
+	}
+
+	cm := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-plugin-config", PluginName),
+			Namespace: PluginNamespace,
+			Labels: map[string]string{
+				"app.kubernetes.io/name":       PluginName,
+				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/managed-by": "secrets-management-operator",
+			},
+		},
+		Data: map[string]string{
+			"plugin-config.json": string(data),
+		},
+	}
+
+	existing := &corev1.ConfigMap{}
+	getErr := r.Get(ctx, types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}, existing)
+	if getErr != nil {
+		if errors.IsNotFound(getErr) {
+			return r.Create(ctx, cm)
+		}
+		return getErr
 	}
 
 	existing.Data = cm.Data
@@ -987,7 +1069,7 @@ func (r *SecretsManagementConfigReconciler) cleanupPluginDeployment(ctx context.
 		return err
 	}
 
-	// Delete ConfigMap
+	// Delete ConfigMap (nginx)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-nginx-conf", PluginName),
@@ -995,6 +1077,17 @@ func (r *SecretsManagementConfigReconciler) cleanupPluginDeployment(ctx context.
 		},
 	}
 	if err := r.Delete(ctx, cm); err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+
+	// Delete ConfigMap (plugin config)
+	pluginCfg := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-plugin-config", PluginName),
+			Namespace: PluginNamespace,
+		},
+	}
+	if err := r.Delete(ctx, pluginCfg); err != nil && !errors.IsNotFound(err) {
 		return err
 	}
 

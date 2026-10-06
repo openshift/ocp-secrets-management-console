@@ -60,10 +60,10 @@ func newTestConfig(name string) *smv1alpha1.SecretsManagementConfig {
 				CreateDefaultRoles: true,
 				RolePrefix:         "secrets-management",
 			},
-		Plugin: smv1alpha1.PluginConfig{
-			Image:    "openshift.io/ocp-secrets-management:test",
-			Replicas: 1,
-		},
+			Plugin: smv1alpha1.PluginConfig{
+				Image:    "openshift.io/ocp-secrets-management:test",
+				Replicas: 1,
+			},
 			Operators: smv1alpha1.OperatorsConfig{
 				CertManager:     smv1alpha1.OperatorConfig{Enabled: true},
 				ExternalSecrets: smv1alpha1.OperatorConfig{Enabled: true},
@@ -254,6 +254,55 @@ func TestReconcileNginxConfig(t *testing.T) {
 	}, cm)
 	require.NoError(t, err)
 	assert.Contains(t, cm.Data["nginx.conf"], "listen 9443 ssl")
+}
+
+func TestReconcilePluginConfig_DefaultDisabled(t *testing.T) {
+	ctx := context.Background()
+	config := newTestConfig("cluster")
+	r := newTestReconciler()
+
+	ns := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{Name: PluginNamespace},
+	}
+	err := r.Create(ctx, ns)
+	require.NoError(t, err)
+
+	err = r.reconcilePluginConfig(ctx, config)
+	require.NoError(t, err)
+
+	cm := &corev1.ConfigMap{}
+	err = r.Get(ctx, types.NamespacedName{
+		Name:      "ocp-secrets-management-plugin-config",
+		Namespace: PluginNamespace,
+	}, cm)
+	require.NoError(t, err)
+	assert.Contains(t, cm.Data["plugin-config.json"], `"enabled":false`)
+}
+
+func TestReconcilePluginConfig_DeleteEnabled(t *testing.T) {
+	ctx := context.Background()
+	config := newTestConfig("cluster")
+	config.Spec.Features.Delete.Enabled = true
+	config.Spec.Features.Delete.CheckRBAC = true
+	r := newTestReconciler()
+
+	ns := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{Name: PluginNamespace},
+	}
+	err := r.Create(ctx, ns)
+	require.NoError(t, err)
+
+	err = r.reconcilePluginConfig(ctx, config)
+	require.NoError(t, err)
+
+	cm := &corev1.ConfigMap{}
+	err = r.Get(ctx, types.NamespacedName{
+		Name:      "ocp-secrets-management-plugin-config",
+		Namespace: PluginNamespace,
+	}, cm)
+	require.NoError(t, err)
+	assert.Contains(t, cm.Data["plugin-config.json"], `"enabled":true`)
+	assert.Contains(t, cm.Data["plugin-config.json"], `"checkRBAC":true`)
 }
 
 func TestReconcileDeployment(t *testing.T) {

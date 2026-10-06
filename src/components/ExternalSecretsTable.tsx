@@ -20,6 +20,7 @@ import {
   ExternalSecretResource,
   isClusterExternalSecret,
 } from './crds';
+import { useDeleteEnabled } from '../hooks/usePluginConfig';
 
 /** Parse Kubernetes/Go duration string (e.g. "1h", "30m", "1h30m") to milliseconds */
 function parseDurationMs(duration: string): number {
@@ -117,6 +118,7 @@ interface ExternalSecretsTableProps {
 
 export const ExternalSecretsTable: React.FC<ExternalSecretsTableProps> = ({ selectedProject }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
+  const deleteEnabled = useDeleteEnabled();
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;
     externalSecret: ExternalSecretResource | null;
@@ -306,17 +308,21 @@ export const ExternalSecretsTable: React.FC<ExternalSecretsTableProps> = ({ sele
                 label: t('Inspect {{kind}}', { kind: resourceKind }),
                 onClick: () => handleInspect(resource),
               },
-              {
-                key: 'delete',
-                label: t('Delete {{kind}}', { kind: resourceKind }),
-                onClick: () => handleDelete(resource),
-              },
+              ...(deleteEnabled
+                ? [
+                    {
+                      key: 'delete',
+                      label: t('Delete {{kind}}', { kind: resourceKind }),
+                      onClick: () => handleDelete(resource),
+                    },
+                  ]
+                : []),
             ]}
           />,
         ],
       };
     });
-  }, [allSecrets, loaded, t]);
+  }, [allSecrets, loaded, t, deleteEnabled]);
 
   return (
     <>

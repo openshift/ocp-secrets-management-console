@@ -8,6 +8,7 @@ import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { RowActionsMenu } from './RowActionsMenu';
 import { useK8sWatchResource, consoleFetch } from '@openshift-console/dynamic-plugin-sdk';
 import { SecretStoreModel, ClusterSecretStoreModel, SecretStore } from './crds';
+import { useDeleteEnabled } from '../hooks/usePluginConfig';
 
 const getProviderType = (secretStore: SecretStore): string => {
   const provider = secretStore.spec?.provider;
@@ -86,6 +87,7 @@ interface SecretStoresTableProps {
 
 export const SecretStoresTable: React.FC<SecretStoresTableProps> = ({ selectedProject }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
+  const deleteEnabled = useDeleteEnabled();
 
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;
@@ -248,17 +250,21 @@ export const SecretStoresTable: React.FC<SecretStoresTableProps> = ({ selectedPr
                 label: t('Inspect {{kind}}', { kind: typeLabel }),
                 onClick: () => handleInspect(secretStore),
               },
-              {
-                key: 'delete',
-                label: t('Delete {{kind}}', { kind: typeLabel }),
-                onClick: () => handleDelete(secretStore),
-              },
+              ...(deleteEnabled
+                ? [
+                    {
+                      key: 'delete',
+                      label: t('Delete {{kind}}', { kind: typeLabel }),
+                      onClick: () => handleDelete(secretStore),
+                    },
+                  ]
+                : []),
             ]}
           />,
         ],
       };
     });
-  }, [secretStores, clusterSecretStores, loaded, t]);
+  }, [secretStores, clusterSecretStores, loaded, t, deleteEnabled]);
 
   return (
     <>

@@ -17,6 +17,7 @@ import {
   getGeneratorInspectHref,
   isClusterGenerator,
 } from './crds';
+import { useDeleteEnabled } from '../hooks/usePluginConfig';
 
 const isMissingCrdError = (error: { message?: string } | undefined): boolean => {
   const message = error?.message?.toLowerCase() || '';
@@ -112,6 +113,7 @@ interface GeneratorsTableProps {
 
 export const GeneratorsTable: React.FC<GeneratorsTableProps> = ({ selectedProject }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
+  const deleteEnabled = useDeleteEnabled();
   const [watchState, setWatchState] = React.useState<Record<string, KindWatchResult>>({});
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;
@@ -257,17 +259,21 @@ export const GeneratorsTable: React.FC<GeneratorsTableProps> = ({ selectedProjec
                 label: t('Inspect {{kind}}', { kind: generatorKind }),
                 onClick: () => handleInspect(generator),
               },
-              {
-                key: 'delete',
-                label: t('Delete {{kind}}', { kind: generatorKind }),
-                onClick: () => openDeleteModal(generator),
-              },
+              ...(deleteEnabled
+                ? [
+                    {
+                      key: 'delete',
+                      label: t('Delete {{kind}}', { kind: generatorKind }),
+                      onClick: () => openDeleteModal(generator),
+                    },
+                  ]
+                : []),
             ]}
           />,
         ],
       };
     });
-  }, [loaded, watchState, t]);
+  }, [loaded, watchState, t, deleteEnabled]);
 
   return (
     <>

@@ -9,8 +9,8 @@ import (
 
 // FeatureConfig defines settings for a specific UI feature
 type FeatureConfig struct {
-	// Enabled is the master switch for this feature
-	// +kubebuilder:default=true
+	// Enabled is the master switch for this feature.
+	// For delete, this defaults to false so the plugin is read-only by default.
 	Enabled bool `json:"enabled,omitempty"`
 
 	// CheckRBAC determines if the UI should check user RBAC via SelfSubjectAccessReview

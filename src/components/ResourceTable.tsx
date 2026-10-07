@@ -1,14 +1,13 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  EmptyState,
-  EmptyStateBody,
   Alert,
   AlertVariant,
+  EmptyState,
+  EmptyStateBody,
   Pagination,
   PaginationVariant,
 } from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
 
 interface Column {
   title: string;
@@ -96,7 +95,6 @@ export const ResourceTable: React.FC<ResourceTableProps> = ({
       <div className="co-m-pane__body" data-test={`${dataTest}-empty`}>
         <EmptyState
           variant="xs"
-          icon={SearchIcon}
           headingLevel="h4"
           titleText={emptyStateTitle || t('No resources found')}
         >

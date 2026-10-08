@@ -20,6 +20,7 @@ import {
   PushSecretResource,
   isClusterPushSecret,
 } from './crds';
+import { useDeleteEnabled } from '../hooks/usePluginConfig';
 
 const getPushSecretStatus = (pushSecret: PushSecretResource) => {
   if (!pushSecret.status?.conditions) {
@@ -63,6 +64,7 @@ interface PushSecretsTableProps {
 
 export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProject }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
+  const deleteEnabled = useDeleteEnabled();
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;
     pushSecret: PushSecretResource | null;
@@ -218,17 +220,21 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
                   }
                 },
               },
-              {
-                key: 'delete',
-                label: t('Delete {{kind}}', { kind: resourceKind }),
-                onClick: () => openDeleteModal(pushSecret),
-              },
+              ...(deleteEnabled
+                ? [
+                    {
+                      key: 'delete',
+                      label: t('Delete {{kind}}', { kind: resourceKind }),
+                      onClick: () => openDeleteModal(pushSecret),
+                    },
+                  ]
+                : []),
             ]}
           />,
         ],
       };
     });
-  }, [pushSecrets, clusterPushSecrets, loaded, t]);
+  }, [pushSecrets, clusterPushSecrets, loaded, t, deleteEnabled]);
 
   const getErrorMessage = () => {
     if (loadError?.message?.includes('no matches for kind')) {

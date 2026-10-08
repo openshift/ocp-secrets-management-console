@@ -8,6 +8,7 @@ import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { RowActionsMenu } from './RowActionsMenu';
 import { useK8sWatchResource, consoleFetch } from '@openshift-console/dynamic-plugin-sdk';
 import { IssuerModel, ClusterIssuerModel, Issuer } from './crds';
+import { useDeleteEnabled } from '../hooks/usePluginConfig';
 
 const getIssuerType = (issuer: Issuer): string => {
   if (issuer.spec.acme) return 'ACME';
@@ -49,6 +50,7 @@ interface IssuersTableProps {
 
 export const IssuersTable: React.FC<IssuersTableProps> = ({ selectedProject }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
+  const deleteEnabled = useDeleteEnabled();
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;
     issuer: Issuer | null;
@@ -209,17 +211,21 @@ export const IssuersTable: React.FC<IssuersTableProps> = ({ selectedProject }) =
                 label: t('Inspect {{kind}}', { kind: issuerKind }),
                 onClick: () => handleInspect(issuer),
               },
-              {
-                key: 'delete',
-                label: t('Delete {{kind}}', { kind: issuerKind }),
-                onClick: () => handleDelete(issuer),
-              },
+              ...(deleteEnabled
+                ? [
+                    {
+                      key: 'delete',
+                      label: t('Delete {{kind}}', { kind: issuerKind }),
+                      onClick: () => handleDelete(issuer),
+                    },
+                  ]
+                : []),
             ]}
           />,
         ],
       };
     });
-  }, [issuers, clusterIssuers, loaded, t]);
+  }, [issuers, clusterIssuers, loaded, t, deleteEnabled]);
 
   return (
     <>

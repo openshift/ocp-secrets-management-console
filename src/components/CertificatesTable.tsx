@@ -13,6 +13,7 @@ import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { RowActionsMenu } from './RowActionsMenu';
 import { useK8sWatchResource, consoleFetch } from '@openshift-console/dynamic-plugin-sdk';
 import { CertificateModel, Certificate } from './crds';
+import { useDeleteEnabled } from '../hooks/usePluginConfig';
 
 const getConditionStatus = (certificate: Certificate) => {
   const readyCondition = certificate.status?.conditions?.find(
@@ -88,6 +89,7 @@ interface CertificatesTableProps {
 
 export const CertificatesTable: React.FC<CertificatesTableProps> = ({ selectedProject }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
+  const deleteEnabled = useDeleteEnabled();
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;
     certificate: Certificate | null;
@@ -223,17 +225,21 @@ export const CertificatesTable: React.FC<CertificatesTableProps> = ({ selectedPr
                 label: t('Inspect {{kind}}', { kind: t('Certificate') }),
                 onClick: () => handleInspect(cert),
               },
-              {
-                key: 'delete',
-                label: t('Delete {{kind}}', { kind: t('Certificate') }),
-                onClick: () => handleDelete(cert),
-              },
+              ...(deleteEnabled
+                ? [
+                    {
+                      key: 'delete',
+                      label: t('Delete {{kind}}', { kind: t('Certificate') }),
+                      onClick: () => handleDelete(cert),
+                    },
+                  ]
+                : []),
             ]}
           />,
         ],
       };
     });
-  }, [certificates, loaded, t]);
+  }, [certificates, loaded, t, deleteEnabled]);
 
   return (
     <>

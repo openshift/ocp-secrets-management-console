@@ -35,6 +35,7 @@ import { SecretProviderClassTable } from './components/SecretProviderClassTable'
 import { NoOperatorsInstalled } from './components/OperatorNotInstalled';
 import { ActiveRowMenuProvider } from './components/ActiveRowMenuProvider';
 import { useOperatorDetection, type OperatorStatus } from './hooks/useOperatorDetection';
+import { PluginConfigProvider } from './hooks/usePluginConfig';
 
 /** Badge shown on card titles when operator detection encountered an error. */
 const OperatorStatusBadge: React.FC<{ status: OperatorStatus }> = ({ status }) => {
@@ -403,233 +404,235 @@ export default function SecretsManagement() {
           </Flex>
         </div>
 
-        <ActiveRowMenuProvider>
-          <div className="co-m-pane__body-group" style={{ padding: '0 2rem' }}>
-            {operatorsLoading && (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '64px' }}>
-                <Spinner size="xl" />
-              </div>
-            )}
+        <PluginConfigProvider>
+          <ActiveRowMenuProvider>
+            <div className="co-m-pane__body-group" style={{ padding: '0 2rem' }}>
+              {operatorsLoading && (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '64px' }}>
+                  <Spinner size="xl" />
+                </div>
+              )}
 
-            {!operatorsLoading && !anyOperatorInstalled && <NoOperatorsInstalled />}
+              {!operatorsLoading && !anyOperatorInstalled && <NoOperatorsInstalled />}
 
-            {!operatorsLoading && anyOperatorInstalled && (
-              <>
-                {/* External Secrets Resources */}
-                {shouldShowComponent('external-secrets', 'externalsecrets') && (
-                  <div style={{ marginBottom: '2rem' }}>
-                    <Flex
-                      alignItems={{ default: 'alignItemsCenter' }}
-                      style={{ marginBottom: '0.5rem' }}
-                    >
-                      <FlexItem>
-                        <Title headingLevel="h3" size="md">
-                          {t('External Secrets')}
-                        </Title>
-                      </FlexItem>
-                      <FlexItem>
-                        <Badge isRead>{t('External Secrets Operator')}</Badge>
-                        <OperatorStatusBadge status={externalSecrets} />
-                      </FlexItem>
-                    </Flex>
-                    <Divider style={{ marginBottom: '1rem' }} />
-                    {renderOperatorContent(
-                      () => (
-                        <ExternalSecretsTable selectedProject={selectedProject} />
-                      ),
-                      'external-secrets',
-                    )}
-                  </div>
-                )}
+              {!operatorsLoading && anyOperatorInstalled && (
+                <>
+                  {/* External Secrets Resources */}
+                  {shouldShowComponent('external-secrets', 'externalsecrets') && (
+                    <div style={{ marginBottom: '2rem' }}>
+                      <Flex
+                        alignItems={{ default: 'alignItemsCenter' }}
+                        style={{ marginBottom: '0.5rem' }}
+                      >
+                        <FlexItem>
+                          <Title headingLevel="h3" size="md">
+                            {t('External Secrets')}
+                          </Title>
+                        </FlexItem>
+                        <FlexItem>
+                          <Badge isRead>{t('External Secrets Operator')}</Badge>
+                          <OperatorStatusBadge status={externalSecrets} />
+                        </FlexItem>
+                      </Flex>
+                      <Divider style={{ marginBottom: '1rem' }} />
+                      {renderOperatorContent(
+                        () => (
+                          <ExternalSecretsTable selectedProject={selectedProject} />
+                        ),
+                        'external-secrets',
+                      )}
+                    </div>
+                  )}
 
-                {shouldShowComponent('external-secrets', 'secretstores') && (
-                  <div style={{ marginBottom: '2rem' }}>
-                    <Flex
-                      alignItems={{ default: 'alignItemsCenter' }}
-                      style={{ marginBottom: '0.5rem' }}
-                    >
-                      <FlexItem>
-                        <Title headingLevel="h3" size="md">
-                          {t('Secret Stores')}
-                        </Title>
-                      </FlexItem>
-                      <FlexItem>
-                        <Badge isRead>{t('External Secrets Operator')}</Badge>
-                        <OperatorStatusBadge status={externalSecrets} />
-                      </FlexItem>
-                    </Flex>
-                    <Divider style={{ marginBottom: '1rem' }} />
-                    {renderOperatorContent(
-                      () => (
-                        <SecretStoresTable selectedProject={selectedProject} />
-                      ),
-                      'external-secrets',
-                    )}
-                  </div>
-                )}
+                  {shouldShowComponent('external-secrets', 'secretstores') && (
+                    <div style={{ marginBottom: '2rem' }}>
+                      <Flex
+                        alignItems={{ default: 'alignItemsCenter' }}
+                        style={{ marginBottom: '0.5rem' }}
+                      >
+                        <FlexItem>
+                          <Title headingLevel="h3" size="md">
+                            {t('Secret Stores')}
+                          </Title>
+                        </FlexItem>
+                        <FlexItem>
+                          <Badge isRead>{t('External Secrets Operator')}</Badge>
+                          <OperatorStatusBadge status={externalSecrets} />
+                        </FlexItem>
+                      </Flex>
+                      <Divider style={{ marginBottom: '1rem' }} />
+                      {renderOperatorContent(
+                        () => (
+                          <SecretStoresTable selectedProject={selectedProject} />
+                        ),
+                        'external-secrets',
+                      )}
+                    </div>
+                  )}
 
-                {shouldShowComponent('external-secrets', 'pushsecrets') && (
-                  <div style={{ marginBottom: '2rem' }}>
-                    <Flex
-                      alignItems={{ default: 'alignItemsCenter' }}
-                      style={{ marginBottom: '0.5rem' }}
-                    >
-                      <FlexItem>
-                        <Title headingLevel="h3" size="md">
-                          {t('Push Secrets')}
-                        </Title>
-                      </FlexItem>
-                      <FlexItem>
-                        <Badge isRead>{t('External Secrets Operator')}</Badge>
-                        <OperatorStatusBadge status={externalSecrets} />
-                      </FlexItem>
-                    </Flex>
-                    <Divider style={{ marginBottom: '1rem' }} />
-                    {renderOperatorContent(
-                      () => (
-                        <PushSecretsTable selectedProject={selectedProject} />
-                      ),
-                      'external-secrets',
-                    )}
-                  </div>
-                )}
+                  {shouldShowComponent('external-secrets', 'pushsecrets') && (
+                    <div style={{ marginBottom: '2rem' }}>
+                      <Flex
+                        alignItems={{ default: 'alignItemsCenter' }}
+                        style={{ marginBottom: '0.5rem' }}
+                      >
+                        <FlexItem>
+                          <Title headingLevel="h3" size="md">
+                            {t('Push Secrets')}
+                          </Title>
+                        </FlexItem>
+                        <FlexItem>
+                          <Badge isRead>{t('External Secrets Operator')}</Badge>
+                          <OperatorStatusBadge status={externalSecrets} />
+                        </FlexItem>
+                      </Flex>
+                      <Divider style={{ marginBottom: '1rem' }} />
+                      {renderOperatorContent(
+                        () => (
+                          <PushSecretsTable selectedProject={selectedProject} />
+                        ),
+                        'external-secrets',
+                      )}
+                    </div>
+                  )}
 
-                {shouldShowComponent('external-secrets', 'generators') && (
-                  <div style={{ marginBottom: '2rem' }}>
-                    <Flex
-                      alignItems={{ default: 'alignItemsCenter' }}
-                      style={{ marginBottom: '0.5rem' }}
-                    >
-                      <FlexItem>
-                        <Title headingLevel="h3" size="md">
-                          {t('Generators')}
-                        </Title>
-                      </FlexItem>
-                      <FlexItem>
-                        <Badge isRead>{t('External Secrets Operator')}</Badge>
-                        <OperatorStatusBadge status={externalSecrets} />
-                      </FlexItem>
-                    </Flex>
-                    <Divider style={{ marginBottom: '1rem' }} />
-                    {renderOperatorContent(
-                      () => (
-                        <GeneratorsTable selectedProject={selectedProject} />
-                      ),
-                      'external-secrets',
-                    )}
-                  </div>
-                )}
+                  {shouldShowComponent('external-secrets', 'generators') && (
+                    <div style={{ marginBottom: '2rem' }}>
+                      <Flex
+                        alignItems={{ default: 'alignItemsCenter' }}
+                        style={{ marginBottom: '0.5rem' }}
+                      >
+                        <FlexItem>
+                          <Title headingLevel="h3" size="md">
+                            {t('Generators')}
+                          </Title>
+                        </FlexItem>
+                        <FlexItem>
+                          <Badge isRead>{t('External Secrets Operator')}</Badge>
+                          <OperatorStatusBadge status={externalSecrets} />
+                        </FlexItem>
+                      </Flex>
+                      <Divider style={{ marginBottom: '1rem' }} />
+                      {renderOperatorContent(
+                        () => (
+                          <GeneratorsTable selectedProject={selectedProject} />
+                        ),
+                        'external-secrets',
+                      )}
+                    </div>
+                  )}
 
-                {/* cert-manager Resources */}
-                {shouldShowComponent('cert-manager', 'certificates') && (
-                  <div style={{ marginBottom: '2rem' }}>
-                    <Flex
-                      alignItems={{ default: 'alignItemsCenter' }}
-                      style={{ marginBottom: '0.5rem' }}
-                    >
-                      <FlexItem>
-                        <Title headingLevel="h3" size="md">
-                          {t('Certificates')}
-                        </Title>
-                      </FlexItem>
-                      <FlexItem>
-                        <Badge isRead>{t('cert-manager')}</Badge>
-                        <OperatorStatusBadge status={certManager} />
-                      </FlexItem>
-                    </Flex>
-                    <Divider style={{ marginBottom: '1rem' }} />
-                    {renderOperatorContent(
-                      () => (
-                        <CertificatesTable selectedProject={selectedProject} />
-                      ),
-                      'cert-manager',
-                    )}
-                  </div>
-                )}
+                  {/* cert-manager Resources */}
+                  {shouldShowComponent('cert-manager', 'certificates') && (
+                    <div style={{ marginBottom: '2rem' }}>
+                      <Flex
+                        alignItems={{ default: 'alignItemsCenter' }}
+                        style={{ marginBottom: '0.5rem' }}
+                      >
+                        <FlexItem>
+                          <Title headingLevel="h3" size="md">
+                            {t('Certificates')}
+                          </Title>
+                        </FlexItem>
+                        <FlexItem>
+                          <Badge isRead>{t('cert-manager')}</Badge>
+                          <OperatorStatusBadge status={certManager} />
+                        </FlexItem>
+                      </Flex>
+                      <Divider style={{ marginBottom: '1rem' }} />
+                      {renderOperatorContent(
+                        () => (
+                          <CertificatesTable selectedProject={selectedProject} />
+                        ),
+                        'cert-manager',
+                      )}
+                    </div>
+                  )}
 
-                {shouldShowComponent('cert-manager', 'issuers') && (
-                  <div style={{ marginBottom: '2rem' }}>
-                    <Flex
-                      alignItems={{ default: 'alignItemsCenter' }}
-                      style={{ marginBottom: '0.5rem' }}
-                    >
-                      <FlexItem>
-                        <Title headingLevel="h3" size="md">
-                          {t('Issuers')}
-                        </Title>
-                      </FlexItem>
-                      <FlexItem>
-                        <Badge isRead>{t('cert-manager')}</Badge>
-                        <OperatorStatusBadge status={certManager} />
-                      </FlexItem>
-                    </Flex>
-                    <Divider style={{ marginBottom: '1rem' }} />
-                    {renderOperatorContent(
-                      () => (
-                        <IssuersTable selectedProject={selectedProject} />
-                      ),
-                      'cert-manager',
-                    )}
-                  </div>
-                )}
+                  {shouldShowComponent('cert-manager', 'issuers') && (
+                    <div style={{ marginBottom: '2rem' }}>
+                      <Flex
+                        alignItems={{ default: 'alignItemsCenter' }}
+                        style={{ marginBottom: '0.5rem' }}
+                      >
+                        <FlexItem>
+                          <Title headingLevel="h3" size="md">
+                            {t('Issuers')}
+                          </Title>
+                        </FlexItem>
+                        <FlexItem>
+                          <Badge isRead>{t('cert-manager')}</Badge>
+                          <OperatorStatusBadge status={certManager} />
+                        </FlexItem>
+                      </Flex>
+                      <Divider style={{ marginBottom: '1rem' }} />
+                      {renderOperatorContent(
+                        () => (
+                          <IssuersTable selectedProject={selectedProject} />
+                        ),
+                        'cert-manager',
+                      )}
+                    </div>
+                  )}
 
-                {/* trust-manager Resources */}
-                {shouldShowComponent('trust-manager', 'bundles') && (
-                  <div style={{ marginBottom: '2rem' }}>
-                    <Flex
-                      alignItems={{ default: 'alignItemsCenter' }}
-                      style={{ marginBottom: '0.5rem' }}
-                    >
-                      <FlexItem>
-                        <Title headingLevel="h3" size="md">
-                          {t('Trust Bundles')}
-                        </Title>
-                      </FlexItem>
-                      <FlexItem>
-                        <Badge isRead>{t('trust-manager')}</Badge>
-                        <OperatorStatusBadge status={trustManager} />
-                      </FlexItem>
-                    </Flex>
-                    <Divider style={{ marginBottom: '1rem' }} />
-                    {renderOperatorContent(
-                      () => (
-                        <BundlesTable selectedProject={selectedProject} />
-                      ),
-                      'trust-manager',
-                    )}
-                  </div>
-                )}
+                  {/* trust-manager Resources */}
+                  {shouldShowComponent('trust-manager', 'bundles') && (
+                    <div style={{ marginBottom: '2rem' }}>
+                      <Flex
+                        alignItems={{ default: 'alignItemsCenter' }}
+                        style={{ marginBottom: '0.5rem' }}
+                      >
+                        <FlexItem>
+                          <Title headingLevel="h3" size="md">
+                            {t('Trust Bundles')}
+                          </Title>
+                        </FlexItem>
+                        <FlexItem>
+                          <Badge isRead>{t('trust-manager')}</Badge>
+                          <OperatorStatusBadge status={trustManager} />
+                        </FlexItem>
+                      </Flex>
+                      <Divider style={{ marginBottom: '1rem' }} />
+                      {renderOperatorContent(
+                        () => (
+                          <BundlesTable selectedProject={selectedProject} />
+                        ),
+                        'trust-manager',
+                      )}
+                    </div>
+                  )}
 
-                {/* Secrets Store CSI Driver Resources */}
-                {shouldShowComponent('secrets-store-csi', 'secretproviderclasses') && (
-                  <div style={{ marginBottom: '2rem' }}>
-                    <Flex
-                      alignItems={{ default: 'alignItemsCenter' }}
-                      style={{ marginBottom: '0.5rem' }}
-                    >
-                      <FlexItem>
-                        <Title headingLevel="h3" size="md">
-                          {t('Secret Provider Classes')}
-                        </Title>
-                      </FlexItem>
-                      <FlexItem>
-                        <Badge isRead>{t('Secrets Store CSI Driver')}</Badge>
-                        <OperatorStatusBadge status={secretsStoreCSI} />
-                      </FlexItem>
-                    </Flex>
-                    <Divider style={{ marginBottom: '1rem' }} />
-                    {renderOperatorContent(
-                      () => (
-                        <SecretProviderClassTable selectedProject={selectedProject} />
-                      ),
-                      'secrets-store-csi',
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </ActiveRowMenuProvider>
+                  {/* Secrets Store CSI Driver Resources */}
+                  {shouldShowComponent('secrets-store-csi', 'secretproviderclasses') && (
+                    <div style={{ marginBottom: '2rem' }}>
+                      <Flex
+                        alignItems={{ default: 'alignItemsCenter' }}
+                        style={{ marginBottom: '0.5rem' }}
+                      >
+                        <FlexItem>
+                          <Title headingLevel="h3" size="md">
+                            {t('Secret Provider Classes')}
+                          </Title>
+                        </FlexItem>
+                        <FlexItem>
+                          <Badge isRead>{t('Secrets Store CSI Driver')}</Badge>
+                          <OperatorStatusBadge status={secretsStoreCSI} />
+                        </FlexItem>
+                      </Flex>
+                      <Divider style={{ marginBottom: '1rem' }} />
+                      {renderOperatorContent(
+                        () => (
+                          <SecretProviderClassTable selectedProject={selectedProject} />
+                        ),
+                        'secrets-store-csi',
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </ActiveRowMenuProvider>
+        </PluginConfigProvider>
       </div>
     </>
   );

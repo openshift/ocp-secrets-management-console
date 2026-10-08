@@ -8,6 +8,7 @@ import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { RowActionsMenu } from './RowActionsMenu';
 import { useK8sWatchResource, consoleFetch } from '@openshift-console/dynamic-plugin-sdk';
 import { BundleModel, Bundle, BundleSource } from './crds';
+import { useDeleteEnabled } from '../hooks/usePluginConfig';
 
 const getSyncedStatus = (bundle: Bundle) => {
   const syncedCondition = bundle.status?.conditions?.find(
@@ -79,6 +80,7 @@ interface BundlesTableProps {
 
 export const BundlesTable: React.FC<BundlesTableProps> = ({ selectedProject }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
+  const deleteEnabled = useDeleteEnabled();
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;
     bundle: Bundle | null;
@@ -197,17 +199,21 @@ export const BundlesTable: React.FC<BundlesTableProps> = ({ selectedProject }) =
                 label: t('Inspect {{kind}}', { kind: t('Bundle') }),
                 onClick: () => handleInspect(bundle),
               },
-              {
-                key: 'delete',
-                label: t('Delete {{kind}}', { kind: t('Bundle') }),
-                onClick: () => openDeleteModal(bundle),
-              },
+              ...(deleteEnabled
+                ? [
+                    {
+                      key: 'delete',
+                      label: t('Delete {{kind}}', { kind: t('Bundle') }),
+                      onClick: () => openDeleteModal(bundle),
+                    },
+                  ]
+                : []),
             ]}
           />,
         ],
       };
     });
-  }, [bundles, loaded, t]);
+  }, [bundles, loaded, t, deleteEnabled]);
 
   return (
     <>

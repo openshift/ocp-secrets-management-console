@@ -9,6 +9,10 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => ({
   consoleFetch: jest.fn(),
 }));
 
+jest.mock('../hooks/usePluginConfig', () => ({
+  useDeleteEnabled: () => true,
+}));
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: Record<string, unknown>) =>

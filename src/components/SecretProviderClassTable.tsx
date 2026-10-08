@@ -18,6 +18,7 @@ import {
   SecretProviderClass,
   SecretProviderClassPodStatus,
 } from './crds';
+import { useDeleteEnabled } from '../hooks/usePluginConfig';
 
 const getProviderIcon = (provider: string) => {
   switch (provider.toLowerCase()) {
@@ -120,6 +121,7 @@ export const SecretProviderClassTable: React.FC<SecretProviderClassTableProps> =
   selectedProject,
 }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
+  const deleteEnabled = useDeleteEnabled();
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;
     secretProviderClass: SecretProviderClass | null;
@@ -260,17 +262,21 @@ export const SecretProviderClassTable: React.FC<SecretProviderClassTableProps> =
                   window.location.href = `/secrets-management/inspect/secretproviderclasses/${spc.metadata.namespace}/${spc.metadata.name}`;
                 },
               },
-              {
-                key: 'delete',
-                label: t('Delete {{kind}}', { kind: t('SecretProviderClass') }),
-                onClick: () => openDeleteModal(spc),
-              },
+              ...(deleteEnabled
+                ? [
+                    {
+                      key: 'delete',
+                      label: t('Delete {{kind}}', { kind: t('SecretProviderClass') }),
+                      onClick: () => openDeleteModal(spc),
+                    },
+                  ]
+                : []),
             ]}
           />,
         ],
       };
     });
-  }, [secretProviderClasses, podStatuses, loaded, t]);
+  }, [secretProviderClasses, podStatuses, loaded, t, deleteEnabled]);
 
   return (
     <>

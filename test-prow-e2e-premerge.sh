@@ -8,7 +8,7 @@
 # mocking (see integration-tests/support/mock-api.ts) and does not require any
 # secrets-management CRs/operators to actually be installed. It still needs a real,
 # reachable console to serve the plugin UI, which the operator registers automatically
-# on install (see console-plugin-operator CSV: "Register the plugin with OpenShift
+# on install (see ocp-secrets-management-operator CSV: "Register the plugin with OpenShift
 # Console"). We therefore point Playwright's BRIDGE_BASE_ADDRESS at the claimed
 # cluster's own console route, the same way test-prow-e2e.sh does for post-merge.
 

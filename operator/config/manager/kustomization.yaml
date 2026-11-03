@@ -6,5 +6,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
 - name: controller
-  newName: openshift.io/ocp-secrets-management-operator
+  newName: openshift.io/secrets-management-operator
   newTag: latest

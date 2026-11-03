@@ -3,8 +3,8 @@ kind: ClusterRoleBinding
 metadata:
   name: secrets-management-operator
   labels:
-    app.kubernetes.io/name: ocp-secrets-management
-    app.kubernetes.io/part-of: ocp-secrets-management-operator
+    app.kubernetes.io/name: secrets-management-console
+    app.kubernetes.io/part-of: secrets-management-operator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

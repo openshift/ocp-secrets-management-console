@@ -35,7 +35,7 @@ const (
 	PluginNamespace = "openshift-secrets-management"
 
 	// PluginName is the name of the console plugin
-	PluginName = "ocp-secrets-management"
+	PluginName = "secrets-management-console"
 
 	// Plugin port
 	PluginPort = 9443
@@ -53,7 +53,7 @@ func getPluginImage() string {
 	if img := os.Getenv("RELATED_IMAGE_PLUGIN"); img != "" {
 		return img
 	}
-	return "openshift.io/ocp-secrets-management:latest"
+	return "openshift.io/secrets-management-console:latest"
 }
 
 // ConsolePlugin GroupVersionKind for OpenShift
@@ -228,7 +228,7 @@ func (r *SecretsManagementConfigReconciler) reconcileNamespace(ctx context.Conte
 			Name: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 				"app.kubernetes.io/managed-by": "secrets-management-operator",
 			},
 		},
@@ -308,7 +308,7 @@ func (r *SecretsManagementConfigReconciler) buildViewClusterRole(prefix string) 
 			Name: fmt.Sprintf("%s-view", prefix),
 			Labels: map[string]string{
 				"app.kubernetes.io/managed-by": "secrets-management-operator",
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 			},
 		},
 		Rules: []rbacv1.PolicyRule{
@@ -338,7 +338,7 @@ func (r *SecretsManagementConfigReconciler) buildDeleteClusterRole(prefix string
 			Name: fmt.Sprintf("%s-delete", prefix),
 			Labels: map[string]string{
 				"app.kubernetes.io/managed-by": "secrets-management-operator",
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 			},
 		},
 		Rules: []rbacv1.PolicyRule{
@@ -368,7 +368,7 @@ func (r *SecretsManagementConfigReconciler) buildAdminClusterRole(prefix string)
 			Name: fmt.Sprintf("%s-admin", prefix),
 			Labels: map[string]string{
 				"app.kubernetes.io/managed-by": "secrets-management-operator",
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 			},
 		},
 		Rules: []rbacv1.PolicyRule{
@@ -440,7 +440,7 @@ func (r *SecretsManagementConfigReconciler) reconcileServiceAccount(ctx context.
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 				"app.kubernetes.io/managed-by": "secrets-management-operator",
 			},
 		},
@@ -466,7 +466,7 @@ func (r *SecretsManagementConfigReconciler) reconcileService(ctx context.Context
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 				"app.kubernetes.io/managed-by": "secrets-management-operator",
 			},
 			Annotations: map[string]string{
@@ -577,7 +577,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 				"app.kubernetes.io/managed-by": "secrets-management-operator",
 			},
 		},
@@ -592,7 +592,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						"app.kubernetes.io/name":    PluginName,
-						"app.kubernetes.io/part-of": "ocp-secrets-management",
+						"app.kubernetes.io/part-of": "secrets-management-console",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -752,7 +752,7 @@ http {
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 				"app.kubernetes.io/managed-by": "secrets-management-operator",
 			},
 		},
@@ -811,7 +811,7 @@ func (r *SecretsManagementConfigReconciler) reconcilePluginConfig(ctx context.Co
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 				"app.kubernetes.io/managed-by": "secrets-management-operator",
 			},
 		},
@@ -848,7 +848,7 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 					"name": PluginName,
 					"labels": map[string]interface{}{
 						"app.kubernetes.io/name":       PluginName,
-						"app.kubernetes.io/part-of":    "ocp-secrets-management",
+						"app.kubernetes.io/part-of":    "secrets-management-console",
 						"app.kubernetes.io/managed-by": "secrets-management-operator",
 					},
 				},
@@ -896,7 +896,7 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 	// Update labels
 	labels := map[string]string{
 		"app.kubernetes.io/name":       PluginName,
-		"app.kubernetes.io/part-of":    "ocp-secrets-management",
+		"app.kubernetes.io/part-of":    "secrets-management-console",
 		"app.kubernetes.io/managed-by": "secrets-management-operator",
 	}
 	existing.SetLabels(labels)

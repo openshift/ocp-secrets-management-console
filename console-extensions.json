@@ -19,7 +19,7 @@
     "type": "console.navigation/section",
     "properties": {
       "id": "plugins",
-      "name": "%plugin__ocp-secrets-management~Plugins%",
+      "name": "%plugin__secrets-management-console~Plugins%",
       "perspective": "admin",
       "insertAfter": "observe"
     }
@@ -28,7 +28,7 @@
     "type": "console.navigation/href",
     "properties": {
       "id": "secrets-management",
-      "name": "%plugin__ocp-secrets-management~Secrets Management%",
+      "name": "%plugin__secrets-management-console~Secrets Management%",
       "href": "/secrets-management",
       "perspective": "admin",
       "section": "plugins"

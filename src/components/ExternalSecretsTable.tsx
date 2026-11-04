@@ -128,7 +128,7 @@ interface ExternalSecretsTableProps {
 }
 
 export const ExternalSecretsTable: React.FC<ExternalSecretsTableProps> = ({ selectedProject }) => {
-  const { t } = useTranslation('plugin__ocp-secrets-management');
+  const { t } = useTranslation('plugin__secrets-management-console');
   const deleteEnabled = useDeleteEnabled();
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;

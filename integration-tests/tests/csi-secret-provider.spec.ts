@@ -9,7 +9,7 @@ test.describe('Secrets Store CSI Driver - SecretProviderClass resources', () => 
   test('CSI driver section is visible on the dashboard', async ({ page }) => {
     await page.goto('/secrets-management');
 
-    const heading = page.getByRole('heading', { name: 'Secrets Management' });
+    const heading = page.getByRole('heading', { name: 'External Secrets Management Console', exact: true });
     await expect(heading).toBeVisible({ timeout: 60000 });
 
     await expect(page.getByRole('heading', { name: 'Secret Provider Classes' })).toBeVisible({

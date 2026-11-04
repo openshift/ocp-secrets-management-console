@@ -103,7 +103,7 @@
   "consolePlugin": {
     "name": "ocp-secrets-management",
     "version": "0.0.1",
-    "displayName": "OCP Secrets Management",
+    "displayName": "External Secrets Management Console",
     "description": "OpenShift Console plugin for managing secrets and sensitive data.",
     "exposedModules": {
       "SecretsManagement": "./SecretsManagement",

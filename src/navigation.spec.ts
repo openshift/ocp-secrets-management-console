@@ -45,9 +45,9 @@ describe('sidebar navigation labels', () => {
     expect(link?.properties.href).toBe('/secrets-management');
   });
 
-  it('renders the top-level menu as "Secrets Management" (not "Plugins")', () => {
+  it('renders the top-level menu as "External Secrets Management Console" (not "Plugins")', () => {
     const label = resolveNavLabel(section.properties.name);
-    expect(label).toBe('Secrets Management');
+    expect(label).toBe('External Secrets Management Console');
     expect(label).not.toBe('Plugins');
   });
 

@@ -52,7 +52,7 @@ export const ResourceTable: React.FC<ResourceTableProps> = ({
   defaultPerPage,
   'data-test': dataTest,
 }) => {
-  const { t } = useTranslation('plugin__ocp-secrets-management');
+  const { t } = useTranslation('plugin__secrets-management-console');
   const resolvedDefaultPerPage =
     typeof defaultPerPage === 'number' ? defaultPerPage : DEFAULT_PER_PAGE;
   const [page, setPage] = React.useState(1);

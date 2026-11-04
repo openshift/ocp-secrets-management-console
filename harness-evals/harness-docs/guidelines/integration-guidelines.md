@@ -15,7 +15,7 @@ Three coordinated files:
 Rules:
 - Every new page needs a `console.page/route` in `console-extensions.json` AND its component in `consolePlugin.exposedModules`.
 - `$codeRef` values must match keys in `exposedModules`.
-- Navigation items use `%plugin__ocp-secrets-management~<key>%` i18n format.
+- Navigation items use `%plugin__secrets-management-console~<key>%` i18n format.
 
 ## 2. Console SDK Usage
 

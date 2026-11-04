@@ -18,9 +18,9 @@ keywords:
   - cert-manager
   - external-secrets
   - secrets-store-csi
-home: https://github.com/openshift/ocp-secrets-management-console
+home: https://github.com/openshift/ocp-secrets-management
 sources:
-  - https://github.com/openshift/ocp-secrets-management-console
+  - https://github.com/openshift/ocp-secrets-management
 maintainers:
   - name: OpenShift Team
     email: openshift-team@redhat.com

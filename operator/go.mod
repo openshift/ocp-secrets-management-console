@@ -1,4 +1,4 @@
-module github.com/openshift/ocp-secrets-management-console/operator
+module github.com/openshift/ocp-secrets-management/operator
 
 go 1.23.0
 

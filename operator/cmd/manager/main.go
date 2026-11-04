@@ -19,8 +19,8 @@ import (
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
-	smv1alpha1 "github.com/openshift/ocp-secrets-management-console/operator/pkg/apis/secretsmanagement/v1alpha1"
-	"github.com/openshift/ocp-secrets-management-console/operator/pkg/controller"
+	smv1alpha1 "github.com/openshift/ocp-secrets-management/operator/pkg/apis/secretsmanagement/v1alpha1"
+	"github.com/openshift/ocp-secrets-management/operator/pkg/controller"
 )
 
 var (

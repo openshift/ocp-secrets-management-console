@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	smv1alpha1 "github.com/openshift/ocp-secrets-management-console/operator/pkg/apis/secretsmanagement/v1alpha1"
+	smv1alpha1 "github.com/openshift/ocp-secrets-management/operator/pkg/apis/secretsmanagement/v1alpha1"
 )
 
 const (

@@ -50,7 +50,7 @@ Before you begin, ensure you have the following installed on your system:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd ocp-secrets-management-console
+   cd ocp-secrets-management
    ```
 
 2. **Install dependencies**

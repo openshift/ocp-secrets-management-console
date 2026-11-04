@@ -853,7 +853,7 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 					},
 				},
 				"spec": map[string]interface{}{
-					"displayName": "OCP Secrets Management",
+					"displayName": "External Secrets Management Console",
 					"backend": map[string]interface{}{
 						"type": "Service",
 						"service": map[string]interface{}{
@@ -876,7 +876,7 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 
 	// Update existing - preserve resourceVersion and other metadata
 	spec := map[string]interface{}{
-		"displayName": "OCP Secrets Management",
+		"displayName": "External Secrets Management Console",
 		"backend": map[string]interface{}{
 			"type": "Service",
 			"service": map[string]interface{}{

@@ -19,7 +19,7 @@
     "type": "console.navigation/section",
     "properties": {
       "id": "plugins",
-      "name": "%plugin__secrets-management-console~Plugins%",
+      "name": "%plugin__external-secrets-management-console~Plugins%",
       "perspective": "admin",
       "insertAfter": "observe"
     }
@@ -28,7 +28,7 @@
     "type": "console.navigation/href",
     "properties": {
       "id": "secrets-management",
-      "name": "%plugin__secrets-management-console~Secrets Management%",
+      "name": "%plugin__external-secrets-management-console~Secrets Management%",
       "href": "/secrets-management",
       "perspective": "admin",
       "section": "plugins"

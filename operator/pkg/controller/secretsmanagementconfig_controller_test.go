@@ -61,7 +61,7 @@ func newTestConfig(name string) *smv1alpha1.SecretsManagementConfig {
 				RolePrefix:         "secrets-management",
 			},
 			Plugin: smv1alpha1.PluginConfig{
-				Image:    "openshift.io/secrets-management-console:test",
+				Image:    "openshift.io/external-secrets-management-console:test",
 				Replicas: 1,
 			},
 			Operators: smv1alpha1.OperatorsConfig{
@@ -328,7 +328,7 @@ func TestReconcileDeployment(t *testing.T) {
 	}, deployment)
 	require.NoError(t, err)
 	assert.Equal(t, int32(1), *deployment.Spec.Replicas)
-	assert.Equal(t, "openshift.io/secrets-management-console:test", deployment.Spec.Template.Spec.Containers[0].Image)
+	assert.Equal(t, "openshift.io/external-secrets-management-console:test", deployment.Spec.Template.Spec.Containers[0].Image)
 }
 
 func TestDetectOperators_NoneInstalled(t *testing.T) {

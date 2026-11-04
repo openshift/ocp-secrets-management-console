@@ -50,7 +50,7 @@ Before you begin, ensure you have the following installed on your system:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd ocp-secrets-management
+   cd ocp-secrets-management-console
    ```
 
 2. **Install dependencies**
@@ -199,10 +199,10 @@ See [DEPLOYMENT_METHODS.md](./DEPLOYMENT_METHODS.md) for detailed comparison.
 
 Alternatively, build each image individually:
 
-1. **Build the plugin image** (from repo root). Set `PLUGIN_IMG` to your image (defaults in Makefile use `openshift.io/ocp-secrets-management:latest`):
+1. **Build the plugin image** (from repo root). Set `PLUGIN_IMG` to your image (defaults in Makefile use `openshift.io/external-secrets-management-console:latest`):
 
    ```bash
-   make plugin-image PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:latest
+   make plugin-image PLUGIN_IMG=quay.io/<my-org>/external-secrets-management-console:latest
    ```
 
    **Note:** The plugin image build can take **several minutes (often 5–15 minutes)**. The Dockerfile has a multi-stage build that runs `yarn install` and `yarn build` (production webpack) inside the image with no cache of `node_modules` or `dist/`. So each build does a full npm install and a full production webpack bundle; that’s why it’s slow. Using the same tag (e.g. `:latest`) with `imagePullPolicy: Always` ensures the cluster pulls the new image after you push.
@@ -219,7 +219,7 @@ Alternatively, build each image individually:
 3. **Push both images** to your registry (pass the same `PLUGIN_IMG` / `IMG` you used to build):
 
    ```bash
-   make plugin-push PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:latest
+   make plugin-push PLUGIN_IMG=quay.io/<my-org>/external-secrets-management-console:latest
    cd operator && make podman-push IMG=quay.io/<my-org>/external-secrets-management-operator:latest
    ```
 
@@ -228,7 +228,7 @@ Alternatively, build each image individually:
    ```bash
    cd operator
    make deploy IMG=quay.io/<my-org>/external-secrets-management-operator:latest
-   make deploy-sample PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:latest
+   make deploy-sample PLUGIN_IMG=quay.io/<my-org>/external-secrets-management-console:latest
    ```
 
    Committed manifests use the official `openshift.io/` images; the Makefile replaces those with `IMG` and `PLUGIN_IMG` at deploy time (same idea as [external-secrets-operator deploy](https://github.com/openshift/external-secrets-operator/blob/main/Makefile)).
@@ -244,13 +244,13 @@ Alternatively, build each image individually:
 
 #### Official images vs. building for your own deploy
 
-Official image references in this repo (samples, manager manifest, CSV, charts) use **`openshift.io/`**. When you build and push to deploy yourself, set **`PLUGIN_IMG`** and **`IMG`** (e.g. `make plugin-image PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:latest` and `make podman-build IMG=quay.io/<my-org>/external-secrets-management-operator:latest`); the Makefiles default those vars to `openshift.io/`.
+Official image references in this repo (samples, manager manifest, CSV, charts) use **`openshift.io/`**. When you build and push to deploy yourself, set **`PLUGIN_IMG`** and **`IMG`** (e.g. `make plugin-image PLUGIN_IMG=quay.io/<my-org>/external-secrets-management-console:latest` and `make podman-build IMG=quay.io/<my-org>/external-secrets-management-operator:latest`); the Makefiles default those vars to `openshift.io/`.
 
 - **Plugin image (what runs in the cluster)**  
-  `make deploy-sample PLUGIN_IMG=...` substitutes **`PLUGIN_IMG`** into the sample `SecretsManagementConfig` before applying, so use e.g. `make deploy-sample PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:latest`. The committed sample uses the official `openshift.io/` default.
+  `make deploy-sample PLUGIN_IMG=...` substitutes **`PLUGIN_IMG`** into the sample `SecretsManagementConfig` before applying, so use e.g. `make deploy-sample PLUGIN_IMG=quay.io/<my-org>/external-secrets-management-console:latest`. The committed sample uses the official `openshift.io/` default.
 
 - **Plugin image (when building)**  
-  Root `make plugin-image` uses **`PLUGIN_IMG`** (default `quay.io/<my-org>/ocp-secrets-management:latest`). Override with e.g. `make plugin-image PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:v1.0.0`.
+  Root `make plugin-image` uses **`PLUGIN_IMG`** (default `quay.io/<my-org>/external-secrets-management-console:latest`). Override with e.g. `make plugin-image PLUGIN_IMG=quay.io/<my-org>/external-secrets-management-console:v1.0.0`.
 
 - **Operator image (what runs in the cluster)**  
   `make deploy IMG=...` substitutes **`IMG`** into the manager manifest before applying, so use e.g. `make deploy IMG=quay.io/<my-org>/external-secrets-management-operator:latest` to deploy your image. The committed file keeps the official `openshift.io/` default.

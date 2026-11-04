@@ -18,7 +18,7 @@ func main() {
 	// Get plugin image from environment or use default
 	pluginImage := os.Getenv("PLUGIN_IMG")
 	if pluginImage == "" {
-		pluginImage = "openshift.io/secrets-management-console:v0.1.0"
+		pluginImage = "openshift.io/external-secrets-management-console:v0.1.0"
 	}
 
 	bundleBuf, err := os.ReadFile(bundlePath)

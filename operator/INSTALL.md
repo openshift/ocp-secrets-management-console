@@ -12,9 +12,9 @@ From the **repository root**:
 
 ```bash
 # Build and push the plugin image
-make plugin-image PLUGIN_IMG=quay.io/<your-org>/secrets-management-console:latest
+make plugin-image PLUGIN_IMG=quay.io/<your-org>/external-secrets-management-console:latest
 # push to your registry, e.g.:
-podman push quay.io/<your-org>/secrets-management-console:latest
+podman push quay.io/<your-org>/external-secrets-management-console:latest
 ```
 
 From the **operator** directory:
@@ -49,7 +49,7 @@ make deploy IMG=quay.io/<your-org>/external-secrets-management-operator:latest
 This creates the `SecretsManagementConfig` CR named `cluster` that tells the operator which plugin image to run and how to configure it.
 
 ```bash
-make deploy-sample PLUGIN_IMG=quay.io/<your-org>/secrets-management-console:latest
+make deploy-sample PLUGIN_IMG=quay.io/<your-org>/external-secrets-management-console:latest
 ```
 
 **Result:** The operator sees the `SecretsManagementConfig` and reconciles it. As part of that reconciliation it:
@@ -80,10 +80,10 @@ The ConsolePlugin CR only **registers** the plugin. On OpenShift, **dynamic plug
 Use a **JSON patch** to append this plugin without touching existing ones. No need to list or know other plugins:
 
 ```bash
-oc patch console.operator.openshift.io cluster --type=json -p '[{"op": "add", "path": "/spec/plugins/-", "value": "secrets-management-console"}]'
+oc patch console.operator.openshift.io cluster --type=json -p '[{"op": "add", "path": "/spec/plugins/-", "value": "external-secrets-management-console"}]'
 ```
 
-`path: "/spec/plugins/-"` means “add to the end of the `plugins` array”. Existing plugins are unchanged. If **secrets-management-console** is already in the list, running this again will add a duplicate; remove it in the Console plugins UI if that happens.
+`path: "/spec/plugins/-"` means “add to the end of the `plugins` array”. Existing plugins are unchanged. If **external-secrets-management-console** is already in the list, running this again will add a duplicate; remove it in the Console plugins UI if that happens.
 
 After enabling, reload the console; the **External Secrets Management Console** menu item should appear.
 

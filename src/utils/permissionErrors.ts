@@ -65,7 +65,7 @@ function isClusterScope(namespace?: string): boolean {
 
 /**
  * Returns i18n-backed copy for permission denial. Callers pass `t` from
- * `useTranslation('plugin__secrets-management-console')`.
+ * `useTranslation('plugin__external-secrets-management-console')`.
  */
 export function getPermissionDeniedMessage(
   t: TranslateFn,

@@ -32,7 +32,7 @@ properties:
       operators.openshift.io/valid-subscription: '["OpenShift Container Platform"]'
       operators.operatorframework.io/builder: operator-sdk-v1.34.1
       operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
-      repository: https://github.com/openshift/ocp-secrets-management
+      repository: https://github.com/openshift/ocp-secrets-management-console
       support: Red Hat
     apiServiceDefinitions: {}
     crdDescriptions:
@@ -132,7 +132,7 @@ properties:
     - security
     links:
     - name: Documentation
-      url: https://github.com/openshift/ocp-secrets-management
+      url: https://github.com/openshift/ocp-secrets-management-console
     - name: cert-manager
       url: https://cert-manager.io
     - name: External Secrets Operator

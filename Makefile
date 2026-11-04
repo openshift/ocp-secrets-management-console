@@ -30,8 +30,8 @@ require-container-runtime: ## (Prerequisite) Ensure CONTAINER_RUNTIME is availab
 # Image name for scripts
 SCRIPTS_IMAGE := ocp-secrets-management-scripts
 
-# Plugin image (override when building for your registry, e.g. make plugin-image PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:v1.0)
-PLUGIN_IMG ?= openshift.io/ocp-secrets-management:latest
+# Plugin image (override when building for your registry, e.g. make plugin-image PLUGIN_IMG=quay.io/<my-org>/external-secrets-management-console:v1.0)
+PLUGIN_IMG ?= openshift.io/external-secrets-management-console:latest
 
 ##@ CRD Management (Containerized)
 
@@ -123,7 +123,7 @@ plugin-image: require-container-runtime plugin-typecheck ## Build the plugin con
 	$(CONTAINER_RUNTIME) build $(BUILD_OPTS) -t $(PLUGIN_IMG) -f Dockerfile .
 
 .PHONY: plugin-push
-plugin-push: require-container-runtime ## Push the plugin container image (override: make plugin-push PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:tag)
+plugin-push: require-container-runtime ## Push the plugin container image (override: make plugin-push PLUGIN_IMG=quay.io/<my-org>/external-secrets-management-console:tag)
 	$(CONTAINER_RUNTIME) push $(PLUGIN_IMG)
 
 ##@ Development
@@ -220,7 +220,7 @@ catalog: get-opm update-catalog catalog-build ## Update catalog using OPERATOR_B
 DEV_REGISTRY ?= quay.io/$(shell whoami)
 ## Dev image tags
 DEV_OPERATOR_IMG ?= $(DEV_REGISTRY)/external-secrets-management-operator:dev
-DEV_PLUGIN_IMG ?= $(DEV_REGISTRY)/ocp-secrets-management:dev
+DEV_PLUGIN_IMG ?= $(DEV_REGISTRY)/external-secrets-management-console:dev
 DEV_BUNDLE_IMG ?= $(DEV_REGISTRY)/external-secrets-management-operator-bundle:dev
 DEV_CATALOG_IMG ?= $(DEV_REGISTRY)/external-secrets-management-operator-fbc:dev
 ## Bundle file to render into

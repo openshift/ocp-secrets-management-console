@@ -16,7 +16,7 @@ const extensions = JSON.parse(
   fs.readFileSync(path.join(ROOT, 'console-extensions.json'), 'utf-8'),
 ) as NavExtension[];
 const locale = JSON.parse(
-  fs.readFileSync(path.join(ROOT, 'locales/en/plugin__secrets-management-console.json'), 'utf-8'),
+  fs.readFileSync(path.join(ROOT, 'locales/en/plugin__external-secrets-management-console.json'), 'utf-8'),
 ) as Record<string, string>;
 
 /**

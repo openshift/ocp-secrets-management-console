@@ -35,10 +35,10 @@ const (
 	PluginNamespace = "openshift-secrets-management"
 
 	// PluginName is the ConsolePlugin / console plugin identity
-	PluginName = "secrets-management-console"
+	PluginName = "external-secrets-management-console"
 
 	// PluginResourcePrefix is the prefix for Kubernetes object names (Deployment, Service, SA, ConfigMaps).
-	// Kept shorter than PluginName so resources are secrets-management-plugin, not secrets-management-console-plugin.
+	// Kept shorter than PluginName so resources are secrets-management-plugin, not external-secrets-management-console-plugin.
 	PluginResourcePrefix = "secrets-management"
 
 	// Plugin port
@@ -57,7 +57,7 @@ func getPluginImage() string {
 	if img := os.Getenv("RELATED_IMAGE_PLUGIN"); img != "" {
 		return img
 	}
-	return "openshift.io/secrets-management-console:latest"
+	return "openshift.io/external-secrets-management-console:latest"
 }
 
 // ConsolePlugin GroupVersionKind for OpenShift
@@ -232,7 +232,7 @@ func (r *SecretsManagementConfigReconciler) reconcileNamespace(ctx context.Conte
 			Name: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 		},
@@ -312,7 +312,7 @@ func (r *SecretsManagementConfigReconciler) buildViewClusterRole(prefix string) 
 			Name: fmt.Sprintf("%s-view", prefix),
 			Labels: map[string]string{
 				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
-				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 			},
 		},
 		Rules: []rbacv1.PolicyRule{
@@ -342,7 +342,7 @@ func (r *SecretsManagementConfigReconciler) buildDeleteClusterRole(prefix string
 			Name: fmt.Sprintf("%s-delete", prefix),
 			Labels: map[string]string{
 				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
-				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 			},
 		},
 		Rules: []rbacv1.PolicyRule{
@@ -372,7 +372,7 @@ func (r *SecretsManagementConfigReconciler) buildAdminClusterRole(prefix string)
 			Name: fmt.Sprintf("%s-admin", prefix),
 			Labels: map[string]string{
 				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
-				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 			},
 		},
 		Rules: []rbacv1.PolicyRule{
@@ -444,7 +444,7 @@ func (r *SecretsManagementConfigReconciler) reconcileServiceAccount(ctx context.
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 		},
@@ -470,7 +470,7 @@ func (r *SecretsManagementConfigReconciler) reconcileService(ctx context.Context
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 			Annotations: map[string]string{
@@ -581,7 +581,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 		},
@@ -596,7 +596,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						"app.kubernetes.io/name":    PluginName,
-						"app.kubernetes.io/part-of": "secrets-management-console",
+						"app.kubernetes.io/part-of": "external-secrets-management-console",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -756,7 +756,7 @@ http {
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 		},
@@ -815,7 +815,7 @@ func (r *SecretsManagementConfigReconciler) reconcilePluginConfig(ctx context.Co
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 		},
@@ -852,7 +852,7 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 					"name": PluginName,
 					"labels": map[string]interface{}{
 						"app.kubernetes.io/name":       PluginName,
-						"app.kubernetes.io/part-of":    "secrets-management-console",
+						"app.kubernetes.io/part-of":    "external-secrets-management-console",
 						"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 					},
 				},
@@ -900,7 +900,7 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 	// Update labels
 	labels := map[string]string{
 		"app.kubernetes.io/name":       PluginName,
-		"app.kubernetes.io/part-of":    "secrets-management-console",
+		"app.kubernetes.io/part-of":    "external-secrets-management-console",
 		"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 	}
 	existing.SetLabels(labels)

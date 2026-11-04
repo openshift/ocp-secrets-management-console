@@ -5,7 +5,7 @@ BUILD_OPTS ?=
 
 # Image settings (override when building for your registry, e.g. make image-build IMG=quay.io/<my-org>/external-secrets-management-operator:tag)
 IMG ?= openshift.io/external-secrets-management-operator:latest
-PLUGIN_IMG ?= openshift.io/secrets-management-console:latest
+PLUGIN_IMG ?= openshift.io/external-secrets-management-console:latest
 BUNDLE_IMG ?= openshift.io/external-secrets-management-operator-bundle:v0.1.0
 CATALOG_IMG ?= openshift.io/external-secrets-management-operator-catalog:v0.1.0
 
@@ -148,7 +148,7 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 # Depends on deploy so the operator is running and can reconcile the sample (create plugin deployment, ConsolePlugin, etc.).
 .PHONY: deploy-sample
 deploy-sample: deploy ## Deploy sample SecretsManagementConfig CR. Uses PLUGIN_IMG for the plugin image.
-	sed -e 's|image: openshift.io/secrets-management-console:latest|image: $(PLUGIN_IMG)|' config/samples/secrets-management_v1alpha1_secretsmanagementconfig.yaml | kubectl apply -f -
+	sed -e 's|image: openshift.io/external-secrets-management-console:latest|image: $(PLUGIN_IMG)|' config/samples/secrets-management_v1alpha1_secretsmanagementconfig.yaml | kubectl apply -f -
 
 .PHONY: undeploy-sample
 undeploy-sample: ## Remove the sample SecretsManagementConfig (operator will clean up plugin Deployment, Service, ConsolePlugin).

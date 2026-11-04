@@ -3,7 +3,7 @@ kind: ClusterRoleBinding
 metadata:
   name: external-secrets-management-operator
   labels:
-    app.kubernetes.io/name: secrets-management-console
+    app.kubernetes.io/name: external-secrets-management-console
     app.kubernetes.io/part-of: external-secrets-management-operator
 roleRef:
   apiGroup: rbac.authorization.k8s.io

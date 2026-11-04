@@ -12,13 +12,13 @@ import (
 )
 
 func main() {
-	bundlePath := "bundle/manifests/console-plugin-operator.clusterserviceversion.yaml"
-	basePath := "config/manifests/bases/console-plugin-operator.clusterserviceversion.yaml"
+	bundlePath := "bundle/manifests/external-secrets-management-operator.clusterserviceversion.yaml"
+	basePath := "config/manifests/bases/external-secrets-management-operator.clusterserviceversion.yaml"
 
 	// Get plugin image from environment or use default
 	pluginImage := os.Getenv("PLUGIN_IMG")
 	if pluginImage == "" {
-		pluginImage = "openshift.io/ocp-secrets-management:v0.1.0"
+		pluginImage = "openshift.io/secrets-management-console:v0.1.0"
 	}
 
 	bundleBuf, err := os.ReadFile(bundlePath)
@@ -186,7 +186,7 @@ func injectRelatedImages(spec map[string]interface{}, pluginImage string) {
 		if !ok {
 			continue
 		}
-		if name, ok := imgMap["name"].(string); ok && name == "ocp-secrets-management-plugin" {
+		if name, ok := imgMap["name"].(string); ok && name == "secrets-management-plugin" {
 			// Update existing value
 			imgMap["image"] = pluginImage
 			foundPlugin = true
@@ -197,7 +197,7 @@ func injectRelatedImages(spec map[string]interface{}, pluginImage string) {
 	// Add if not found
 	if !foundPlugin {
 		relatedImages = append(relatedImages, map[string]interface{}{
-			"name":  "ocp-secrets-management-plugin",
+			"name":  "secrets-management-plugin",
 			"image": pluginImage,
 		})
 	}

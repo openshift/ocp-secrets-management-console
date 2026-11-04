@@ -207,27 +207,27 @@ Alternatively, build each image individually:
 
    **Note:** The plugin image build can take **several minutes (often 5–15 minutes)**. The Dockerfile has a multi-stage build that runs `yarn install` and `yarn build` (production webpack) inside the image with no cache of `node_modules` or `dist/`. So each build does a full npm install and a full production webpack bundle; that’s why it’s slow. Using the same tag (e.g. `:latest`) with `imagePullPolicy: Always` ensures the cluster pulls the new image after you push.
 
-2. **Build the operator image** (from `operator/`). Set `IMG` to your image (defaults in operator Makefile use `openshift.io/ocp-secrets-management-operator:latest`):
+2. **Build the operator image** (from `operator/`). Set `IMG` to your image (defaults in operator Makefile use `openshift.io/external-secrets-management-operator:latest`):
 
    ```bash
    cd operator
    make build
-   make podman-build IMG=quay.io/<my-org>/ocp-secrets-management-operator:latest
-   # or: make docker-build IMG=quay.io/<my-org>/ocp-secrets-management-operator:latest
+   make podman-build IMG=quay.io/<my-org>/external-secrets-management-operator:latest
+   # or: make docker-build IMG=quay.io/<my-org>/external-secrets-management-operator:latest
    ```
 
 3. **Push both images** to your registry (pass the same `PLUGIN_IMG` / `IMG` you used to build):
 
    ```bash
    make plugin-push PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:latest
-   cd operator && make podman-push IMG=quay.io/<my-org>/ocp-secrets-management-operator:latest
+   cd operator && make podman-push IMG=quay.io/<my-org>/external-secrets-management-operator:latest
    ```
 
 4. **Deploy the operator and apply the config**. The deploy targets substitute **`IMG`** and **`PLUGIN_IMG`** into the manifests before applying, so the cluster uses the images you built (no need to edit YAML):
 
    ```bash
    cd operator
-   make deploy IMG=quay.io/<my-org>/ocp-secrets-management-operator:latest
+   make deploy IMG=quay.io/<my-org>/external-secrets-management-operator:latest
    make deploy-sample PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:latest
    ```
 
@@ -236,7 +236,7 @@ Alternatively, build each image individually:
 5. **Restart deployments** so they use the new images (if you use `:latest`):
 
    ```bash
-   oc rollout restart deployment/secrets-management-operator -n openshift-secrets-management
+   oc rollout restart deployment/external-secrets-management-operator -n openshift-secrets-management
    oc rollout restart deployment/ocp-secrets-management-plugin -n openshift-secrets-management
    ```
 
@@ -244,7 +244,7 @@ Alternatively, build each image individually:
 
 #### Official images vs. building for your own deploy
 
-Official image references in this repo (samples, manager manifest, CSV, charts) use **`openshift.io/`**. When you build and push to deploy yourself, set **`PLUGIN_IMG`** and **`IMG`** (e.g. `make plugin-image PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:latest` and `make podman-build IMG=quay.io/<my-org>/ocp-secrets-management-operator:latest`); the Makefiles default those vars to `openshift.io/`.
+Official image references in this repo (samples, manager manifest, CSV, charts) use **`openshift.io/`**. When you build and push to deploy yourself, set **`PLUGIN_IMG`** and **`IMG`** (e.g. `make plugin-image PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:latest` and `make podman-build IMG=quay.io/<my-org>/external-secrets-management-operator:latest`); the Makefiles default those vars to `openshift.io/`.
 
 - **Plugin image (what runs in the cluster)**  
   `make deploy-sample PLUGIN_IMG=...` substitutes **`PLUGIN_IMG`** into the sample `SecretsManagementConfig` before applying, so use e.g. `make deploy-sample PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:latest`. The committed sample uses the official `openshift.io/` default.
@@ -253,10 +253,10 @@ Official image references in this repo (samples, manager manifest, CSV, charts) 
   Root `make plugin-image` uses **`PLUGIN_IMG`** (default `quay.io/<my-org>/ocp-secrets-management:latest`). Override with e.g. `make plugin-image PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:v1.0.0`.
 
 - **Operator image (what runs in the cluster)**  
-  `make deploy IMG=...` substitutes **`IMG`** into the manager manifest before applying, so use e.g. `make deploy IMG=quay.io/<my-org>/ocp-secrets-management-operator:latest` to deploy your image. The committed file keeps the official `openshift.io/` default.
+  `make deploy IMG=...` substitutes **`IMG`** into the manager manifest before applying, so use e.g. `make deploy IMG=quay.io/<my-org>/external-secrets-management-operator:latest` to deploy your image. The committed file keeps the official `openshift.io/` default.
 
 - **Operator image (when building)**  
-  In `operator/`, `make podman-build` and `make podman-push` use **`IMG`** (default `quay.io/<my-org>/ocp-secrets-management-operator:latest`). Override with e.g. `make podman-build IMG=quay.io/<my-org>/ocp-secrets-management-operator:v1.0.0`.
+  In `operator/`, `make podman-build` and `make podman-push` use **`IMG`** (default `quay.io/<my-org>/external-secrets-management-operator:latest`). Override with e.g. `make podman-build IMG=quay.io/<my-org>/external-secrets-management-operator:v1.0.0`.
 
 ### Plugin Features
 

@@ -34,8 +34,12 @@ const (
 	// PluginNamespace is the namespace where the plugin is deployed
 	PluginNamespace = "openshift-secrets-management"
 
-	// PluginName is the name of the console plugin
-	PluginName = "ocp-secrets-management"
+	// PluginName is the ConsolePlugin / console plugin identity
+	PluginName = "secrets-management-console"
+
+	// PluginResourcePrefix is the prefix for Kubernetes object names (Deployment, Service, SA, ConfigMaps).
+	// Kept shorter than PluginName so resources are secrets-management-plugin, not secrets-management-console-plugin.
+	PluginResourcePrefix = "secrets-management"
 
 	// Plugin port
 	PluginPort = 9443
@@ -53,7 +57,7 @@ func getPluginImage() string {
 	if img := os.Getenv("RELATED_IMAGE_PLUGIN"); img != "" {
 		return img
 	}
-	return "openshift.io/ocp-secrets-management:latest"
+	return "openshift.io/secrets-management-console:latest"
 }
 
 // ConsolePlugin GroupVersionKind for OpenShift
@@ -228,8 +232,8 @@ func (r *SecretsManagementConfigReconciler) reconcileNamespace(ctx context.Conte
 			Name: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
-				"app.kubernetes.io/managed-by": "secrets-management-operator",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 		},
 	}
@@ -307,8 +311,8 @@ func (r *SecretsManagementConfigReconciler) buildViewClusterRole(prefix string) 
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fmt.Sprintf("%s-view", prefix),
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "secrets-management-operator",
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 			},
 		},
 		Rules: []rbacv1.PolicyRule{
@@ -337,8 +341,8 @@ func (r *SecretsManagementConfigReconciler) buildDeleteClusterRole(prefix string
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fmt.Sprintf("%s-delete", prefix),
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "secrets-management-operator",
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 			},
 		},
 		Rules: []rbacv1.PolicyRule{
@@ -367,8 +371,8 @@ func (r *SecretsManagementConfigReconciler) buildAdminClusterRole(prefix string)
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fmt.Sprintf("%s-admin", prefix),
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "secrets-management-operator",
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
+				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
 			},
 		},
 		Rules: []rbacv1.PolicyRule{
@@ -436,12 +440,12 @@ func (r *SecretsManagementConfigReconciler) reconcilePluginDeployment(ctx contex
 func (r *SecretsManagementConfigReconciler) reconcileServiceAccount(ctx context.Context, config *smv1alpha1.SecretsManagementConfig) error {
 	sa := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-plugin", PluginName),
+			Name:      fmt.Sprintf("%s-plugin", PluginResourcePrefix),
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
-				"app.kubernetes.io/managed-by": "secrets-management-operator",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 		},
 	}
@@ -462,15 +466,15 @@ func (r *SecretsManagementConfigReconciler) reconcileServiceAccount(ctx context.
 func (r *SecretsManagementConfigReconciler) reconcileService(ctx context.Context, config *smv1alpha1.SecretsManagementConfig) error {
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-plugin", PluginName),
+			Name:      fmt.Sprintf("%s-plugin", PluginResourcePrefix),
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
-				"app.kubernetes.io/managed-by": "secrets-management-operator",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 			Annotations: map[string]string{
-				"service.alpha.openshift.io/serving-cert-secret-name": fmt.Sprintf("%s-plugin-cert", PluginName),
+				"service.alpha.openshift.io/serving-cert-secret-name": fmt.Sprintf("%s-plugin-cert", PluginResourcePrefix),
 			},
 		},
 		Spec: corev1.ServiceSpec{
@@ -573,12 +577,12 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-plugin", PluginName),
+			Name:      fmt.Sprintf("%s-plugin", PluginResourcePrefix),
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
-				"app.kubernetes.io/managed-by": "secrets-management-operator",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
@@ -592,11 +596,11 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						"app.kubernetes.io/name":    PluginName,
-						"app.kubernetes.io/part-of": "ocp-secrets-management",
+						"app.kubernetes.io/part-of": "secrets-management-console",
 					},
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: fmt.Sprintf("%s-plugin", PluginName),
+					ServiceAccountName: fmt.Sprintf("%s-plugin", PluginResourcePrefix),
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsNonRoot: boolPtr(true),
 						SeccompProfile: &corev1.SeccompProfile{
@@ -647,7 +651,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 							Name: "plugin-cert",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName:  fmt.Sprintf("%s-plugin-cert", PluginName),
+									SecretName:  fmt.Sprintf("%s-plugin-cert", PluginResourcePrefix),
 									DefaultMode: int32Ptr(420),
 								},
 							},
@@ -657,7 +661,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
-										Name: fmt.Sprintf("%s-nginx-conf", PluginName),
+										Name: fmt.Sprintf("%s-nginx-conf", PluginResourcePrefix),
 									},
 									DefaultMode: int32Ptr(420),
 								},
@@ -668,7 +672,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
-										Name: fmt.Sprintf("%s-plugin-config", PluginName),
+										Name: fmt.Sprintf("%s-plugin-config", PluginResourcePrefix),
 									},
 									DefaultMode: int32Ptr(420),
 								},
@@ -703,7 +707,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 	// Update status with deployment info
 	config.Status.Plugin = smv1alpha1.PluginStatus{
 		DeploymentName:    deployment.Name,
-		ServiceName:       fmt.Sprintf("%s-plugin", PluginName),
+		ServiceName:       fmt.Sprintf("%s-plugin", PluginResourcePrefix),
 		ConsolePluginName: PluginName,
 		AvailableReplicas: existing.Status.AvailableReplicas,
 		Ready:             existing.Status.AvailableReplicas > 0,
@@ -748,12 +752,12 @@ http {
 
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-nginx-conf", PluginName),
+			Name:      fmt.Sprintf("%s-nginx-conf", PluginResourcePrefix),
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
-				"app.kubernetes.io/managed-by": "secrets-management-operator",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 		},
 		Data: map[string]string{
@@ -807,12 +811,12 @@ func (r *SecretsManagementConfigReconciler) reconcilePluginConfig(ctx context.Co
 
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-plugin-config", PluginName),
+			Name:      fmt.Sprintf("%s-plugin-config", PluginResourcePrefix),
 			Namespace: PluginNamespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
-				"app.kubernetes.io/part-of":    "ocp-secrets-management",
-				"app.kubernetes.io/managed-by": "secrets-management-operator",
+				"app.kubernetes.io/part-of":    "secrets-management-console",
+				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 			},
 		},
 		Data: map[string]string{
@@ -848,8 +852,8 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 					"name": PluginName,
 					"labels": map[string]interface{}{
 						"app.kubernetes.io/name":       PluginName,
-						"app.kubernetes.io/part-of":    "ocp-secrets-management",
-						"app.kubernetes.io/managed-by": "secrets-management-operator",
+						"app.kubernetes.io/part-of":    "secrets-management-console",
+						"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 					},
 				},
 				"spec": map[string]interface{}{
@@ -857,7 +861,7 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 					"backend": map[string]interface{}{
 						"type": "Service",
 						"service": map[string]interface{}{
-							"name":      fmt.Sprintf("%s-plugin", PluginName),
+							"name":      fmt.Sprintf("%s-plugin", PluginResourcePrefix),
 							"namespace": PluginNamespace,
 							"port":      int64(PluginPort), // Must be int64 for unstructured
 							"basePath":  "/",
@@ -880,7 +884,7 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 		"backend": map[string]interface{}{
 			"type": "Service",
 			"service": map[string]interface{}{
-				"name":      fmt.Sprintf("%s-plugin", PluginName),
+				"name":      fmt.Sprintf("%s-plugin", PluginResourcePrefix),
 				"namespace": PluginNamespace,
 				"port":      int64(PluginPort),
 				"basePath":  "/",
@@ -896,8 +900,8 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 	// Update labels
 	labels := map[string]string{
 		"app.kubernetes.io/name":       PluginName,
-		"app.kubernetes.io/part-of":    "ocp-secrets-management",
-		"app.kubernetes.io/managed-by": "secrets-management-operator",
+		"app.kubernetes.io/part-of":    "secrets-management-console",
+		"app.kubernetes.io/managed-by": "external-secrets-management-operator",
 	}
 	existing.SetLabels(labels)
 
@@ -1039,7 +1043,7 @@ func (r *SecretsManagementConfigReconciler) cleanupPluginDeployment(ctx context.
 	// Delete Deployment
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-plugin", PluginName),
+			Name:      fmt.Sprintf("%s-plugin", PluginResourcePrefix),
 			Namespace: PluginNamespace,
 		},
 	}
@@ -1050,7 +1054,7 @@ func (r *SecretsManagementConfigReconciler) cleanupPluginDeployment(ctx context.
 	// Delete Service
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-plugin", PluginName),
+			Name:      fmt.Sprintf("%s-plugin", PluginResourcePrefix),
 			Namespace: PluginNamespace,
 		},
 	}
@@ -1061,7 +1065,7 @@ func (r *SecretsManagementConfigReconciler) cleanupPluginDeployment(ctx context.
 	// Delete ServiceAccount
 	sa := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-plugin", PluginName),
+			Name:      fmt.Sprintf("%s-plugin", PluginResourcePrefix),
 			Namespace: PluginNamespace,
 		},
 	}
@@ -1072,7 +1076,7 @@ func (r *SecretsManagementConfigReconciler) cleanupPluginDeployment(ctx context.
 	// Delete ConfigMap (nginx)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-nginx-conf", PluginName),
+			Name:      fmt.Sprintf("%s-nginx-conf", PluginResourcePrefix),
 			Namespace: PluginNamespace,
 		},
 	}
@@ -1083,7 +1087,7 @@ func (r *SecretsManagementConfigReconciler) cleanupPluginDeployment(ctx context.
 	// Delete ConfigMap (plugin config)
 	pluginCfg := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-plugin-config", PluginName),
+			Name:      fmt.Sprintf("%s-plugin-config", PluginResourcePrefix),
 			Namespace: PluginNamespace,
 		},
 	}

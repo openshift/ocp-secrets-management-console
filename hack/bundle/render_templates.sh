@@ -95,7 +95,7 @@ yq -i "
 log "  → spec.relatedImages"
 
 # Update or append the operator entry
-OPERATOR_NAME="ocp-secrets-management-operator"
+OPERATOR_NAME="external-secrets-management-operator"
 if yq -e ".spec.relatedImages[] | select(.name == \"${OPERATOR_NAME}\")" "${CSV_FILE}" >/dev/null 2>&1; then
     yq -i "
       (.spec.relatedImages[] | select(.name == \"${OPERATOR_NAME}\") | .image) =

@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openshift/ocp-secrets-management-console"
+    "url": "https://github.com/openshift/ocp-secrets-management"
   },
   "scripts": {
     "clean": "rm -rf dist",

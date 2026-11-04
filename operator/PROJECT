@@ -8,7 +8,7 @@ plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
 projectName: external-secrets-management-operator
-repo: github.com/openshift/ocp-secrets-management
+repo: github.com/openshift/ocp-secrets-management-console
 resources:
 - api:
     crdVersion: v1
@@ -16,6 +16,6 @@ resources:
   domain: openshift.io
   group: secrets-management
   kind: SecretsManagementConfig
-  path: github.com/openshift/ocp-secrets-management/operator/pkg/apis/secretsmanagement/v1alpha1
+  path: github.com/openshift/ocp-secrets-management-console/operator/pkg/apis/secretsmanagement/v1alpha1
   version: v1alpha1
 version: "3"

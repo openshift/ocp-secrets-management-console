@@ -21,9 +21,9 @@ set -euo pipefail
 # ─── Configuration from environment ──────────────────────────────────
 QUAY_USER="${SM_QUAY_USER:-anankuma}"
 IMAGE_TAG="${SM_IMAGE_TAG:-latest}"
-PLUGIN_IMG="quay.io/${QUAY_USER}/secrets-management-console:${IMAGE_TAG}"
-OPERATOR_IMG="quay.io/${QUAY_USER}/secrets-management-operator:${IMAGE_TAG}"
-BUNDLE_IMG="quay.io/${QUAY_USER}/secrets-management-operator-bundle:${IMAGE_TAG}"
+PLUGIN_IMG="quay.io/${QUAY_USER}/ocp-secrets-management:${IMAGE_TAG}"
+OPERATOR_IMG="quay.io/${QUAY_USER}/ocp-secrets-management-operator:${IMAGE_TAG}"
+BUNDLE_IMG="quay.io/${QUAY_USER}/ocp-secrets-management-operator-bundle:${IMAGE_TAG}"
 NAMESPACE="openshift-secrets-management"
 # ─────────────────────────────────────────────────────────────────────
 
@@ -120,7 +120,7 @@ ensure_pull_secret() {
 link_pull_secrets() {
   oc secrets link secrets-management-operator quay-pull-secret --for=pull -n "${NAMESPACE}" 2>/dev/null || true
 
-  local plugin_sa="secrets-management-plugin"
+  local plugin_sa="ocp-secrets-management-plugin"
   if oc get sa "${plugin_sa}" -n "${NAMESPACE}" >/dev/null 2>&1; then
     oc secrets link "${plugin_sa}" quay-pull-secret --for=pull -n "${NAMESPACE}" 2>/dev/null || true
   fi
@@ -150,7 +150,7 @@ deploy() {
 
   # Restart pods stuck in ImagePullBackOff so they pick up the pull secret
   local failing
-  failing=$(oc get pods -n "${NAMESPACE}" -l app.kubernetes.io/name=secrets-management-console \
+  failing=$(oc get pods -n "${NAMESPACE}" -l app.kubernetes.io/name=ocp-secrets-management \
     --no-headers -o custom-columns=NAME:.metadata.name,STATUS:.status.phase \
     2>/dev/null | grep -v Running | awk '{print $1}' || true)
   if [[ -n "${failing}" ]]; then
@@ -159,17 +159,17 @@ deploy() {
     sleep 5
   fi
 
-  oc rollout status deployment/secrets-management-plugin -n "${NAMESPACE}" --timeout=120s
+  oc rollout status deployment/ocp-secrets-management-plugin -n "${NAMESPACE}" --timeout=120s
   ok "Plugin pods are running"
 
   info "Enabling plugin in OpenShift Console..."
   local current
   current=$(oc get console.operator.openshift.io cluster -o jsonpath='{.spec.plugins}' 2>/dev/null || echo "")
-  if echo "${current}" | grep -q "secrets-management-console"; then
+  if echo "${current}" | grep -q "ocp-secrets-management"; then
     ok "Plugin already enabled in Console"
   else
     oc patch console.operator.openshift.io cluster --type=json \
-      -p '[{"op": "add", "path": "/spec/plugins/-", "value": "secrets-management-console"}]'
+      -p '[{"op": "add", "path": "/spec/plugins/-", "value": "ocp-secrets-management"}]'
     ok "Plugin enabled in Console"
   fi
 
@@ -198,7 +198,7 @@ undeploy() {
   # Clean up cluster-scoped resources the operator may have created
   oc delete clusterrole secrets-management-view secrets-management-delete secrets-management-admin --ignore-not-found 2>/dev/null || true
   oc delete clusterrolebinding secrets-management-view secrets-management-delete secrets-management-admin --ignore-not-found 2>/dev/null || true
-  oc delete consoleplugin secrets-management-console --ignore-not-found 2>/dev/null || true
+  oc delete consoleplugin ocp-secrets-management --ignore-not-found 2>/dev/null || true
   ok "Undeploy complete"
 }
 

@@ -7,7 +7,7 @@ layout:
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
-projectName: secrets-management-operator
+projectName: ocp-secrets-management-operator
 repo: github.com/openshift/ocp-secrets-management
 resources:
 - api:

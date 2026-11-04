@@ -39,7 +39,7 @@ export default defineConfig({
         storageState: 'integration-tests/.auth/user.json',
       },
       dependencies: ['setup'],
-      testIgnore: [/\.premerge\.spec\.ts$/, /example-page/],
+      testIgnore: [/\.premerge\.spec\.ts$/],
     },
   ],
   reporter: [

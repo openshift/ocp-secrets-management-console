@@ -12732,9 +12732,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"secrets-management-console@workspace:.":
+"external-secrets-management-console@workspace:.":
   version: 0.0.0-use.local
-  resolution: "secrets-management-console@workspace:."
+  resolution: "external-secrets-management-console@workspace:."
   dependencies:
     "@babel/core": "npm:^7.29.0"
     "@babel/preset-env": "npm:^7.29.3"

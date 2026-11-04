@@ -35,8 +35,8 @@ Report at most five minor issues. Overflow: "plus N similar items" in the summar
 - New CRD kinds have matching entries in all four sync files (see AGENTS.md critical patterns)
 - PatternFly imports use correct package paths (Modal from `@patternfly/react-core/deprecated`)
 - Cluster-scoped resources skip namespace in API paths and URL construction
-- i18n keys added to `locales/en/plugin__secrets-management-console.json`
-- Console extension format in `console-extensions.json` uses `%plugin__secrets-management-console~Key%`
+- i18n keys added to `locales/en/plugin__external-secrets-management-console.json`
+- Console extension format in `console-extensions.json` uses `%plugin__external-secrets-management-console~Key%`
 - New RBAC rules follow three-tier pattern: view (get/list/watch), delete (delete), admin (all)
 - New `useK8sWatchResource` calls are in separate table components gated by `shouldShowComponent`
 - `containsSensitiveData()` updated when adding resource types to ResourceInspect

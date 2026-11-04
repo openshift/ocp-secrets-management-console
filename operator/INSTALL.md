@@ -72,7 +72,7 @@ The ConsolePlugin CR only **registers** the plugin. On OpenShift, **dynamic plug
 1. Go to **Administration** → **Cluster Settings**.
 2. Open the **Console** configuration (under "Configuration" or "Operator details").
 3. Go to the **Console plugins** tab.
-4. Find **OCP Secrets Management** and switch it to **Enabled**.
+4. Find **External Secrets Management Console** and switch it to **Enabled**.
 5. Refresh the browser if the console prompts you.
 
 **Option B – CLI (append only)**
@@ -85,7 +85,7 @@ oc patch console.operator.openshift.io cluster --type=json -p '[{"op": "add", "p
 
 `path: "/spec/plugins/-"` means “add to the end of the `plugins` array”. Existing plugins are unchanged. If **ocp-secrets-management** is already in the list, running this again will add a duplicate; remove it in the Console plugins UI if that happens.
 
-After enabling, reload the console; the **Secrets Management** menu item should appear.
+After enabling, reload the console; the **External Secrets Management Console** menu item should appear.
 
 ---
 

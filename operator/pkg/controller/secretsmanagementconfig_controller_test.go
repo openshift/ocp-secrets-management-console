@@ -61,7 +61,7 @@ func newTestConfig(name string) *smv1alpha1.SecretsManagementConfig {
 				RolePrefix:         "secrets-management",
 			},
 			Plugin: smv1alpha1.PluginConfig{
-				Image:    "openshift.io/secrets-management-console:test",
+				Image:    "openshift.io/ocp-secrets-management:test",
 				Replicas: 1,
 			},
 			Operators: smv1alpha1.OperatorsConfig{
@@ -200,7 +200,7 @@ func TestReconcileServiceAccount(t *testing.T) {
 	// Verify SA was created
 	sa := &corev1.ServiceAccount{}
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      "secrets-management-plugin",
+		Name:      "ocp-secrets-management-plugin",
 		Namespace: PluginNamespace,
 	}, sa)
 	require.NoError(t, err)
@@ -224,7 +224,7 @@ func TestReconcileService(t *testing.T) {
 	// Verify service was created
 	svc := &corev1.Service{}
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      "secrets-management-plugin",
+		Name:      "ocp-secrets-management-plugin",
 		Namespace: PluginNamespace,
 	}, svc)
 	require.NoError(t, err)
@@ -249,7 +249,7 @@ func TestReconcileNginxConfig(t *testing.T) {
 	// Verify configmap was created
 	cm := &corev1.ConfigMap{}
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      "secrets-management-nginx-conf",
+		Name:      "ocp-secrets-management-nginx-conf",
 		Namespace: PluginNamespace,
 	}, cm)
 	require.NoError(t, err)
@@ -272,7 +272,7 @@ func TestReconcilePluginConfig_DefaultDisabled(t *testing.T) {
 
 	cm := &corev1.ConfigMap{}
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      "secrets-management-plugin-config",
+		Name:      "ocp-secrets-management-plugin-config",
 		Namespace: PluginNamespace,
 	}, cm)
 	require.NoError(t, err)
@@ -297,7 +297,7 @@ func TestReconcilePluginConfig_DeleteEnabled(t *testing.T) {
 
 	cm := &corev1.ConfigMap{}
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      "secrets-management-plugin-config",
+		Name:      "ocp-secrets-management-plugin-config",
 		Namespace: PluginNamespace,
 	}, cm)
 	require.NoError(t, err)
@@ -323,12 +323,12 @@ func TestReconcileDeployment(t *testing.T) {
 	// Verify deployment was created
 	deployment := &appsv1.Deployment{}
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      "secrets-management-plugin",
+		Name:      "ocp-secrets-management-plugin",
 		Namespace: PluginNamespace,
 	}, deployment)
 	require.NoError(t, err)
 	assert.Equal(t, int32(1), *deployment.Spec.Replicas)
-	assert.Equal(t, "openshift.io/secrets-management-console:test", deployment.Spec.Template.Spec.Containers[0].Image)
+	assert.Equal(t, "openshift.io/ocp-secrets-management:test", deployment.Spec.Template.Spec.Containers[0].Image)
 }
 
 func TestDetectOperators_NoneInstalled(t *testing.T) {
@@ -425,7 +425,7 @@ func TestCleanupPluginDeployment(t *testing.T) {
 	// Verify resources exist
 	deployment := &appsv1.Deployment{}
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      "secrets-management-plugin",
+		Name:      "ocp-secrets-management-plugin",
 		Namespace: PluginNamespace,
 	}, deployment)
 	require.NoError(t, err)
@@ -436,7 +436,7 @@ func TestCleanupPluginDeployment(t *testing.T) {
 
 	// Verify deployment is deleted
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      "secrets-management-plugin",
+		Name:      "ocp-secrets-management-plugin",
 		Namespace: PluginNamespace,
 	}, deployment)
 	assert.True(t, apierrors.IsNotFound(err))
@@ -538,7 +538,7 @@ func TestReconcile_FullCycle(t *testing.T) {
 	// Verify deployment was created
 	deployment := &appsv1.Deployment{}
 	err = r.Get(ctx, types.NamespacedName{
-		Name:      "secrets-management-plugin",
+		Name:      "ocp-secrets-management-plugin",
 		Namespace: PluginNamespace,
 	}, deployment)
 	require.NoError(t, err)

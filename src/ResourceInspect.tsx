@@ -99,7 +99,7 @@ function colorizeYaml(yamlString: string): React.ReactNode {
 }
 
 export const ResourceInspect: React.FC = () => {
-  const { t } = useTranslation('plugin__ocp-secrets-management');
+  const { t } = useTranslation('plugin__secrets-management-console');
 
   // State for revealing sensitive data (separate for spec and status)
   const [showSpecSensitiveData, setShowSpecSensitiveData] = React.useState(false);

@@ -33,7 +33,7 @@ export const RelationshipGraphPanel: React.FC<RelationshipGraphPanelProps> = ({
   namespace,
   name,
 }) => {
-  const { t } = useTranslation('plugin__ocp-secrets-management');
+  const { t } = useTranslation('plugin__secrets-management-console');
   const theme = useConsoleTheme();
   const secondaryTextColor = theme === 'dark' ? '#ffffff' : 'var(--pf-t--global--text--color--100)';
   const [isExpanded, setIsExpanded] = React.useState(false);

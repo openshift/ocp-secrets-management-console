@@ -3,7 +3,7 @@
 #
 # Example usage:
 # ./hack/update-catalog.sh ./bin/tools/opm \
-# quay.io/<org>/ocp-secrets-management-operator-bundle@sha256:4114321b0ab6ceb882f26501ff9b22214d90b83d92466e7c5a62217f592c1fed \
+# quay.io/<org>/external-secrets-management-operator-bundle@sha256:4114321b0ab6ceb882f26501ff9b22214d90b83d92466e7c5a62217f592c1fed \
 # catalogs/v4.22/catalog \
 # bundle-v0.2.0.yaml \
 # no
@@ -27,7 +27,7 @@ declare CATALOG_DIR
 declare BUNDLE_FILE_NAME
 declare REPLICATE_BUNDLE_FILE_IN_CATALOGS
 
-CATALOG_PACKAGE_NAME="console-plugin-operator"
+CATALOG_PACKAGE_NAME="external-secrets-management-operator"
 GREEN_COLOR_TEXT='\033[0;32m'
 RED_COLOR_TEXT='\033[0;31m'
 REVERT_COLOR_TEXT='\033[0m'

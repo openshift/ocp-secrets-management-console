@@ -323,7 +323,7 @@ export const RelationshipGraph: React.FC<RelationshipGraphProps> = ({
   edges,
   onNavigate,
 }) => {
-  const { t } = useTranslation('plugin__ocp-secrets-management');
+  const { t } = useTranslation('plugin__secrets-management-console');
   const themeName = useConsoleTheme();
   const theme = THEMES[themeName];
   const { positioned, width, height } = React.useMemo(() => layout(nodes), [nodes]);

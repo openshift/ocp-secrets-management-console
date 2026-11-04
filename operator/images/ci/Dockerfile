@@ -6,9 +6,9 @@ COPY . .
 RUN unset GOFLAGS && cd operator && make build
 
 FROM registry.access.redhat.com/ubi9-minimal:latest
-COPY --from=builder /go/src/github.com/openshift/ocp-secrets-management-console/operator/bin/manager /bin/ocp-secrets-management-operator
+COPY --from=builder /go/src/github.com/openshift/ocp-secrets-management-console/operator/bin/manager /bin/secrets-management-operator
 
 # Run as non-root user
 USER 65532:65532
 
-ENTRYPOINT ["/bin/ocp-secrets-management-operator"]
+ENTRYPOINT ["/bin/secrets-management-operator"]

@@ -3,11 +3,11 @@ CONTAINER_ENGINE ?= podman
 # Set BUILD_OPTS=--no-cache to force a full rebuild (avoids stale "Created" date when cache is reused)
 BUILD_OPTS ?=
 
-# Image settings (override when building for your registry, e.g. make image-build IMG=quay.io/<my-org>/ocp-secrets-management-operator:tag)
-IMG ?= openshift.io/ocp-secrets-management-operator:latest
-PLUGIN_IMG ?= openshift.io/ocp-secrets-management:latest
-BUNDLE_IMG ?= openshift.io/ocp-secrets-management-operator-bundle:v0.1.0
-CATALOG_IMG ?= openshift.io/ocp-secrets-management-operator-catalog:v0.1.0
+# Image settings (override when building for your registry, e.g. make image-build IMG=quay.io/<my-org>/secrets-management-operator:tag)
+IMG ?= openshift.io/secrets-management-operator:latest
+PLUGIN_IMG ?= openshift.io/secrets-management-console:latest
+BUNDLE_IMG ?= openshift.io/secrets-management-operator-bundle:v0.1.0
+CATALOG_IMG ?= openshift.io/secrets-management-operator-catalog:v0.1.0
 
 # Version
 VERSION ?= 0.1.0
@@ -129,13 +129,13 @@ uninstall: manifests ## Uninstall CRDs from the K8s cluster specified in ~/.kube
 	kubectl delete -f config/crd/
 
 # Deploy substitutes IMG into config/manager/ and PLUGIN_IMG into the sample so that
-# the applied manifests use the images you set (e.g. make deploy IMG=quay.io/<my-org>/ocp-secrets-management-operator:latest).
+# the applied manifests use the images you set (e.g. make deploy IMG=quay.io/<my-org>/secrets-management-operator:latest).
 .PHONY: deploy
 deploy: manifests ## Deploy controller to the K8s cluster specified in ~/.kube/config. Uses IMG for the operator image.
 	kubectl apply -f config/crd/
 	kubectl apply -f config/namespace.yaml
 	kubectl apply -f config/rbac/
-	sed -e 's|image: openshift.io/ocp-secrets-management-operator:latest|image: $(IMG)|' config/manager/manager.yaml | kubectl apply -f -
+	sed -e 's|image: openshift.io/secrets-management-operator:latest|image: $(IMG)|' config/manager/manager.yaml | kubectl apply -f -
 
 .PHONY: undeploy
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
@@ -148,7 +148,7 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 # Depends on deploy so the operator is running and can reconcile the sample (create plugin deployment, ConsolePlugin, etc.).
 .PHONY: deploy-sample
 deploy-sample: deploy ## Deploy sample SecretsManagementConfig CR. Uses PLUGIN_IMG for the plugin image.
-	sed -e 's|image: openshift.io/ocp-secrets-management:latest|image: $(PLUGIN_IMG)|' config/samples/secrets-management_v1alpha1_secretsmanagementconfig.yaml | kubectl apply -f -
+	sed -e 's|image: openshift.io/secrets-management-console:latest|image: $(PLUGIN_IMG)|' config/samples/secrets-management_v1alpha1_secretsmanagementconfig.yaml | kubectl apply -f -
 
 .PHONY: undeploy-sample
 undeploy-sample: ## Remove the sample SecretsManagementConfig (operator will clean up plugin Deployment, Service, ConsolePlugin).

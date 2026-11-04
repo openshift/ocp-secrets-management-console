@@ -12,17 +12,17 @@ From the **repository root**:
 
 ```bash
 # Build and push the plugin image
-make plugin-image PLUGIN_IMG=quay.io/<your-org>/ocp-secrets-management:latest
+make plugin-image PLUGIN_IMG=quay.io/<your-org>/secrets-management-console:latest
 # push to your registry, e.g.:
-podman push quay.io/<your-org>/ocp-secrets-management:latest
+podman push quay.io/<your-org>/secrets-management-console:latest
 ```
 
 From the **operator** directory:
 
 ```bash
 cd operator
-make podman-build IMG=quay.io/<your-org>/ocp-secrets-management-operator:latest
-podman push quay.io/<your-org>/ocp-secrets-management-operator:latest
+make podman-build IMG=quay.io/<your-org>/secrets-management-operator:latest
+podman push quay.io/<your-org>/secrets-management-operator:latest
 ```
 
 ---
@@ -37,7 +37,7 @@ This installs the CRD, namespace `openshift-secrets-management`, RBAC (ClusterRo
 
 ```bash
 cd operator
-make deploy IMG=quay.io/<your-org>/ocp-secrets-management-operator:latest
+make deploy IMG=quay.io/<your-org>/secrets-management-operator:latest
 ```
 
 **Result:** The operator is running and watching for `SecretsManagementConfig` resources. No plugin or ConsolePlugin exists yet.
@@ -49,7 +49,7 @@ make deploy IMG=quay.io/<your-org>/ocp-secrets-management-operator:latest
 This creates the `SecretsManagementConfig` CR named `cluster` that tells the operator which plugin image to run and how to configure it.
 
 ```bash
-make deploy-sample PLUGIN_IMG=quay.io/<your-org>/ocp-secrets-management:latest
+make deploy-sample PLUGIN_IMG=quay.io/<your-org>/secrets-management-console:latest
 ```
 
 **Result:** The operator sees the `SecretsManagementConfig` and reconciles it. As part of that reconciliation it:
@@ -80,10 +80,10 @@ The ConsolePlugin CR only **registers** the plugin. On OpenShift, **dynamic plug
 Use a **JSON patch** to append this plugin without touching existing ones. No need to list or know other plugins:
 
 ```bash
-oc patch console.operator.openshift.io cluster --type=json -p '[{"op": "add", "path": "/spec/plugins/-", "value": "ocp-secrets-management"}]'
+oc patch console.operator.openshift.io cluster --type=json -p '[{"op": "add", "path": "/spec/plugins/-", "value": "secrets-management-console"}]'
 ```
 
-`path: "/spec/plugins/-"` means “add to the end of the `plugins` array”. Existing plugins are unchanged. If **ocp-secrets-management** is already in the list, running this again will add a duplicate; remove it in the Console plugins UI if that happens.
+`path: "/spec/plugins/-"` means “add to the end of the `plugins` array”. Existing plugins are unchanged. If **secrets-management-console** is already in the list, running this again will add a duplicate; remove it in the Console plugins UI if that happens.
 
 After enabling, reload the console; the **Secrets Management** menu item should appear.
 

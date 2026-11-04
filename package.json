@@ -1,5 +1,5 @@
 {
-  "name": "secrets-management-console",
+  "name": "ocp-secrets-management",
   "version": "0.0.1",
   "description": "OpenShift Console plugin for secrets management",
   "private": true,
@@ -101,7 +101,7 @@
     "proxy-addr": "^2.0.8"
   },
   "consolePlugin": {
-    "name": "secrets-management-console",
+    "name": "ocp-secrets-management",
     "version": "0.0.1",
     "displayName": "OCP Secrets Management",
     "description": "OpenShift Console plugin for managing secrets and sensitive data.",

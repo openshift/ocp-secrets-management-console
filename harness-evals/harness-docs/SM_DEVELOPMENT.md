@@ -94,7 +94,7 @@ scripts/deploy-via-bundle.sh
 5. Create `src/components/NewResourceTable.tsx` (follow `CertificatesTable.tsx` pattern)
 6. Add section in `SecretsManagement.tsx` (conditional on operator detection)
 7. Add CRD name to `useOperatorDetection.ts` if new operator
-8. Add i18n keys to `locales/en/plugin__secrets-management-console.json`
+8. Add i18n keys to `locales/en/plugin__ocp-secrets-management.json`
 9. Run `make sync-crd-types` then `make verify`
 
 ### Add a New Operator Domain
@@ -133,7 +133,7 @@ scripts/deploy-via-bundle.sh
 1. DO NOT hand-edit files with "Auto-generated from CRD" headers — they are overwritten by `yarn generate-types`
 2. DO NOT use `useParams()` for URL parsing — it does not work in Console plugin environment. Use `window.location.pathname.split('/')`
 3. DO NOT use React Router navigation (`useNavigate`, `<Link>`) — use `window.location.href` for inspect links
-4. DO NOT forget to add i18n keys — every user-facing string must go through `t()` from `useTranslation('plugin__secrets-management-console')`
+4. DO NOT forget to add i18n keys — every user-facing string must go through `t()` from `useTranslation('plugin__ocp-secrets-management')`
 5. DO NOT import `Modal` from `@patternfly/react-core` directly — use `@patternfly/react-core/deprecated` (current codebase pattern)
 6. DO NOT call the K8s API directly — all requests must go through `consoleFetch` (the console proxy handles auth, CSRF, impersonation)
 7. DO NOT add `core/v1` Secrets to any RBAC role — this plugin displays CRD metadata only, never `core/v1` Secret data
@@ -171,10 +171,10 @@ scripts/deploy-via-bundle.sh
 
 ## i18n
 
-- Namespace: `plugin__secrets-management-console`
-- Locale files: `locales/en/plugin__secrets-management-console.json`
+- Namespace: `plugin__ocp-secrets-management`
+- Locale files: `locales/en/plugin__ocp-secrets-management.json`
 - Extract keys: `yarn i18n`
-- Console extensions use `%plugin__secrets-management-console~Key%` format
+- Console extensions use `%plugin__ocp-secrets-management~Key%` format
 
 ## See Also
 

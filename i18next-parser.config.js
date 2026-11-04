@@ -9,7 +9,7 @@ module.exports = {
   locales: ['en'],
   namespaceSeparator: '~',
   reactNamespace: false,
-  defaultNamespace: 'plugin__secrets-management-console',
+  defaultNamespace: 'plugin__ocp-secrets-management',
   useKeysAsDefaultValue: true,
 
   // see below for more details

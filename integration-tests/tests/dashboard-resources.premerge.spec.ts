@@ -29,10 +29,10 @@ test.describe('Dashboard renders mock resources and correct status badges', () =
     await mockK8sResourceList(page, 'secrets-store.csi.x-k8s.io', 'v1', 'secretproviderclasspodstatuses', []);
   });
 
-  test('renders the Secrets Management page title', async ({ page }) => {
+  test('renders the External Secrets Management Console page title', async ({ page }) => {
     await page.goto('/secrets-management');
 
-    await expect(page.getByRole('heading', { name: 'Secrets Management' })).toBeVisible({
+    await expect(page.getByRole('heading', { name: 'External Secrets Management Console', exact: true })).toBeVisible({
       timeout: 30000,
     });
     await expect(page.getByText('Manage certificates, external secrets')).toBeVisible();
@@ -41,7 +41,7 @@ test.describe('Dashboard renders mock resources and correct status badges', () =
   test('shows cert-manager section with badge', async ({ page }) => {
     await page.goto('/secrets-management');
 
-    const heading = page.getByRole('heading', { name: 'Secrets Management' });
+    const heading = page.getByRole('heading', { name: 'External Secrets Management Console', exact: true });
     await expect(heading).toBeVisible({ timeout: 30000 });
 
     const certSection = page.getByRole('heading', { name: 'Certificates' });
@@ -82,7 +82,7 @@ test.describe('Dashboard renders mock resources and correct status badges', () =
   test('shows External Secrets section', async ({ page }) => {
     await page.goto('/secrets-management');
 
-    const heading = page.getByRole('heading', { name: 'Secrets Management' });
+    const heading = page.getByRole('heading', { name: 'External Secrets Management Console', exact: true });
     await expect(heading).toBeVisible({ timeout: 30000 });
 
     await expect(page.getByRole('heading', { name: 'External Secrets' })).toBeVisible({
@@ -93,7 +93,7 @@ test.describe('Dashboard renders mock resources and correct status badges', () =
   test('shows Secrets Store CSI Driver section with mock data', async ({ page }) => {
     await page.goto('/secrets-management');
 
-    const heading = page.getByRole('heading', { name: 'Secrets Management' });
+    const heading = page.getByRole('heading', { name: 'External Secrets Management Console', exact: true });
     await expect(heading).toBeVisible({ timeout: 30000 });
 
     await expect(page.getByRole('heading', { name: 'Secret Provider Classes' })).toBeVisible({
@@ -107,7 +107,7 @@ test.describe('Dashboard renders mock resources and correct status badges', () =
   test('renders filter dropdowns', async ({ page }) => {
     await page.goto('/secrets-management');
 
-    const heading = page.getByRole('heading', { name: 'Secrets Management' });
+    const heading = page.getByRole('heading', { name: 'External Secrets Management Console', exact: true });
     await expect(heading).toBeVisible({ timeout: 30000 });
 
     await expect(page.getByLabel('Project')).toBeVisible();

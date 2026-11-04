@@ -161,7 +161,7 @@ interface GeneratorsTableProps {
 }
 
 export const GeneratorsTable: React.FC<GeneratorsTableProps> = ({ selectedProject }) => {
-  const { t } = useTranslation('plugin__secrets-management-console');
+  const { t } = useTranslation('plugin__ocp-secrets-management');
   const deleteEnabled = useDeleteEnabled();
   const [watchState, setWatchState] = React.useState<Record<string, KindWatchResult>>({});
   const [deleteAllowedByKind, setDeleteAllowedByKind] = React.useState<Record<string, boolean>>({});

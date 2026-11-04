@@ -129,7 +129,7 @@ interface SecretProviderClassTableProps {
 export const SecretProviderClassTable: React.FC<SecretProviderClassTableProps> = ({
   selectedProject,
 }) => {
-  const { t } = useTranslation('plugin__secrets-management-console');
+  const { t } = useTranslation('plugin__ocp-secrets-management');
   const deleteEnabled = useDeleteEnabled();
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;

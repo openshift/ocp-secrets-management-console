@@ -33,7 +33,7 @@ export const RelationshipGraphPanel: React.FC<RelationshipGraphPanelProps> = ({
   namespace,
   name,
 }) => {
-  const { t } = useTranslation('plugin__secrets-management-console');
+  const { t } = useTranslation('plugin__ocp-secrets-management');
   const [isExpanded, setIsExpanded] = React.useState(false);
   const { data, loading, error, hasFetched, fetch, refresh } = useRelationshipGraph({
     kind,

@@ -22,7 +22,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
   onConfirm,
   onCancel,
 }) => {
-  const { t } = useTranslation('plugin__secrets-management-console');
+  const { t } = useTranslation('plugin__ocp-secrets-management');
   const [confirmationInput, setConfirmationInput] = React.useState('');
 
   const nameMatches = Boolean(resourceName) && confirmationInput === resourceName;

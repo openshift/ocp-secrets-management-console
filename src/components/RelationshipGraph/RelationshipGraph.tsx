@@ -196,7 +196,7 @@ export const RelationshipGraph: React.FC<RelationshipGraphProps> = ({
   edges,
   onNavigate,
 }) => {
-  const { t } = useTranslation('plugin__secrets-management-console');
+  const { t } = useTranslation('plugin__ocp-secrets-management');
   const { positioned, width, height } = React.useMemo(() => layout(nodes), [nodes]);
   const byId = React.useMemo(() => new Map(positioned.map((n) => [n.id, n])), [positioned]);
 

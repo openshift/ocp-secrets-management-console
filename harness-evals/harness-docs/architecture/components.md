@@ -89,7 +89,7 @@ Pure React state — no Redux, no external store. Each component manages its own
 | Back navigation | `window.history.back()` | `ResourceInspect.tsx` |
 | Cluster vs namespaced | Union types + type guards (`isClusterExternalSecret`, `isClusterPushSecret`) | `src/components/crds/ExternalSecret.ts`, `PushSecret.ts` |
 | Modal import | `Modal` from `@patternfly/react-core/deprecated` | `DeleteConfirmationModal.tsx` |
-| i18n | `useTranslation('plugin__secrets-management-console')` in every component | All `*.tsx` files |
+| i18n | `useTranslation('plugin__ocp-secrets-management')` in every component | All `*.tsx` files |
 | Test selectors | `data-test` attribute (not `data-testid`) | `setup-tests.ts`, components |
 
 ## Build Pipeline

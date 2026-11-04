@@ -18,7 +18,7 @@ import { CubesIcon } from '@patternfly/react-icons';
  * — the admin may have intentionally chosen an alternate solution.
  */
 export const NoOperatorsInstalled: React.FC = () => {
-  const { t } = useTranslation('plugin__secrets-management-console');
+  const { t } = useTranslation('plugin__ocp-secrets-management');
   const navigate = useNavigate();
 
   return (

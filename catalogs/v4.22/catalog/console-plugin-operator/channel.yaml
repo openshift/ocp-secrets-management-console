@@ -1,0 +1,6 @@
+---
+entries:
+- name: console-plugin-operator.v0.1.0
+name: tech-preview-v1
+package: console-plugin-operator
+schema: olm.channel

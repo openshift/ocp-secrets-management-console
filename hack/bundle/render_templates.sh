@@ -108,7 +108,7 @@ else
 fi
 
 # Update or append the plugin entry
-PLUGIN_NAME="ocp-secrets-management-plugin"
+PLUGIN_NAME="secrets-management-plugin"
 if yq -e ".spec.relatedImages[] | select(.name == \"${PLUGIN_NAME}\")" "${CSV_FILE}" >/dev/null 2>&1; then
     yq -i "
       (.spec.relatedImages[] | select(.name == \"${PLUGIN_NAME}\") | .image) =

@@ -151,5 +151,5 @@ relatedImages:
 - image: registry.redhat.io/external-secrets-management/console-plugin-operator-rhel9@sha256:cf50616779d71e915a6b33d607b5ee4e47c86c34a2db10ee65a055b764b65589
   name: external-secrets-management-operator
 - image: registry.redhat.io/external-secrets-management/console-plugin-rhel9@sha256:c5106e00d59f6d49f361712d0787753431aef4b2569ed9b96ed061c748dff8aa
-  name: ocp-secrets-management-plugin
+  name: secrets-management-plugin
 schema: olm.bundle

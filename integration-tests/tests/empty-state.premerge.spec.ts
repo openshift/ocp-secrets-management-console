@@ -63,6 +63,6 @@ test.describe('SMC Empty state displays correct user-friendly message', () => {
     const errorElements = page.locator('[data-test$="-error"]');
     expect(await errorElements.count()).toBe(0);
 
-    await expect(page.getByRole('heading', { name: 'Secrets Management' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'External Secrets Management Console', exact: true })).toBeVisible();
   });
 });

@@ -94,7 +94,7 @@ interface CertificatesTableProps {
 }
 
 export const CertificatesTable: React.FC<CertificatesTableProps> = ({ selectedProject }) => {
-  const { t } = useTranslation('plugin__ocp-secrets-management');
+  const { t } = useTranslation('plugin__external-secrets-management-console');
   const deleteEnabled = useDeleteEnabled();
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;

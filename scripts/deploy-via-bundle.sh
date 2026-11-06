@@ -24,11 +24,11 @@ set -euo pipefail
 # ─── Configuration from environment ──────────────────────────────────
 QUAY_USER="${SM_QUAY_USER:-sapurohi}"
 IMAGE_TAG="${SM_IMAGE_TAG:-latest}"
-PLUGIN_IMG="quay.io/${QUAY_USER}/ocp-secrets-management:${IMAGE_TAG}"
-OPERATOR_IMG="quay.io/${QUAY_USER}/ocp-secrets-management-operator:${IMAGE_TAG}"
-BUNDLE_IMG="quay.io/${QUAY_USER}/ocp-secrets-management-operator-bundle:${IMAGE_TAG}"
+PLUGIN_IMG="quay.io/${QUAY_USER}/external-secrets-management-console:${IMAGE_TAG}"
+OPERATOR_IMG="quay.io/${QUAY_USER}/external-secrets-management-operator:${IMAGE_TAG}"
+BUNDLE_IMG="quay.io/${QUAY_USER}/external-secrets-management-operator-bundle:${IMAGE_TAG}"
 NAMESPACE="openshift-secrets-management"
-OPERATOR_NAME="ocp-secrets-management-operator"
+OPERATOR_NAME="external-secrets-management-operator"
 # ─────────────────────────────────────────────────────────────────────
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -184,7 +184,7 @@ deploy_bundle() {
   info "Waiting for operator deployment to be created..."
   local timeout=120
   local elapsed=0
-  while ! oc get deployment secrets-management-operator -n "${NAMESPACE}" >/dev/null 2>&1; do
+  while ! oc get deployment external-secrets-management-operator -n "${NAMESPACE}" >/dev/null 2>&1; do
     if [ $elapsed -ge $timeout ]; then
       fail "Timeout waiting for operator deployment to be created"
     fi
@@ -195,7 +195,7 @@ deploy_bundle() {
 
   info "Waiting for operator to be ready..."
   oc wait --for=condition=Available \
-    deployment/secrets-management-operator \
+    deployment/external-secrets-management-operator \
     -n "${NAMESPACE}" \
     --timeout=180s || fail "Operator did not become ready"
 
@@ -208,7 +208,7 @@ deploy_bundle() {
   # Check if operator has RELATED_IMAGE_PLUGIN env var
   info "Verifying operator has RELATED_IMAGE_PLUGIN environment variable..."
   local plugin_img_from_env
-  plugin_img_from_env=$(oc get deployment secrets-management-operator \
+  plugin_img_from_env=$(oc get deployment external-secrets-management-operator \
     -n "${NAMESPACE}" \
     -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="RELATED_IMAGE_PLUGIN")].value}' 2>/dev/null || echo "")
 
@@ -241,7 +241,7 @@ EOF
   info "Waiting for plugin deployment to be created..."
   local timeout=120
   local elapsed=0
-  while ! oc get deployment ocp-secrets-management-plugin -n "${NAMESPACE}" >/dev/null 2>&1; do
+  while ! oc get deployment secrets-management-plugin -n "${NAMESPACE}" >/dev/null 2>&1; do
     if [ $elapsed -ge $timeout ]; then
       fail "Timeout waiting for plugin deployment to be created"
     fi
@@ -252,7 +252,7 @@ EOF
 
   info "Waiting for plugin pods to be ready..."
   oc wait --for=condition=Available \
-    deployment/ocp-secrets-management-plugin \
+    deployment/secrets-management-plugin \
     -n "${NAMESPACE}" \
     --timeout=180s || warn "Plugin deployment may not be ready yet"
 
@@ -260,12 +260,12 @@ EOF
 
   # Show plugin pod details
   info "Plugin pod details:"
-  oc get pods -n "${NAMESPACE}" -l app.kubernetes.io/name=ocp-secrets-management
+  oc get pods -n "${NAMESPACE}" -l app.kubernetes.io/name=external-secrets-management-console
 
   # Check what image the plugin is using
   info "Verifying plugin is using correct image..."
   local plugin_img_actual
-  plugin_img_actual=$(oc get deployment ocp-secrets-management-plugin \
+  plugin_img_actual=$(oc get deployment secrets-management-plugin \
     -n "${NAMESPACE}" \
     -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || echo "")
 
@@ -282,19 +282,19 @@ EOF
 
   # Check ConsolePlugin
   info "Checking if ConsolePlugin was created..."
-  if oc get consoleplugin ocp-secrets-management >/dev/null 2>&1; then
+  if oc get consoleplugin external-secrets-management-console >/dev/null 2>&1; then
     ok "✓ ConsolePlugin resource exists"
 
     # Check if it's enabled in the console
     local console_plugins
     console_plugins=$(oc get console.operator.openshift.io cluster -o jsonpath='{.spec.plugins}' 2>/dev/null || echo "")
-    if echo "${console_plugins}" | grep -q "ocp-secrets-management"; then
+    if echo "${console_plugins}" | grep -q "external-secrets-management-console"; then
       ok "✓ Plugin is enabled in OpenShift Console"
     else
       warn "Plugin is not yet enabled in Console. Enabling now..."
       oc patch console.operator.openshift.io cluster \
         --type=json \
-        -p '[{"op": "add", "path": "/spec/plugins/-", "value": "ocp-secrets-management"}]' \
+        -p '[{"op": "add", "path": "/spec/plugins/-", "value": "external-secrets-management-console"}]' \
         2>/dev/null || warn "Failed to enable plugin automatically. Enable it manually in Console settings."
     fi
   else
@@ -317,7 +317,7 @@ undeploy() {
   oc delete namespace "${NAMESPACE}" --ignore-not-found 2>/dev/null || true
   oc delete clusterrole secrets-management-view secrets-management-delete secrets-management-admin --ignore-not-found 2>/dev/null || true
   oc delete clusterrolebinding secrets-management-view secrets-management-delete secrets-management-admin --ignore-not-found 2>/dev/null || true
-  oc delete consoleplugin ocp-secrets-management --ignore-not-found 2>/dev/null || true
+  oc delete consoleplugin external-secrets-management-console --ignore-not-found 2>/dev/null || true
 
   ok "Undeploy complete"
 }
@@ -369,7 +369,7 @@ show_summary() {
   echo "    oc logs -n ${NAMESPACE} -l control-plane=controller-manager -f"
   echo ""
   echo "  Check plugin logs:"
-  echo "    oc logs -n ${NAMESPACE} -l app.kubernetes.io/name=ocp-secrets-management -f"
+  echo "    oc logs -n ${NAMESPACE} -l app.kubernetes.io/name=external-secrets-management-console -f"
   echo ""
   echo "  Refresh the OpenShift Console to see the Secrets Management page."
   echo ""

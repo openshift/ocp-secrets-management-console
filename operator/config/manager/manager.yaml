@@ -3,29 +3,29 @@ kind: Namespace
 metadata:
   name: openshift-secrets-management
   labels:
-    app.kubernetes.io/name: ocp-secrets-management
-    app.kubernetes.io/part-of: ocp-secrets-management-operator
+    app.kubernetes.io/name: external-secrets-management-console
+    app.kubernetes.io/part-of: external-secrets-management-operator
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: secrets-management-operator
+  name: external-secrets-management-operator
   namespace: openshift-secrets-management
   labels:
-    app.kubernetes.io/name: ocp-secrets-management
-    app.kubernetes.io/part-of: ocp-secrets-management-operator
+    app.kubernetes.io/name: external-secrets-management-console
+    app.kubernetes.io/part-of: external-secrets-management-operator
     control-plane: controller-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
       control-plane: controller-manager
-      app.kubernetes.io/name: ocp-secrets-management
+      app.kubernetes.io/name: external-secrets-management-console
   template:
     metadata:
       labels:
         control-plane: controller-manager
-        app.kubernetes.io/name: ocp-secrets-management
+        app.kubernetes.io/name: external-secrets-management-console
       annotations:
         kubectl.kubernetes.io/default-container: manager
     spec:
@@ -33,13 +33,13 @@ spec:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
-      serviceAccountName: secrets-management-operator
+      serviceAccountName: external-secrets-management-operator
       containers:
         - name: manager
-          image: openshift.io/ocp-secrets-management-operator:latest
+          image: openshift.io/external-secrets-management-operator:latest
           imagePullPolicy: Always
           command:
-            - /bin/ocp-secrets-management-operator
+            - /bin/external-secrets-management-operator
           args:
             - --leader-elect
           ports:

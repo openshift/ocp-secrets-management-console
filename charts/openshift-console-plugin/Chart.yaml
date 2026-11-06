@@ -1,5 +1,5 @@
 apiVersion: v2
-name: ocp-secrets-management
+name: external-secrets-management-console
 description: |
   OpenShift Console Plugin for Secrets Management.
   Provides a unified UI for managing:

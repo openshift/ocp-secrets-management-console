@@ -74,7 +74,7 @@ interface PushSecretsTableProps {
 }
 
 export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProject }) => {
-  const { t } = useTranslation('plugin__ocp-secrets-management');
+  const { t } = useTranslation('plugin__external-secrets-management-console');
   const deleteEnabled = useDeleteEnabled();
   const [deleteModal, setDeleteModal] = React.useState<{
     isOpen: boolean;

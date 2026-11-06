@@ -28,7 +28,7 @@ test.describe('Trust Manager Bundles - Pre-merge E2E Tests', () => {
       await page.goto('/secrets-management');
 
       // Verify page loads
-      await expect(page.getByRole('heading', { name: 'Secrets Management' })).toBeVisible({
+      await expect(page.getByRole('heading', { name: 'External Secrets Management Console', exact: true })).toBeVisible({
         timeout: 30000,
       });
 
@@ -122,7 +122,7 @@ test.describe('Trust Manager Bundles - Pre-merge E2E Tests', () => {
 
       await page.goto('/secrets-management');
 
-      await expect(page.getByRole('heading', { name: 'Secrets Management' })).toBeVisible({
+      await expect(page.getByRole('heading', { name: 'External Secrets Management Console', exact: true })).toBeVisible({
         timeout: 30000,
       });
 
@@ -147,7 +147,7 @@ test.describe('Trust Manager Bundles - Pre-merge E2E Tests', () => {
 
       await page.goto('/secrets-management');
 
-      await expect(page.getByRole('heading', { name: 'Secrets Management' })).toBeVisible({
+      await expect(page.getByRole('heading', { name: 'External Secrets Management Console', exact: true })).toBeVisible({
         timeout: 30000,
       });
 
@@ -187,7 +187,7 @@ test.describe('Trust Manager Bundles - Pre-merge E2E Tests', () => {
     test('filter dropdowns include trust-manager options and filtering works', async ({ page }) => {
       await page.goto('/secrets-management');
 
-      await expect(page.getByRole('heading', { name: 'Secrets Management' })).toBeVisible({
+      await expect(page.getByRole('heading', { name: 'External Secrets Management Console', exact: true })).toBeVisible({
         timeout: 30000,
       });
 
@@ -272,7 +272,7 @@ test.describe('Trust Manager Bundles - Pre-merge E2E Tests', () => {
 
       await page.goto('/secrets-management');
 
-      await expect(page.getByRole('heading', { name: 'Secrets Management' })).toBeVisible({
+      await expect(page.getByRole('heading', { name: 'External Secrets Management Console', exact: true })).toBeVisible({
         timeout: 30000,
       });
 
@@ -315,7 +315,7 @@ test.describe('Trust Manager Bundles - Pre-merge E2E Tests', () => {
 
       await page.goto('/secrets-management');
 
-      await expect(page.getByRole('heading', { name: 'Secrets Management' })).toBeVisible({
+      await expect(page.getByRole('heading', { name: 'External Secrets Management Console', exact: true })).toBeVisible({
         timeout: 30000,
       });
 

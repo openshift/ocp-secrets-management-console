@@ -3,5 +3,5 @@ kind: Namespace
 metadata:
   name: openshift-secrets-management
   labels:
-    app.kubernetes.io/name: ocp-secrets-management
-    app.kubernetes.io/part-of: ocp-secrets-management-operator
+    app.kubernetes.io/name: external-secrets-management-console
+    app.kubernetes.io/part-of: external-secrets-management-operator

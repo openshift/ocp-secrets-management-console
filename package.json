@@ -98,7 +98,8 @@
     }
   },
   "resolutions": {
-    "proxy-addr": "^2.0.8"
+    "proxy-addr": "^2.0.8",
+    "immutable": "^3.8.4"
   },
   "consolePlugin": {
     "name": "ocp-secrets-management",

@@ -34,6 +34,8 @@ spec:
     value: catalogs/v4.22/Containerfile
   - name: path-context
     value: catalogs/v4.22
+  - name: build-args
+    value: []
   pipelineRef:
     name: fbc-build-pipeline
   taskRunTemplate:

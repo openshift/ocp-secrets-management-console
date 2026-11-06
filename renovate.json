@@ -1,0 +1,85 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "https://github.com/konflux-ci/mintmaker/blob/main/config/renovate/renovate.json?raw=true"
+  ],
+  "automergeStrategy": "auto",
+  "automergeType": "pr",
+  "commitMessagePrefix": "[{{baseBranch}}] NO-JIRA: ",
+  "ignoreTests": false,
+  "rebaseLabel": "needs-rebase",
+  "rebaseWhen": "behind-base-branch",
+  "recreateWhen": "always",
+  "minimumReleaseAge": "7 days",
+  "prConcurrentLimit": 50,
+  "tekton": {
+    "enabled": true,
+    "schedule": ["at any time"],
+    "packageRules": [
+      {
+        "description": "Disable all Tekton updates by default",
+        "matchDatasources": ["docker"],
+        "enabled": false
+      },
+      {
+        "description": "Konflux Tekton catalog image updates only (tag + digest); majors/minors require human review",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^quay\\.io\\/konflux-ci\\/tekton-catalog\\//",
+          "/^quay\\.io\\/redhat-appstudio-tekton-catalog\\//"
+        ],
+        "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+        "minimumReleaseAge": "7 days",
+        "enabled": true,
+        "automerge": false,
+        "prPriority": 10,
+        "groupName": "Konflux references",
+        "branchPrefix": "konflux/references/",
+        "additionalBranchPrefix": "",
+        "group": {
+          "branchTopic": "{{{baseBranch}}}",
+          "commitMessageTopic": "{{{groupName}}}"
+        },
+        "commitMessageTopic": "Konflux references",
+        "recreateWhen": "always",
+        "rebaseWhen": "behind-base-branch"
+      },
+      {
+        "description": "Automerge only low-risk Tekton digest and patch image updates",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^quay\\.io\\/konflux-ci\\/tekton-catalog\\//",
+          "/^quay\\.io\\/redhat-appstudio-tekton-catalog\\//"
+        ],
+        "matchUpdateTypes": ["digest", "patch"],
+        "minimumReleaseAge": "7 days",
+        "enabled": true,
+        "automerge": true,
+        "addLabels": ["approved", "lgtm"],
+        "prPriority": 10
+      }
+    ]
+  },
+  "dockerfile": {
+    "enabled": true,
+    "packageRules": [
+      {
+        "description": "Disable all Containerfile image updates by default",
+        "matchDatasources": ["docker"],
+        "enabled": false
+      },
+      {
+        "description": "Only digest updates for images already pinned with @sha256 (nothing else)",
+        "matchCurrentValue": "/@sha256:[a-f0-9]+$/i",
+        "matchUpdateTypes": ["digest"],
+        "minimumReleaseAge": "3 days",
+        "enabled": true,
+        "automerge": true,
+        "addLabels": ["approved", "lgtm"]
+      }
+    ]
+  },
+  "git-submodules": {
+    "enabled": false
+  }
+}

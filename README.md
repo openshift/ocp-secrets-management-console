@@ -237,7 +237,7 @@ Alternatively, build each image individually:
 
    ```bash
    oc rollout restart deployment/external-secrets-management-operator -n openshift-secrets-management
-   oc rollout restart deployment/ocp-secrets-management-plugin -n openshift-secrets-management
+   oc rollout restart deployment/secrets-management-plugin -n openshift-secrets-management
    ```
 
    With `imagePullPolicy: Always` on the plugin (as in the sample), the plugin pods will pull the new image on restart.

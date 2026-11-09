@@ -11,19 +11,19 @@
   "rebaseWhen": "behind-base-branch",
   "recreateWhen": "always",
   "minimumReleaseAge": "7 days",
-  "prConcurrentLimit": 50,
+  "prConcurrentLimit": 200,
   "tekton": {
     "enabled": true,
     "schedule": ["at any time"],
     "packageRules": [
       {
         "description": "Disable all Tekton updates by default",
-        "matchDatasources": ["docker"],
+        "matchManagers": ["tekton"],
         "enabled": false
       },
       {
         "description": "Konflux Tekton catalog image updates only (tag + digest); majors/minors require human review",
-        "matchDatasources": ["docker"],
+        "matchManagers": ["tekton"],
         "matchPackageNames": [
           "/^quay\\.io\\/konflux-ci\\/tekton-catalog\\//",
           "/^quay\\.io\\/redhat-appstudio-tekton-catalog\\//"
@@ -46,7 +46,7 @@
       },
       {
         "description": "Automerge only low-risk Tekton digest and patch image updates",
-        "matchDatasources": ["docker"],
+        "matchManagers": ["tekton"],
         "matchPackageNames": [
           "/^quay\\.io\\/konflux-ci\\/tekton-catalog\\//",
           "/^quay\\.io\\/redhat-appstudio-tekton-catalog\\//"

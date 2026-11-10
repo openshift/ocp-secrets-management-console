@@ -17,46 +17,13 @@
     "schedule": ["at any time"],
     "packageRules": [
       {
-        "description": "Disable all Tekton updates by default",
-        "matchManagers": ["tekton"],
-        "enabled": false
-      },
-      {
-        "description": "Konflux Tekton catalog image updates only (tag + digest); majors/minors require human review",
-        "matchManagers": ["tekton"],
-        "matchPackageNames": [
-          "/^quay\\.io\\/konflux-ci\\/tekton-catalog\\//",
-          "/^quay\\.io\\/redhat-appstudio-tekton-catalog\\//"
-        ],
-        "matchUpdateTypes": ["major", "minor", "patch", "digest"],
-        "minimumReleaseAge": "7 days",
-        "enabled": true,
-        "automerge": false,
-        "prPriority": 10,
-        "groupName": "Konflux references",
-        "branchPrefix": "konflux/references/",
-        "additionalBranchPrefix": "",
-        "group": {
-          "branchTopic": "{{{baseBranch}}}",
-          "commitMessageTopic": "{{{groupName}}}"
-        },
-        "commitMessageTopic": "Konflux references",
-        "recreateWhen": "always",
-        "rebaseWhen": "behind-base-branch"
-      },
-      {
-        "description": "Automerge only low-risk Tekton digest and patch image updates",
-        "matchManagers": ["tekton"],
-        "matchPackageNames": [
-          "/^quay\\.io\\/konflux-ci\\/tekton-catalog\\//",
-          "/^quay\\.io\\/redhat-appstudio-tekton-catalog\\//"
-        ],
+        "description": "Automerge low-risk Tekton digest and patch",
         "matchUpdateTypes": ["digest", "patch"],
-        "minimumReleaseAge": "7 days",
-        "enabled": true,
         "automerge": true,
-        "addLabels": ["approved", "lgtm"],
-        "prPriority": 10
+        "matchPackageNames": [
+          "/konflux-ci/tekton-catalog/",
+          "/redhat-appstudio-tekton-catalog/"
+        ]
       }
     ]
   },

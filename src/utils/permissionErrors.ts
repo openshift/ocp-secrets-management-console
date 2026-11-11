@@ -1,5 +1,10 @@
 import { HttpError } from '@openshift-console/dynamic-plugin-sdk';
 
+/**
+ * Shared helpers for normalizing RBAC permission-denied errors (401/403) into
+ * friendly, i18n-backed copy for resource tables and delete flows.
+ */
+
 export type PermissionDeniedVerb = 'list' | 'delete';
 
 export type PermissionDeniedMessageParams = {

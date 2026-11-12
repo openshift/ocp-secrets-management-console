@@ -46,7 +46,7 @@ spec:
         1h, 2d, 3w for hours, days, and weeks, respectively.
       name: image-expires-after
       type: string
-    - default: "false"
+    - default: "true"
       description: Build a source image.
       name: build-source-image
       type: string
@@ -65,7 +65,8 @@ spec:
         tools. Multiple values should be separated with commas.
       name: sast-target-dirs
       type: string
-    - default: []
+    - default:
+      - $(params.build-args)
       description: Array of --build-arg values ("arg=value" strings) for buildah
       name: build-args
       type: array
@@ -75,6 +76,9 @@ spec:
       type: string
     - default:
       - linux/x86_64
+      - linux/s390x
+      - linux/ppc64le
+      - linux/arm64
       description: List of platforms to build the container images on. The available
         set of values is determined by the configuration of the multi-platform-controller.
       name: build-platforms

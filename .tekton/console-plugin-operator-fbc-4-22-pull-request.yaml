@@ -27,11 +27,8 @@ spec:
     value: quay.io/redhat-user-workloads/secrets-management-console-tenant/console-plugin-operator-fbc-4-22/console-plugin-operator-fbc-4-22:on-pr-{{revision}}
   - name: image-expires-after
     value: 5d
-  - name: build-platforms
-    value:
-    - linux/x86_64
   - name: dockerfile
-    value: catalogs/v4.22/Containerfile
+    value: Containerfile
   - name: path-context
     value: catalogs/v4.22
   - name: build-args

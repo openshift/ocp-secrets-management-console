@@ -16,7 +16,7 @@ const extensions = JSON.parse(
   fs.readFileSync(path.join(ROOT, 'console-extensions.json'), 'utf-8'),
 ) as NavExtension[];
 const locale = JSON.parse(
-  fs.readFileSync(path.join(ROOT, 'locales/en/plugin__ocp-secrets-management.json'), 'utf-8'),
+  fs.readFileSync(path.join(ROOT, 'locales/en/plugin__external-secrets-management-console.json'), 'utf-8'),
 ) as Record<string, string>;
 
 /**
@@ -45,9 +45,9 @@ describe('sidebar navigation labels', () => {
     expect(link?.properties.href).toBe('/secrets-management');
   });
 
-  it('renders the top-level menu as "Secrets Management" (not "Plugins")', () => {
+  it('renders the top-level menu as "External Secrets Management Console" (not "Plugins")', () => {
     const label = resolveNavLabel(section.properties.name);
-    expect(label).toBe('Secrets Management');
+    expect(label).toBe('External Secrets Management Console');
     expect(label).not.toBe('Plugins');
   });
 

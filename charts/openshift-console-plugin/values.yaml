@@ -7,13 +7,13 @@
 
 plugin:
   # Plugin name (required) - matches the console-extensions.json name
-  name: "ocp-secrets-management"
+  name: "external-secrets-management-console"
   
   # Plugin display name shown in the console
   description: "Manage certificates, external secrets, and secret providers"
   
-  # Plugin image (required) - placeholder; not pullable. Override with your built image (e.g. quay.io/<your-org>/ocp-secrets-management:latest)
-  image: "openshift.io/ocp-secrets-management:latest"
+  # Plugin image (required) - placeholder; not pullable. Override with your built image (e.g. quay.io/<your-org>/external-secrets-management-console:latest)
+  image: "openshift.io/external-secrets-management-console:latest"
   
   imagePullPolicy: Always
   imagePullSecrets: []

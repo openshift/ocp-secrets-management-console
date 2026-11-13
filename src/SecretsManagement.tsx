@@ -39,7 +39,7 @@ import { PluginConfigProvider } from './hooks/usePluginConfig';
 
 /** Badge shown on card titles when operator detection encountered an error. */
 const OperatorStatusBadge: React.FC<{ status: OperatorStatus }> = ({ status }) => {
-  const { t } = useTranslation('plugin__ocp-secrets-management');
+  const { t } = useTranslation('plugin__external-secrets-management-console');
   if (status.error) {
     return (
       <Tooltip content={status.error}>
@@ -81,7 +81,7 @@ interface FilterState {
 }
 
 export default function SecretsManagement() {
-  const { t } = useTranslation('plugin__ocp-secrets-management');
+  const { t } = useTranslation('plugin__external-secrets-management-console');
   const [filters, setFilters] = React.useState<FilterState>({
     operator: 'all',
     resourceKind: 'all',

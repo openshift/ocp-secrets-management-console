@@ -50,7 +50,7 @@ export const PluginConfigProvider: React.FC<{ children: React.ReactNode }> = ({ 
     void (async () => {
       try {
         const response = await consoleFetch(
-          '/api/plugins/ocp-secrets-management/plugin-config.json',
+          '/api/plugins/external-secrets-management-console/plugin-config.json',
         );
         if (!response.ok) {
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

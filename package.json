@@ -1,12 +1,12 @@
 {
-  "name": "ocp-secrets-management",
+  "name": "external-secrets-management-console",
   "version": "0.0.1",
   "description": "OpenShift Console plugin for secrets management",
   "private": true,
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openshift/console-plugin-template.git"
+    "url": "https://github.com/openshift/ocp-secrets-management"
   },
   "scripts": {
     "clean": "rm -rf dist",
@@ -101,9 +101,9 @@
     "proxy-addr": "^2.0.8"
   },
   "consolePlugin": {
-    "name": "ocp-secrets-management",
+    "name": "external-secrets-management-console",
     "version": "0.0.1",
-    "displayName": "OCP Secrets Management",
+    "displayName": "External Secrets Management Console",
     "description": "OpenShift Console plugin for managing secrets and sensitive data.",
     "exposedModules": {
       "SecretsManagement": "./SecretsManagement",

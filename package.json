@@ -82,7 +82,7 @@
     "react-i18next": "~16.5.8",
     "react-router": "~7.13.1",
     "style-loader": "^4.0.0",
-    "stylelint": "^17.9.1",
+    "stylelint": "^18.0.0",
     "stylelint-config-standard": "^40.0.0",
     "swc-loader": "^0.2.7",
     "ts-node": "^10.9.2",

@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useOperatorDetection } from './useOperatorDetection';
 import { consoleFetch } from '@openshift-console/dynamic-plugin-sdk';
 
@@ -506,15 +506,16 @@ describe('useOperatorDetection', () => {
         expect(result.current.certManager.error).toBeDefined();
       });
 
-      // Now mock success
+      // Now mock success. Wait until this refresh settles; loading is already
+      // false from the failed check, so a wait on loading alone can observe
+      // the previous "Network error" before the new result is committed.
       mockConsoleFetch.mockResolvedValue(createMockResponse(404));
 
-      result.current.refresh();
-
-      await waitFor(() => {
-        expect(result.current.certManager.loading).toBe(false);
+      await act(async () => {
+        await result.current.refresh();
       });
 
+      expect(result.current.certManager.loading).toBe(false);
       expect(result.current.certManager.error).toBeUndefined();
     });
   });

@@ -30,8 +30,8 @@ require-container-runtime: ## (Prerequisite) Ensure CONTAINER_RUNTIME is availab
 # Image name for scripts
 SCRIPTS_IMAGE := ocp-secrets-management-scripts
 
-# Plugin image (override when building for your registry, e.g. make plugin-image PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:v1.0)
-PLUGIN_IMG ?= openshift.io/ocp-secrets-management:latest
+# Plugin image (override when building for your registry, e.g. make plugin-image PLUGIN_IMG=quay.io/<my-org>/external-secrets-management-console:v1.0)
+PLUGIN_IMG ?= openshift.io/external-secrets-management-console:latest
 
 ##@ CRD Management (Containerized)
 
@@ -123,7 +123,7 @@ plugin-image: require-container-runtime plugin-typecheck ## Build the plugin con
 	$(CONTAINER_RUNTIME) build $(BUILD_OPTS) -t $(PLUGIN_IMG) -f Dockerfile .
 
 .PHONY: plugin-push
-plugin-push: require-container-runtime ## Push the plugin container image (override: make plugin-push PLUGIN_IMG=quay.io/<my-org>/ocp-secrets-management:tag)
+plugin-push: require-container-runtime ## Push the plugin container image (override: make plugin-push PLUGIN_IMG=quay.io/<my-org>/external-secrets-management-console:tag)
 	$(CONTAINER_RUNTIME) push $(PLUGIN_IMG)
 
 ##@ Development
@@ -162,8 +162,8 @@ operator-bundle: ## Generate operator bundle
 
 ## OCP version directory under catalogs/ to operate on by default (e.g. v4.22).
 CATALOG_VERSION ?= v4.22
-## image name/tag for the ocp-secrets-management-operator catalog.
-CATALOG_IMG ?= openshift.io/ocp-secrets-management-operator-catalog:v0.1.0
+## image name/tag for the external-secrets-management-operator catalog.
+CATALOG_IMG ?= openshift.io/external-secrets-management-operator-catalog:v0.1.0
 ## operator bundle image to use for generating/updating the catalog (e.g. registry.stage.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:...).
 OPERATOR_BUNDLE_IMAGE ?=
 ## catalog directory to update (e.g. catalogs/v4.22/catalog).
@@ -219,19 +219,19 @@ catalog: get-opm update-catalog catalog-build ## Update catalog using OPERATOR_B
 ## Personal registry prefix for local dev builds (e.g. quay.io/yourusername)
 DEV_REGISTRY ?= quay.io/$(shell whoami)
 ## Dev image tags
-DEV_OPERATOR_IMG ?= $(DEV_REGISTRY)/ocp-secrets-management-operator:dev
-DEV_PLUGIN_IMG ?= $(DEV_REGISTRY)/ocp-secrets-management:dev
-DEV_BUNDLE_IMG ?= $(DEV_REGISTRY)/console-plugin-operator-bundle:dev
-DEV_CATALOG_IMG ?= $(DEV_REGISTRY)/console-plugin-operator-fbc:dev
+DEV_OPERATOR_IMG ?= $(DEV_REGISTRY)/external-secrets-management-operator:dev
+DEV_PLUGIN_IMG ?= $(DEV_REGISTRY)/external-secrets-management-console:dev
+DEV_BUNDLE_IMG ?= $(DEV_REGISTRY)/external-secrets-management-operator-bundle:dev
+DEV_CATALOG_IMG ?= $(DEV_REGISTRY)/external-secrets-management-operator-fbc:dev
 ## Bundle file to render into
 DEV_BUNDLE_FILE ?= bundle-v0.1.0.yaml
 
 .PHONY: update-catalog-local
 update-catalog-local: get-opm ## Render FBC catalog from local operator/bundle/ directory (no registry push needed)
 	@echo "Rendering catalog from local bundle directory..."
-	@mkdir -p "$(CATALOG_DIR)/console-plugin-operator"
+	@mkdir -p "$(CATALOG_DIR)/external-secrets-management-operator"
 	$(OPM) render operator/bundle/ --migrate-level=bundle-object-to-csv-metadata -o yaml \
-		> "$(CATALOG_DIR)/console-plugin-operator/$(DEV_BUNDLE_FILE)"
+		> "$(CATALOG_DIR)/external-secrets-management-operator/$(DEV_BUNDLE_FILE)"
 	@echo "Validating catalog..."
 	$(OPM) validate $(CATALOG_DIR)
 	@echo "Done. Catalog updated from local bundle."
@@ -273,8 +273,9 @@ dev-push: require-container-runtime ## Push all dev images to your personal regi
 .PHONY: dev-deploy-catalog
 dev-deploy-catalog: ## Deploy the dev FBC catalog to the current OCP cluster (push first: make dev-push)
 	@echo "Deploying CatalogSource with image: $(DEV_CATALOG_IMG)"
+	@oc delete catalogsource external-secrets-management-operator-catalog -n openshift-marketplace 2>/dev/null || true
 	@oc delete catalogsource console-plugin-operator-catalog -n openshift-marketplace 2>/dev/null || true
-	@printf 'apiVersion: operators.coreos.com/v1alpha1\nkind: CatalogSource\nmetadata:\n  name: console-plugin-operator-catalog\n  namespace: openshift-marketplace\nspec:\n  sourceType: grpc\n  image: $(DEV_CATALOG_IMG)\n  displayName: "External Secrets Management Console (Dev)"\n  publisher: "Dev"\n  updateStrategy:\n    registryPoll:\n      interval: 1m\n' | oc apply -f -
+	@printf 'apiVersion: operators.coreos.com/v1alpha1\nkind: CatalogSource\nmetadata:\n  name: external-secrets-management-operator-catalog\n  namespace: openshift-marketplace\nspec:\n  sourceType: grpc\n  image: $(DEV_CATALOG_IMG)\n  displayName: "External Secrets Management Console (Dev)"\n  publisher: "Dev"\n  updateStrategy:\n    registryPoll:\n      interval: 1m\n' | oc apply -f -
 	@echo "CatalogSource deployed. Check: oc get catalogsource -n openshift-marketplace"
 
 ##@ Update & verify (run after code changes / before PR)

@@ -1,7 +1,7 @@
 ---
 image: registry.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:91b648c26f7d4d9624226f9293e8b756e3a08717ca98f9663e97311ada8a17af
-name: console-plugin-operator.v0.1.0
-package: console-plugin-operator
+name: external-secrets-management-operator.v0.1.0
+package: external-secrets-management-operator
 properties:
 - type: olm.gvk
   value:
@@ -10,7 +10,7 @@ properties:
     version: v1alpha1
 - type: olm.package
   value:
-    packageName: console-plugin-operator
+    packageName: external-secrets-management-operator
     version: 0.1.0
 - type: olm.csv.metadata
   value:
@@ -149,7 +149,7 @@ relatedImages:
 - image: registry.redhat.io/external-secrets-management/console-plugin-operator-bundle@sha256:91b648c26f7d4d9624226f9293e8b756e3a08717ca98f9663e97311ada8a17af
   name: ""
 - image: registry.redhat.io/external-secrets-management/console-plugin-operator-rhel9@sha256:cf50616779d71e915a6b33d607b5ee4e47c86c34a2db10ee65a055b764b65589
-  name: ocp-secrets-management-operator
+  name: external-secrets-management-operator
 - image: registry.redhat.io/external-secrets-management/console-plugin-rhel9@sha256:c5106e00d59f6d49f361712d0787753431aef4b2569ed9b96ed061c748dff8aa
-  name: ocp-secrets-management-plugin
+  name: secrets-management-plugin
 schema: olm.bundle

@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	bundlePath := "bundle/manifests/console-plugin-operator.clusterserviceversion.yaml"
-	basePath := "config/manifests/bases/console-plugin-operator.clusterserviceversion.yaml"
+	bundlePath := "bundle/manifests/ocp-secrets-management-operator.clusterserviceversion.yaml"
+	basePath := "config/manifests/bases/ocp-secrets-management-operator.clusterserviceversion.yaml"
 
 	// Get plugin image from environment or use default
 	pluginImage := os.Getenv("PLUGIN_IMG")

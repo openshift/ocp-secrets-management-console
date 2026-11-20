@@ -2873,7 +2873,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@patternfly/react-core@npm:^6.4.3, @patternfly/react-core@npm:^6.5.1":
+"@patternfly/react-core@npm:^6.4.3, @patternfly/react-core@npm:^6.7.0":
   version: 6.7.0
   resolution: "@patternfly/react-core@npm:6.7.0"
   dependencies:
@@ -2890,7 +2890,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@patternfly/react-icons@npm:^6.4.0, @patternfly/react-icons@npm:^6.5.1, @patternfly/react-icons@npm:^6.7.0":
+"@patternfly/react-icons@npm:^6.4.0, @patternfly/react-icons@npm:^6.7.0":
   version: 6.7.0
   resolution: "@patternfly/react-icons@npm:6.7.0"
   dependencies:
@@ -2902,13 +2902,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@patternfly/react-styles@npm:^6.5.1":
-  version: 6.5.1
-  resolution: "@patternfly/react-styles@npm:6.5.1"
-  checksum: 10c0/34590666ba21e2b0116316ade4572ec3436686cbfde32096dd838ea64c710016f835ee94da8deb5a8cd0bc9fefef9b9669e08d958411fcef428720a50782dbb4
-  languageName: node
-  linkType: hard
-
 "@patternfly/react-styles@npm:^6.7.0":
   version: 6.7.0
   resolution: "@patternfly/react-styles@npm:6.7.0"
@@ -2917,26 +2910,19 @@ __metadata:
   linkType: hard
 
 "@patternfly/react-table@npm:^6.4.3":
-  version: 6.5.1
-  resolution: "@patternfly/react-table@npm:6.5.1"
+  version: 6.7.0
+  resolution: "@patternfly/react-table@npm:6.7.0"
   dependencies:
-    "@patternfly/react-core": "npm:^6.5.1"
-    "@patternfly/react-icons": "npm:^6.5.1"
-    "@patternfly/react-styles": "npm:^6.5.1"
-    "@patternfly/react-tokens": "npm:^6.5.1"
+    "@patternfly/react-core": "npm:^6.7.0"
+    "@patternfly/react-icons": "npm:^6.7.0"
+    "@patternfly/react-styles": "npm:^6.7.0"
+    "@patternfly/react-tokens": "npm:^6.7.0"
     lodash: "npm:^4.18.1"
     tslib: "npm:^2.8.1"
   peerDependencies:
     react: ^17 || ^18 || ^19
     react-dom: ^17 || ^18 || ^19
-  checksum: 10c0/97ae49378606452ae84c59b5fe179c34aea175f5a77907eaa2d85973d901916bfcb3571ff50c429509ec74f999cfc77f43d1471c0bfd0e928d466df1989cb664
-  languageName: node
-  linkType: hard
-
-"@patternfly/react-tokens@npm:^6.5.1":
-  version: 6.5.1
-  resolution: "@patternfly/react-tokens@npm:6.5.1"
-  checksum: 10c0/3d38d92550d61cd34eea9c7b530b826af31cb929c1da28fd7f0649df12e40753ffdd5655a1ac2cf537d79866f635fcb71562e5ce3f55c32c81986a1f03b07cc2
+  checksum: 10c0/82a22d0ee3a8ce92a60310cf66e8a48f84e6d204ee6635eba6d3d6e1ae66ee38f16edb71be69341dacce2c67c5dc88708c99f75f3a4096b44411fc5501369e1c
   languageName: node
   linkType: hard
 

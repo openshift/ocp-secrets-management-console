@@ -3,7 +3,7 @@ module github.com/openshift/ocp-secrets-management/operator
 go 1.25.0
 
 require (
-	github.com/go-logr/logr v1.4.1
+	github.com/go-logr/logr v1.4.4
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.29.0

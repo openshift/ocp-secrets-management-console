@@ -29,7 +29,7 @@
     "update-types": "yarn fetch-crds && yarn generate-types"
   },
   "dependencies": {
-    "js-yaml": "^4.1.1"
+    "js-yaml": "^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

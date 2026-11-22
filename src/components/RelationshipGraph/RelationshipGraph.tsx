@@ -35,8 +35,6 @@ type ThemeName = 'light' | 'dark';
 
 interface RoleStyle {
   background: string;
-  /** Faint top sheen. Light theme cards stay flat. */
-  sheen: string;
   accent: string;
   kind: string;
   name: string;
@@ -71,9 +69,8 @@ function role(
   kind: string,
   name: string,
   shadow: string,
-  sheen = 'none',
 ): RoleStyle {
-  return { background, sheen, accent, kind, name, shadow };
+  return { background, accent, kind, name, shadow };
 }
 
 const LIGHT_THEME: GraphTheme = {
@@ -141,49 +138,13 @@ const DARK_THEME: GraphTheme = {
       '#C084FC',
       '#FFFFFF',
       '0 0 0 1px rgba(168, 85, 247, 0.28), 0 0 22px rgba(168, 85, 247, 0.16)',
-      'linear-gradient(180deg, rgba(168, 85, 247, 0.14), rgba(168, 85, 247, 0) 52%)',
     ),
-    upstream: role(
-      '#0F172A',
-      '#3B82F6',
-      '#60A5FA',
-      '#E2E8F0',
-      DARK_SHADOW,
-      'linear-gradient(180deg, rgba(59, 130, 246, 0.12), rgba(59, 130, 246, 0) 48%)',
-    ),
-    downstream: role(
-      '#042F2E',
-      '#14B8A6',
-      '#5EEAD4',
-      '#E2E8F0',
-      DARK_SHADOW,
-      'linear-gradient(180deg, rgba(20, 184, 166, 0.12), rgba(20, 184, 166, 0) 48%)',
-    ),
-    secret: role(
-      '#1C1917',
-      '#F59E0B',
-      '#FDBA74',
-      '#E2E8F0',
-      DARK_SHADOW,
-      'linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0) 48%)',
-    ),
-    workload: role(
-      '#1C1836',
-      '#818CF8',
-      '#A5B4FC',
-      '#E2E8F0',
-      DARK_SHADOW,
-      'linear-gradient(180deg, rgba(129, 140, 248, 0.12), rgba(129, 140, 248, 0) 48%)',
-    ),
+    upstream: role('#0F172A', '#3B82F6', '#60A5FA', '#E2E8F0', DARK_SHADOW),
+    downstream: role('#042F2E', '#14B8A6', '#5EEAD4', '#E2E8F0', DARK_SHADOW),
+    secret: role('#1C1917', '#F59E0B', '#FDBA74', '#E2E8F0', DARK_SHADOW),
+    workload: role('#1C1836', '#818CF8', '#A5B4FC', '#E2E8F0', DARK_SHADOW),
   },
-  missing: role(
-    '#1C1214',
-    '#F87171',
-    '#FCA5A5',
-    '#E2E8F0',
-    DARK_SHADOW,
-    'linear-gradient(180deg, rgba(248, 113, 113, 0.12), rgba(248, 113, 113, 0) 48%)',
-  ),
+  missing: role('#1C1214', '#F87171', '#FCA5A5', '#E2E8F0', DARK_SHADOW),
   forbidden: role('#18181B', '#A1A1AA', '#D4D4D8', '#E2E8F0', DARK_SHADOW),
   status: {
     ready: {
@@ -487,7 +448,7 @@ export const RelationshipGraph: React.FC<RelationshipGraphProps> = ({
                   borderBottom: `1px solid ${themeName === 'light' ? '#E5E7EB' : 'rgba(255,255,255,0.08)'}`,
                   borderLeft: `4px solid ${roleStyle.accent}`,
                   backgroundColor: roleStyle.background,
-                  backgroundImage: roleStyle.sheen,
+                  backgroundImage: 'none',
                   boxShadow: roleStyle.shadow,
                   color: roleStyle.name,
                   cursor: isClickable ? 'pointer' : 'default',

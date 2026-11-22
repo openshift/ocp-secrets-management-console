@@ -132,6 +132,8 @@ describe('RelationshipGraph', () => {
     expect(canvas.style.backgroundImage).toContain('linear-gradient');
 
     expect(root.style.backgroundColor).toBe('rgb(30, 27, 75)');
+    expect(root.style.backgroundImage).toBe('none');
+    expect(secret.style.backgroundImage).toBe('none');
     expect(root.style.borderLeftColor).toBe('rgb(168, 85, 247)');
     expect(kindOf(root).style.color).toBe('rgb(192, 132, 252)');
     expect(nameOf(root).style.color).toBe('rgb(255, 255, 255)');

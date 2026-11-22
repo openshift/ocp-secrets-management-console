@@ -13,9 +13,41 @@ jest.mock('react-i18next', () => ({
 
 const mockUseRelationshipGraph = useRelationshipGraph as jest.Mock;
 
+const HELP_TEXT =
+  'Shows how this resource depends on, is depended on by, and produces other resources. Fetched on demand (not watched).';
+
+const DARK_THEME_CLASSES = ['pf-v6-theme-dark', 'pf-v5-theme-dark', 'pf-theme-dark'];
+
 describe('RelationshipGraphPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    DARK_THEME_CLASSES.forEach((cls) => {
+      document.documentElement.classList.remove(cls);
+      document.body.classList.remove(cls);
+    });
+  });
+
+  it('renders the relationship description in white when the console dark theme is active', () => {
+    document.documentElement.classList.add('pf-v6-theme-dark');
+    mockUseRelationshipGraph.mockReturnValue({
+      data: undefined,
+      loading: false,
+      error: undefined,
+      hasFetched: false,
+      fetch: jest.fn(),
+      refresh: jest.fn(),
+    });
+
+    render(
+      <RelationshipGraphPanel
+        kind="Certificate"
+        resource={{ metadata: { name: 'x' } }}
+        namespace="demo"
+        name="x"
+      />,
+    );
+
+    expect(screen.getByText(HELP_TEXT, { hidden: true })).toHaveStyle({ color: '#ffffff' });
   });
 
   it('does not fetch data until the panel is expanded', async () => {

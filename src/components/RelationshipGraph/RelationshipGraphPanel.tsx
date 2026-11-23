@@ -17,7 +17,7 @@ import {
 import { SyncAltIcon } from '@patternfly/react-icons';
 import { useRelationshipGraph } from '../../hooks/useRelationshipGraph';
 import type { MinimalK8sResource } from './relationshipTypes';
-import { RelationshipGraph } from './RelationshipGraph';
+import { RelationshipGraph, useConsoleTheme } from './RelationshipGraph';
 
 export interface RelationshipGraphPanelProps {
   /** Kubernetes Kind of the currently inspected resource, e.g. "Certificate". */
@@ -34,6 +34,8 @@ export const RelationshipGraphPanel: React.FC<RelationshipGraphPanelProps> = ({
   name,
 }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
+  const theme = useConsoleTheme();
+  const secondaryTextColor = theme === 'dark' ? '#ffffff' : 'var(--pf-t--global--text--color--100)';
   const [isExpanded, setIsExpanded] = React.useState(false);
   const { data, loading, error, hasFetched, fetch, refresh } = useRelationshipGraph({
     kind,
@@ -78,7 +80,7 @@ export const RelationshipGraphPanel: React.FC<RelationshipGraphPanelProps> = ({
                 marginBottom: '8px',
               }}
             >
-              <span style={{ fontSize: '13px', color: '#9ca3af' }}>
+              <span style={{ fontSize: '13px', color: secondaryTextColor }}>
                 {t(
                   'Shows how this resource depends on, is depended on by, and produces other resources. Fetched on demand (not watched).',
                 )}
@@ -145,7 +147,14 @@ export const RelationshipGraphPanel: React.FC<RelationshipGraphPanelProps> = ({
             )}
 
             {!loading && !error && data && (
-              <div style={{ marginTop: '8px', fontSize: '12px', color: '#6b7280' }}>
+              <div
+                style={{
+                  marginTop: '8px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: secondaryTextColor,
+                }}
+              >
                 {t('{{nodeCount}} resources, {{edgeCount}} relationships', {
                   nodeCount,
                   edgeCount,

@@ -1,7 +1,7 @@
 # File-Based Catalog (FBC)
 
 This directory contains the [file-based catalog](https://olm.operatorframework.io/docs/reference/file-based-catalogs/)
-(FBC) for the `console-plugin-operator` package, used to publish the operator to an OLM
+(FBC) for the `ocp-secrets-management-operator` package, used to publish the operator to an OLM
 catalog (e.g. `redhat-operator-index`) so it can be installed via OperatorHub/Subscriptions.
 
 ```
@@ -9,14 +9,14 @@ catalogs/
   v4.22/
     Containerfile                                    # builds the FBC image (opm serve /configs)
     catalog/
-      console-plugin-operator/
+      ocp-secrets-management-operator/
         package.yaml                                 # olm.package: name, icon, defaultChannel
         channel.yaml                                 # olm.channel: entries (versions) per channel
         bundle-v0.1.0.yaml                            # olm.bundle: one file per released bundle version
 ```
 
-The `.tekton/console-plugin-operator-fbc-4-22-*.yaml` PipelineRuns build and validate
-`catalogs/v4.22` on push/PR (triggered when files under `catalogs/v4.22/` change) and publish the
+The `.tekton/console-plugin-operator-fbc-4-22-*.yaml` PipelineRuns (Konflux application names unchanged)
+build and validate `catalogs/v4.22` on push/PR (triggered when files under `catalogs/v4.22/` change) and publish the
 result to `quay.io/redhat-user-workloads/secrets-management-console-tenant/console-plugin-operator-fbc-4-22/...`.
 
 ## Adding a new bundle version
@@ -39,6 +39,9 @@ result to `quay.io/redhat-user-workloads/secrets-management-console-tenant/conso
      REPLICATE_BUNDLE_FILE_IN_CATALOGS=no
    ```
 
+   (`console-plugin-operator-bundle` in the example is the **Red Hat registry image repository name**;
+   OLM package identity is `ocp-secrets-management-operator` via `hack/update-catalog.sh` → `CATALOG_PACKAGE_NAME`.)
+
    This runs [`hack/update-catalog.sh`](../hack/update-catalog.sh),
    which: verifies the bundle image is a real bundle (not an index), renders it with
    `opm render --migrate-level=bundle-object-to-csv-metadata` (producing a readable
@@ -57,4 +60,5 @@ Other useful targets: `make catalog-validate` (just `opm validate`), `make get-o
 Copy `v4.22/` to the new version directory (e.g. `v4.23/`), update the base image tag in its
 `Containerfile` (`ose-operator-registry-rhel9:v4.23`), and add matching
 `.tekton/console-plugin-operator-fbc-4-23-{push,pull-request}.yaml` PipelineRuns (copy the
-existing `v4.22` ones and update the version/paths).
+existing `v4.22` ones and update the version/paths; Tekton resource names may retain the legacy
+`console-plugin-operator-fbc` prefix until releng renames Konflux applications).

@@ -255,7 +255,14 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
   }, [pushSecrets, clusterPushSecrets, loaded, t, deleteEnabled, canDeleteRow]);
 
   const getErrorMessage = () => {
-    if (loadError?.message?.includes('no matches for kind')) {
+    const loadErrorMessage =
+      typeof loadError === 'object' &&
+      loadError !== null &&
+      'message' in loadError &&
+      typeof loadError.message === 'string'
+        ? loadError.message
+        : '';
+    if (loadErrorMessage.includes('no matches for kind')) {
       return t(
         'PushSecret CRDs are not available. This feature requires External Secrets Operator v0.9.0 or later.',
       );

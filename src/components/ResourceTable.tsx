@@ -131,7 +131,7 @@ export const ResourceTable: React.FC<ResourceTableProps> = ({
     setPage(newPage);
   };
 
-  const pagination = (variant: typeof PaginationVariant.top, widgetId: string) => (
+  const pagination = (variant: PaginationVariant, widgetId: string) => (
     <div data-test={widgetId} style={{ display: 'flex', justifyContent: 'flex-end' }}>
       <Pagination
         itemCount={itemCount}

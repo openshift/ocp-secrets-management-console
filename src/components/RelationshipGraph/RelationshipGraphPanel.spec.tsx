@@ -47,7 +47,7 @@ describe('RelationshipGraphPanel', () => {
       />,
     );
 
-    expect(screen.getByText(HELP_TEXT, { hidden: true })).toHaveStyle({ color: '#ffffff' });
+    expect(screen.getByText(HELP_TEXT)).toHaveStyle({ color: '#ffffff' });
   });
 
   it('does not fetch data until the panel is expanded', async () => {

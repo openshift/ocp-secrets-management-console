@@ -7,7 +7,7 @@
 
 plugin:
   # Plugin name (required) - matches the console-extensions.json name
-  name: "external-secrets-management-console"
+  name: "external-secrets-management-console-plugin"
   
   # Plugin display name shown in the console
   description: "Manage certificates, external secrets, and secret providers"

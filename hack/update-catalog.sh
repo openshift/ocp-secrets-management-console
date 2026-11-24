@@ -27,7 +27,7 @@ declare CATALOG_DIR
 declare BUNDLE_FILE_NAME
 declare REPLICATE_BUNDLE_FILE_IN_CATALOGS
 
-CATALOG_PACKAGE_NAME="external-secrets-management-operator"
+CATALOG_PACKAGE_NAME="external-secrets-management-console-operator"
 GREEN_COLOR_TEXT='\033[0;32m'
 RED_COLOR_TEXT='\033[0;31m'
 REVERT_COLOR_TEXT='\033[0m'

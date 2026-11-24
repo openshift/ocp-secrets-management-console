@@ -25,10 +25,10 @@ set -euo pipefail
 QUAY_USER="${SM_QUAY_USER:-sapurohi}"
 IMAGE_TAG="${SM_IMAGE_TAG:-latest}"
 PLUGIN_IMG="quay.io/${QUAY_USER}/external-secrets-management-console:${IMAGE_TAG}"
-OPERATOR_IMG="quay.io/${QUAY_USER}/external-secrets-management-operator:${IMAGE_TAG}"
-BUNDLE_IMG="quay.io/${QUAY_USER}/external-secrets-management-operator-bundle:${IMAGE_TAG}"
+OPERATOR_IMG="quay.io/${QUAY_USER}/external-secrets-management-console-operator:${IMAGE_TAG}"
+BUNDLE_IMG="quay.io/${QUAY_USER}/external-secrets-management-console-operator-bundle:${IMAGE_TAG}"
 NAMESPACE="openshift-secrets-management"
-OPERATOR_NAME="external-secrets-management-operator"
+OPERATOR_NAME="external-secrets-management-console-operator"
 # ─────────────────────────────────────────────────────────────────────
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -184,7 +184,7 @@ deploy_bundle() {
   info "Waiting for operator deployment to be created..."
   local timeout=120
   local elapsed=0
-  while ! oc get deployment external-secrets-management-operator -n "${NAMESPACE}" >/dev/null 2>&1; do
+  while ! oc get deployment external-secrets-management-console-operator -n "${NAMESPACE}" >/dev/null 2>&1; do
     if [ $elapsed -ge $timeout ]; then
       fail "Timeout waiting for operator deployment to be created"
     fi
@@ -195,7 +195,7 @@ deploy_bundle() {
 
   info "Waiting for operator to be ready..."
   oc wait --for=condition=Available \
-    deployment/external-secrets-management-operator \
+    deployment/external-secrets-management-console-operator \
     -n "${NAMESPACE}" \
     --timeout=180s || fail "Operator did not become ready"
 
@@ -208,7 +208,7 @@ deploy_bundle() {
   # Check if operator has RELATED_IMAGE_PLUGIN env var
   info "Verifying operator has RELATED_IMAGE_PLUGIN environment variable..."
   local plugin_img_from_env
-  plugin_img_from_env=$(oc get deployment external-secrets-management-operator \
+  plugin_img_from_env=$(oc get deployment external-secrets-management-console-operator \
     -n "${NAMESPACE}" \
     -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="RELATED_IMAGE_PLUGIN")].value}' 2>/dev/null || echo "")
 
@@ -241,7 +241,7 @@ EOF
   info "Waiting for plugin deployment to be created..."
   local timeout=120
   local elapsed=0
-  while ! oc get deployment secrets-management-plugin -n "${NAMESPACE}" >/dev/null 2>&1; do
+  while ! oc get deployment secrets-management-console-plugin -n "${NAMESPACE}" >/dev/null 2>&1; do
     if [ $elapsed -ge $timeout ]; then
       fail "Timeout waiting for plugin deployment to be created"
     fi
@@ -252,7 +252,7 @@ EOF
 
   info "Waiting for plugin pods to be ready..."
   oc wait --for=condition=Available \
-    deployment/secrets-management-plugin \
+    deployment/secrets-management-console-plugin \
     -n "${NAMESPACE}" \
     --timeout=180s || warn "Plugin deployment may not be ready yet"
 
@@ -265,7 +265,7 @@ EOF
   # Check what image the plugin is using
   info "Verifying plugin is using correct image..."
   local plugin_img_actual
-  plugin_img_actual=$(oc get deployment secrets-management-plugin \
+  plugin_img_actual=$(oc get deployment secrets-management-console-plugin \
     -n "${NAMESPACE}" \
     -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || echo "")
 

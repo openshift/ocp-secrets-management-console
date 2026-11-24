@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	bundlePath := "bundle/manifests/external-secrets-management-operator.clusterserviceversion.yaml"
-	basePath := "config/manifests/bases/external-secrets-management-operator.clusterserviceversion.yaml"
+	bundlePath := "bundle/manifests/external-secrets-management-console-operator.clusterserviceversion.yaml"
+	basePath := "config/manifests/bases/external-secrets-management-console-operator.clusterserviceversion.yaml"
 
 	// Get plugin image from environment or use default
 	pluginImage := os.Getenv("PLUGIN_IMG")
@@ -186,7 +186,7 @@ func injectRelatedImages(spec map[string]interface{}, pluginImage string) {
 		if !ok {
 			continue
 		}
-		if name, ok := imgMap["name"].(string); ok && name == "secrets-management-plugin" {
+		if name, ok := imgMap["name"].(string); ok && name == "secrets-management-console-plugin" {
 			// Update existing value
 			imgMap["image"] = pluginImage
 			foundPlugin = true
@@ -197,7 +197,7 @@ func injectRelatedImages(spec map[string]interface{}, pluginImage string) {
 	// Add if not found
 	if !foundPlugin {
 		relatedImages = append(relatedImages, map[string]interface{}{
-			"name":  "secrets-management-plugin",
+			"name":  "secrets-management-console-plugin",
 			"image": pluginImage,
 		})
 	}

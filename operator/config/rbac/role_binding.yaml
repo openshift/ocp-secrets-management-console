@@ -1,15 +1,15 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: external-secrets-management-operator
+  name: external-secrets-management-console-operator
   labels:
     app.kubernetes.io/name: external-secrets-management-console
-    app.kubernetes.io/part-of: external-secrets-management-operator
+    app.kubernetes.io/part-of: external-secrets-management-console-operator
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: external-secrets-management-operator
+  name: external-secrets-management-console-operator
 subjects:
   - kind: ServiceAccount
-    name: external-secrets-management-operator
+    name: external-secrets-management-console-operator
     namespace: openshift-secrets-management

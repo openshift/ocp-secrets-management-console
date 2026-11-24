@@ -21,8 +21,8 @@ From the **operator** directory:
 
 ```bash
 cd operator
-make podman-build IMG=quay.io/<your-org>/external-secrets-management-operator:latest
-podman push quay.io/<your-org>/external-secrets-management-operator:latest
+make podman-build IMG=quay.io/<your-org>/external-secrets-management-console-operator:latest
+podman push quay.io/<your-org>/external-secrets-management-console-operator:latest
 ```
 
 ---
@@ -37,7 +37,7 @@ This installs the CRD, namespace `openshift-secrets-management`, RBAC (ClusterRo
 
 ```bash
 cd operator
-make deploy IMG=quay.io/<your-org>/external-secrets-management-operator:latest
+make deploy IMG=quay.io/<your-org>/external-secrets-management-console-operator:latest
 ```
 
 **Result:** The operator is running and watching for `SecretsManagementConfig` resources. No plugin or ConsolePlugin exists yet.

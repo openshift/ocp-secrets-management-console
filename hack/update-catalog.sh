@@ -3,7 +3,7 @@
 #
 # Example usage:
 # ./hack/update-catalog.sh ./bin/tools/opm \
-# quay.io/<org>/external-secrets-management-operator-bundle@sha256:4114321b0ab6ceb882f26501ff9b22214d90b83d92466e7c5a62217f592c1fed \
+# quay.io/<org>/external-secrets-management-console-operator-bundle@sha256:4114321b0ab6ceb882f26501ff9b22214d90b83d92466e7c5a62217f592c1fed \
 # catalogs/v4.22/catalog \
 # bundle-v0.2.0.yaml \
 # no

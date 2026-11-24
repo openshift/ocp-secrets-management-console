@@ -22,8 +22,8 @@ set -euo pipefail
 QUAY_USER="${SM_QUAY_USER:-anankuma}"
 IMAGE_TAG="${SM_IMAGE_TAG:-latest}"
 PLUGIN_IMG="quay.io/${QUAY_USER}/external-secrets-management-console:${IMAGE_TAG}"
-OPERATOR_IMG="quay.io/${QUAY_USER}/external-secrets-management-operator:${IMAGE_TAG}"
-BUNDLE_IMG="quay.io/${QUAY_USER}/external-secrets-management-operator-bundle:${IMAGE_TAG}"
+OPERATOR_IMG="quay.io/${QUAY_USER}/external-secrets-management-console-operator:${IMAGE_TAG}"
+BUNDLE_IMG="quay.io/${QUAY_USER}/external-secrets-management-console-operator-bundle:${IMAGE_TAG}"
 NAMESPACE="openshift-secrets-management"
 # ─────────────────────────────────────────────────────────────────────
 
@@ -118,9 +118,9 @@ ensure_pull_secret() {
 }
 
 link_pull_secrets() {
-  oc secrets link external-secrets-management-operator quay-pull-secret --for=pull -n "${NAMESPACE}" 2>/dev/null || true
+  oc secrets link external-secrets-management-console-operator quay-pull-secret --for=pull -n "${NAMESPACE}" 2>/dev/null || true
 
-  local plugin_sa="secrets-management-plugin"
+  local plugin_sa="secrets-management-console-plugin"
   if oc get sa "${plugin_sa}" -n "${NAMESPACE}" >/dev/null 2>&1; then
     oc secrets link "${plugin_sa}" quay-pull-secret --for=pull -n "${NAMESPACE}" 2>/dev/null || true
   fi
@@ -136,7 +136,7 @@ deploy() {
   ensure_pull_secret
 
   info "Waiting for operator pod..."
-  oc rollout status deployment/external-secrets-management-operator -n "${NAMESPACE}" --timeout=120s
+  oc rollout status deployment/external-secrets-management-console-operator -n "${NAMESPACE}" --timeout=120s
   link_pull_secrets
   ok "Operator is running"
 
@@ -159,7 +159,7 @@ deploy() {
     sleep 5
   fi
 
-  oc rollout status deployment/secrets-management-plugin -n "${NAMESPACE}" --timeout=120s
+  oc rollout status deployment/secrets-management-console-plugin -n "${NAMESPACE}" --timeout=120s
   ok "Plugin pods are running"
 
   info "Enabling plugin in OpenShift Console..."

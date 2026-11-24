@@ -38,8 +38,8 @@ const (
 	PluginName = "external-secrets-management-console"
 
 	// PluginResourcePrefix is the prefix for Kubernetes object names (Deployment, Service, SA, ConfigMaps).
-	// Kept shorter than PluginName so resources are secrets-management-plugin, not external-secrets-management-console-plugin.
-	PluginResourcePrefix = "secrets-management"
+	// Kept shorter than PluginName so resources are secrets-management-console-plugin, not external-secrets-management-console-plugin.
+	PluginResourcePrefix = "secrets-management-console"
 
 	// Plugin port
 	PluginPort = 9443
@@ -233,7 +233,7 @@ func (r *SecretsManagementConfigReconciler) reconcileNamespace(ctx context.Conte
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
 				"app.kubernetes.io/part-of":    "external-secrets-management-console",
-				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 			},
 		},
 	}
@@ -311,7 +311,7 @@ func (r *SecretsManagementConfigReconciler) buildViewClusterRole(prefix string) 
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fmt.Sprintf("%s-view", prefix),
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 			},
 		},
@@ -341,7 +341,7 @@ func (r *SecretsManagementConfigReconciler) buildDeleteClusterRole(prefix string
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fmt.Sprintf("%s-delete", prefix),
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 			},
 		},
@@ -371,7 +371,7 @@ func (r *SecretsManagementConfigReconciler) buildAdminClusterRole(prefix string)
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fmt.Sprintf("%s-admin", prefix),
 			Labels: map[string]string{
-				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 				"app.kubernetes.io/part-of":    "external-secrets-management-console",
 			},
 		},
@@ -445,7 +445,7 @@ func (r *SecretsManagementConfigReconciler) reconcileServiceAccount(ctx context.
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
 				"app.kubernetes.io/part-of":    "external-secrets-management-console",
-				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 			},
 		},
 	}
@@ -471,7 +471,7 @@ func (r *SecretsManagementConfigReconciler) reconcileService(ctx context.Context
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
 				"app.kubernetes.io/part-of":    "external-secrets-management-console",
-				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 			},
 			Annotations: map[string]string{
 				"service.alpha.openshift.io/serving-cert-secret-name": fmt.Sprintf("%s-plugin-cert", PluginResourcePrefix),
@@ -582,7 +582,7 @@ func (r *SecretsManagementConfigReconciler) reconcileDeployment(ctx context.Cont
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
 				"app.kubernetes.io/part-of":    "external-secrets-management-console",
-				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
@@ -757,7 +757,7 @@ http {
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
 				"app.kubernetes.io/part-of":    "external-secrets-management-console",
-				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 			},
 		},
 		Data: map[string]string{
@@ -816,7 +816,7 @@ func (r *SecretsManagementConfigReconciler) reconcilePluginConfig(ctx context.Co
 			Labels: map[string]string{
 				"app.kubernetes.io/name":       PluginName,
 				"app.kubernetes.io/part-of":    "external-secrets-management-console",
-				"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+				"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 			},
 		},
 		Data: map[string]string{
@@ -853,7 +853,7 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 					"labels": map[string]interface{}{
 						"app.kubernetes.io/name":       PluginName,
 						"app.kubernetes.io/part-of":    "external-secrets-management-console",
-						"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+						"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 					},
 				},
 				"spec": map[string]interface{}{
@@ -901,7 +901,7 @@ func (r *SecretsManagementConfigReconciler) reconcileConsolePlugin(ctx context.C
 	labels := map[string]string{
 		"app.kubernetes.io/name":       PluginName,
 		"app.kubernetes.io/part-of":    "external-secrets-management-console",
-		"app.kubernetes.io/managed-by": "external-secrets-management-operator",
+		"app.kubernetes.io/managed-by": "external-secrets-management-console-operator",
 	}
 	existing.SetLabels(labels)
 

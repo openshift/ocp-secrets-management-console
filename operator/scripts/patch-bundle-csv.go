@@ -186,7 +186,7 @@ func injectRelatedImages(spec map[string]interface{}, pluginImage string) {
 		if !ok {
 			continue
 		}
-		if name, ok := imgMap["name"].(string); ok && name == "secrets-management-console-plugin" {
+		if name, ok := imgMap["name"].(string); ok && name == "external-secrets-management-console-plugin" {
 			// Update existing value
 			imgMap["image"] = pluginImage
 			foundPlugin = true
@@ -197,7 +197,7 @@ func injectRelatedImages(spec map[string]interface{}, pluginImage string) {
 	// Add if not found
 	if !foundPlugin {
 		relatedImages = append(relatedImages, map[string]interface{}{
-			"name":  "secrets-management-console-plugin",
+			"name":  "external-secrets-management-console-plugin",
 			"image": pluginImage,
 		})
 	}

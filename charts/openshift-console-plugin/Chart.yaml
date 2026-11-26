@@ -1,5 +1,5 @@
 apiVersion: v2
-name: external-secrets-management-console-plugin
+name: external-secrets-management-console
 description: |
   OpenShift Console Plugin for Secrets Management.
   Provides a unified UI for managing:

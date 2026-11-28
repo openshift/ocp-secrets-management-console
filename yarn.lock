@@ -7618,7 +7618,7 @@ __metadata:
     eslint-plugin-testing-library: "npm:^7.16.2"
     fork-ts-checker-webpack-plugin: "npm:^9.1.0"
     globals: "npm:^17.6.0"
-    i18next: "npm:^26.0.0"
+    i18next: "npm:^27.0.0"
     i18next-parser: "npm:^9.4.0"
     jest: "npm:^30.3.0"
     jest-environment-jsdom: "npm:^30.3.0"
@@ -8798,15 +8798,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^26.0.0":
-  version: 26.7.2
-  resolution: "i18next@npm:26.7.2"
+"i18next@npm:^27.0.0":
+  version: 27.2.9
+  resolution: "i18next@npm:27.2.9"
   peerDependencies:
     typescript: ^5 || ^6 || ^7
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/671576c1a225e10994cff250dfc44585fcccc4486cda4162caadbefe5287052e56998fe80aa15e36e1c441215b601770702a820fd1dc5511255bc4ad514aa2cf
+  checksum: 10c0/cfc18ce50ceebb9d55444facdc725ca71449e03426ff1bbf60ac148aaed42c330401201c041eeaa155d5eecd08e50279b5c28eb2d498826a6326d4ea89c88ee4
   languageName: node
   linkType: hard
 
